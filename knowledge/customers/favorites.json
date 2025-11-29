@@ -1,0 +1,14 @@
+{
+  "customer:test@example.com": {
+    "DIMMER-UNIV": {
+      "article_number": "0000120",
+      "usage_count": 1,
+      "updated_at": "2025-11-16T14:51:25"
+    },
+    "APPRAM-1FACK": {
+      "article_number": "0000120",
+      "usage_count": 1,
+      "updated_at": "2025-11-16T15:01:53"
+    }
+  }
+}

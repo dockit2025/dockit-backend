@@ -1,0 +1,346 @@
+# file: knowledge/dockit/dockit_custom_mapping.yaml
+# Beskrivning:
+#   Hög-nivå "kundvänliga" arbetsmoment som kan kopplas mot:
+#     - ATL (Del 7) via ATLLoader + atl_mapping.yaml, eller
+#     - manuella tider där ATL saknar relevanta rader.
+#
+# Struktur per task:
+#   tasks:
+#     some_task_id:
+#       label: "Synlig text"
+#       category: "fri kategorietikett"
+#       patterns:                # fraser som elektriker säger
+#         - "..."
+#       time_source: "atl" | "manual"
+#       atl_refs:                # används när time_source == "atl"
+#         - mapping_key: "..."   # nyckel som finns i atl_mapping.yaml
+#           # alternativt: search_text: "fri söksträng mot ATL"
+#           # variant: 0        # valfritt, om vi vill låsa till viss variant
+#           # top_k: 5          # valfritt, annars används default
+#       manual_time_minutes_per_unit: 60   # endast när time_source == "manual"
+#       pricing_source: "manual" | "pricelist"
+#       material_suggestions:
+#         - "sökterm mot prislista"
+#       notes: "Fri kommentar"
+
+version: 0.2
+description: "Dockit custom mapping för vanliga lägenhetsjobb (service/installation)"
+
+tasks:
+
+  tasks:
+
+  # ---------------------------------------------------------
+  # GENERELL FELSÖKNING
+  # ---------------------------------------------------------
+
+  felsokning_generell:
+    label: "Generell felsökning"
+    category: "felsokning"
+    patterns:
+      - "felsök"
+      - "felsökning"
+      - "något fungerar inte"
+      - "elektrikern får felsöka"
+      - "problem med elen"
+      - "allmän felsökning"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 45
+    pricing_source: "manual"
+    material_suggestions: []
+    notes: "Övergripande felsökning när kund inte vet vad problemet är."
+
+  # ---------------------------------------------------------
+  # FELSÖKNING – BELYSNING
+  # ---------------------------------------------------------
+
+  felsokning_belysning:
+    label: "Felsökning belysning"
+    category: "felsokning"
+    patterns:
+      - "belysningen fungerar inte"
+      - "lampan funkar inte"
+      - "lamporna blinkar"
+      - "tänds inte"
+      - "släcks av sig själv"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 45
+    pricing_source: "manual"
+    material_suggestions: []
+    notes: "Riktad felsökning på en eller flera armaturer / ljuspunkter."
+
+  felsokning_driver:
+    label: "Felsökning LED-driver/transformator"
+    category: "felsokning"
+    patterns:
+      - "driver trasig"
+      - "transformator trasig"
+      - "led driver fungerar inte"
+      - "belysning tänds inte driver"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 35
+    pricing_source: "manual"
+    material_suggestions: []
+    notes: "Felsökning av LED-driver/transformator till belysning."
+
+  # ---------------------------------------------------------
+  # FELSÖKNING – UTTAG & BRYTARE
+  # ---------------------------------------------------------
+
+  felsokning_uttag:
+    label: "Felsökning vägguttag"
+    category: "felsokning"
+    patterns:
+      - "uttag fungerar inte"
+      - "fel på uttag"
+      - "eluttag funkar inte"
+      - "uttaget är dött"
+      - "vägguttag fungerar ej"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 45
+    pricing_source: "manual"
+    material_suggestions: []
+    notes: "Felsökning vid spänningsbortfall, glapp, skadad dosa eller överbelastning."
+
+  felsokning_strombrytare:
+    label: "Felsökning strömbrytare"
+    category: "felsokning"
+    patterns:
+      - "strömbrytaren fungerar inte"
+      - "brytare trasig"
+      - "lampan tänds inte"
+      - "glapp i strömbrytare"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 40
+    pricing_source: "manual"
+    material_suggestions: []
+    notes: "Felsökning av inkoppling, glapp eller trasig brytare."
+
+  # ---------------------------------------------------------
+  # FELSÖKNING – JORDFEL / SÄKRINGAR
+  # ---------------------------------------------------------
+
+  felsokning_jordfelsbrytare:
+    label: "Felsökning jordfelsbrytare"
+    category: "felsokning"
+    patterns:
+      - "jordfelsbrytaren löser ut"
+      - "jordfelsbrytare går hela tiden"
+      - "jordfel i huset"
+      - "jordfelsbrytare problem"
+      - "fel på jordfelsbrytare"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 60
+    pricing_source: "manual"
+    material_suggestions: []
+    notes: "Felsökning vid återkommande utlösning av jordfelsbrytare."
+
+  felsokning_sakring:
+    label: "Felsökning säkring/grupp"
+    category: "felsokning"
+    patterns:
+      - "säkring löser ut"
+      - "propp går"
+      - "säkering går hela tiden"
+      - "fel på gruppen"
+      - "kortslutning i elen"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 50
+    pricing_source: "manual"
+    material_suggestions: []
+    notes: "Felsökning i dvärgbrytare, propp eller enskild gruppledning."
+
+  # ---------------------------------------------------------
+  # FELSÖKNING – BADRUM
+  # ---------------------------------------------------------
+
+  felsokning_badrumsflakt:
+    label: "Felsökning badrumsfläkt"
+    category: "felsokning"
+    patterns:
+      - "badrumsfläkt fungerar inte"
+      - "badrumsfläkten startar inte"
+      - "fläkten i badrummet är trasig"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 45
+    pricing_source: "manual"
+    material_suggestions: []
+    notes: "Riktad felsökning av badrumsfläkt."
+
+  felsokning_golvvarme:
+    label: "Felsökning golvvärme"
+    category: "felsokning"
+    patterns:
+      - "golvvärmen fungerar inte"
+      - "golvvärmeslingan trasig"
+      - "termostaten funkar inte"
+      - "golvvärme fel"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 60
+    pricing_source: "manual"
+    material_suggestions: []
+    notes: "Felsökning av termostat, givare eller golvvärmeslinga."
+
+  felsokning_badrumsbelysning:
+    label: "Felsökning badrumsbelysning"
+    category: "felsokning"
+    patterns:
+      - "badrumsbelysning fungerar inte"
+      - "lampa i badrum fungerar inte"
+      - "badrumslampan tänds inte"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 45
+    pricing_source: "manual"
+    material_suggestions: []
+    notes: "Felsökning av belysning i våtrum, IP-klassad armatur."
+
+  # ---------------------------------------------------------
+  # FELSÖKNING – KÖK / VITVAROR
+  # ---------------------------------------------------------
+
+  felsokning_spis:
+    label: "Felsökning spis/ugn"
+    category: "felsokning"
+    patterns:
+      - "spisen fungerar inte"
+      - "ugnen fungerar inte"
+      - "fel på spisen"
+      - "ugnen får ingen ström"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 50
+    pricing_source: "manual"
+    material_suggestions: []
+    notes: "Felsökning av matning, kopplingsplint eller trasig anslutning."
+
+  felsokning_dismaskin:
+    label: "Felsökning diskmaskin"
+    category: "felsokning"
+    patterns:
+      - "diskmaskin fungerar inte"
+      - "diskmaskin får ingen ström"
+      - "diskmaskinen startar inte"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 45
+    pricing_source: "manual"
+    material_suggestions: []
+    notes: "Felsökning av elmatning och anslutning (ej VVS)."
+
+  felsokning_tvattmaskin:
+    label: "Felsökning tvättmaskin"
+    category: "felsokning"
+    patterns:
+      - "tvättmaskinen startar inte"
+      - "tvättmaskinen får ingen ström"
+      - "fel på tvättmaskin el"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 45
+    pricing_source: "manual"
+    material_suggestions: []
+    notes: "Felsökning av elmatning (ej VVS)."
+
+  # ---------------------------------------------------------
+  # FELSÖKNING – UTOMHUS
+  # ---------------------------------------------------------
+
+  felsokning_utomhusbelysning:
+    label: "Felsökning utomhusbelysning"
+    category: "felsokning"
+    patterns:
+      - "utomhusbelysningen fungerar inte"
+      - "utelampan är trasig"
+      - "fasadbelysning fungerar inte"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 45
+    pricing_source: "manual"
+    material_suggestions: []
+    notes: "Felsökning av utebelysning, IP-klass och fuktproblem vanligt."
+
+  felsokning_rorelsevakt:
+    label: "Felsökning rörelsevakt"
+    category: "felsokning"
+    patterns:
+      - "rörelsevakten fungerar inte"
+      - "rörelsesensorn är trasig"
+      - "lampan tänds inte med rörelse"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 40
+    pricing_source: "manual"
+    material_suggestions: []
+    notes: "Felsökning av rörelsevakt och last."
+
+  # ---------------------------------------------------------
+  # SERVICE & SMÅJOBB
+  # ---------------------------------------------------------
+
+  kontrollera_installation:
+    label: "Kontrollera befintlig installation"
+    category: "felsokning"
+    patterns:
+      - "kontrollera installation"
+      - "se över elen"
+      - "säkerhetskontroll av el"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 30
+    pricing_source: "manual"
+    material_suggestions: []
+    notes: "Genomgång av befintlig anläggning."
+
+  montera_enkel_dosa:
+    label: "Montera enkel apparatdosa"
+    category: "felsokning"
+    patterns:
+      - "montera dosa"
+      - "sätta upp apparatdosa"
+      - "fixa trasig dosa"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 25
+    pricing_source: "manual"
+    material_suggestions:
+      - "apparatdosa"
+    notes: "Montering av ny dosa vid lös eller trasig infästning."
+
+  laga_glappkontakt:
+    label: "Åtgärda glappkontakt"
+    category: "felsokning"
+    patterns:
+      - "glappkontakt"
+      - "kontakten glappar"
+      - "glapp i dosa"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 20
+    pricing_source: "manual"
+    material_suggestions: []
+    notes: "Åtgärd av glappkontakt i uttag eller brytare."
+
+  kontrollera_jordning:
+    label: "Kontrollera jordning i rum"
+    category: "felsokning"
+    patterns:
+      - "kontrollera jordning"
+      - "jorden fungerar inte"
+      - "jordning saknas"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 35
+    pricing_source: "manual"
+    material_suggestions: []
+    notes: "Kontroll av jordningssystem, mätning och dokumentation."
+

@@ -1,0 +1,203 @@
+[
+  {
+    "id": 1,
+    "title": "Testoffert Dockit",
+    "customer_name": null,
+    "subtotal_sek": 5000.0,
+    "rot_discount_sek": 500.0,
+    "total_sek": 4500.0,
+    "lines": []
+  },
+  {
+    "id": 2,
+    "title": "Preliminär installation",
+    "customer_name": null,
+    "subtotal_sek": 6680.0,
+    "rot_discount_sek": 1536.0,
+    "total_sek": 5144.0,
+    "lines": []
+  },
+  {
+    "id": 3,
+    "title": "Ny installation",
+    "customer_name": null,
+    "subtotal_sek": 3200.0,
+    "rot_discount_sek": 0.0,
+    "total_sek": 3200.0,
+    "lines": []
+  },
+  {
+    "id": 4,
+    "title": "Ny installation med rad",
+    "customer_name": null,
+    "subtotal_sek": 3200.0,
+    "rot_discount_sek": 0.0,
+    "total_sek": 3200.0,
+    "lines": [
+      {
+        "kind": "work",
+        "ref": null,
+        "description": "Elmontör",
+        "qty": 4.0,
+        "unit_price_sek": 800.0,
+        "line_total_sek": 3200.0
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "title": "Prov-offert med rader",
+    "customer_name": null,
+    "subtotal_sek": 3200.0,
+    "rot_discount_sek": 0.0,
+    "total_sek": 3200.0,
+    "lines": [
+      {
+        "kind": "work",
+        "ref": null,
+        "description": "Elmontör",
+        "qty": 4.0,
+        "unit_price_sek": 800.0,
+        "line_total_sek": 3200.0
+      },
+      {
+        "kind": "material",
+        "ref": null,
+        "description": "LED-armatur infälld",
+        "qty": 2.0,
+        "unit_price_sek": 390.0,
+        "line_total_sek": 780.0
+      }
+    ]
+  },
+  {
+    "id": 6,
+    "title": "Preliminär offert för Testkund AB",
+    "customer_name": "Testkund AB",
+    "subtotal_sek": 18000.0,
+    "rot_discount_sek": 0.0,
+    "total_sek": 18000.0,
+    "lines": [
+      {
+        "kind": "Arbete",
+        "ref": "LAB-STD",
+        "description": "Arbetstid timdebitering",
+        "qty": 10.0,
+        "unit_price_sek": 850.0,
+        "line_total_sek": 8500.0
+      },
+      {
+        "kind": "Material",
+        "ref": "MAT-EC-SET",
+        "description": "Elcentral + JFB + 6 st dvärgbrytare",
+        "qty": 1.0,
+        "unit_price_sek": 9500.0,
+        "line_total_sek": 9500.0
+      }
+    ]
+  },
+  {
+    "id": 7,
+    "title": "Preliminär offert för Testkund AB",
+    "customer_name": "Testkund AB",
+    "subtotal_sek": 18000.0,
+    "rot_discount_sek": 0.0,
+    "total_sek": 18000.0,
+    "lines": [
+      {
+        "kind": "Arbete",
+        "ref": "LAB-STD",
+        "description": "Arbetstid timdebitering",
+        "qty": 10.0,
+        "unit_price_sek": 850.0,
+        "line_total_sek": 8500.0
+      },
+      {
+        "kind": "Material",
+        "ref": "MAT-EC-SET",
+        "description": "Elcentral + JFB + 6 st dvärgbrytare",
+        "qty": 1.0,
+        "unit_price_sek": 9500.0,
+        "line_total_sek": 9500.0
+      }
+    ]
+  },
+  {
+    "id": 8,
+    "title": "Preliminär offert för Testkund AB",
+    "customer_name": "Testkund AB",
+    "subtotal_sek": 18000.0,
+    "rot_discount_sek": 0.0,
+    "total_sek": 18000.0,
+    "lines": [
+      {
+        "kind": "Arbete",
+        "ref": "LAB-STD",
+        "description": "Arbetstid timdebitering",
+        "qty": 10.0,
+        "unit_price_sek": 850.0,
+        "line_total_sek": 8500.0
+      },
+      {
+        "kind": "Material",
+        "ref": "MAT-EC-SET",
+        "description": "Elcentral + JFB + 6 st dvärgbrytare",
+        "qty": 1.0,
+        "unit_price_sek": 9500.0,
+        "line_total_sek": 9500.0
+      }
+    ]
+  },
+  {
+    "id": 9,
+    "title": "Preliminär offert för Testkund AB",
+    "customer_name": "Testkund AB",
+    "subtotal_sek": 18000.0,
+    "rot_discount_sek": 0.0,
+    "total_sek": 18000.0,
+    "lines": [
+      {
+        "kind": "Arbete",
+        "ref": "LAB-STD",
+        "description": "Arbetstid timdebitering",
+        "qty": 10.0,
+        "unit_price_sek": 850.0,
+        "line_total_sek": 8500.0
+      },
+      {
+        "kind": "Material",
+        "ref": "MAT-EC-SET",
+        "description": "Elcentral + JFB + 6 st dvärgbrytare",
+        "qty": 1.0,
+        "unit_price_sek": 9500.0,
+        "line_total_sek": 9500.0
+      }
+    ]
+  },
+  {
+    "id": 10,
+    "title": "Preliminär offert för Testkund AB",
+    "customer_name": "Testkund AB",
+    "subtotal_sek": 18000.0,
+    "rot_discount_sek": 0.0,
+    "total_sek": 18000.0,
+    "lines": [
+      {
+        "kind": "Arbete",
+        "ref": "LAB-STD",
+        "description": "Arbetstid timdebitering",
+        "qty": 10.0,
+        "unit_price_sek": 850.0,
+        "line_total_sek": 8500.0
+      },
+      {
+        "kind": "Material",
+        "ref": "MAT-EC-SET",
+        "description": "Elcentral + JFB + 6 st dvärgbrytare",
+        "qty": 1.0,
+        "unit_price_sek": 9500.0,
+        "line_total_sek": 9500.0
+      }
+    ]
+  }
+]

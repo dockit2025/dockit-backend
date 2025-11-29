@@ -1,0 +1,239 @@
+tasks:
+- label: Byta vägguttag
+  category: brytare_och_uttag
+  patterns:
+  - byta vägguttag
+  - byta uttag
+  - byta eluttag
+  - byta väggkontakt
+  - byta gamla uttag
+  - ersätta vägguttag
+  - ersätta uttag
+  - byta uttagen i vardagsrummet
+  - byta uttagen i köket
+  - byta alla vägguttag
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 18
+  pricing_source: manual
+  materials:
+  - ref: VEGGUTTAG-1V-JORD
+    description: Vägguttag 1-vägs, jordat
+    quantity_per_unit: 1
+  - ref: APPRAM-1FACK
+    description: Apparatram 1-fack
+    quantity_per_unit: 1
+  notes: 'Generellt moment för att byta ett befintligt vägguttag
+
+    mot ett nytt, jordat uttag. 18 min / uttag bygger på
+
+    dina tidigare tester.
+
+    '
+  task_id: byta_vagguttag
+- label: Installera nytt vägguttag
+  category: brytare_och_uttag
+  patterns:
+  - installera nytt vägguttag
+  - installera vägguttag
+  - sätta upp ett extra uttag
+  - sätta upp extra uttag
+  - sätta upp nytt uttag
+  - sätta upp nya uttag
+  - nya uttag
+  - nytt uttag
+  - extra uttag
+  - ett extra uttag
+  - ytterligare uttag
+  - ett uttag till
+  - ytterligare vägguttag
+  - montera uttag
+  - montera ett uttag
+  - montera vägguttag
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 45
+  pricing_source: manual
+  materials:
+  - ref: VEGGUTTAG-1V-JORD
+    description: Vägguttag 1-vägs, jordat
+    quantity_per_unit: 1
+  - ref: APPDOS-INF
+    description: Apparatdosa, infälld
+    quantity_per_unit: 1
+  - ref: EKLK-3G1.5
+    description: Kabel 3G1,5 för matning av nytt uttag (m)
+    quantity_per_unit: 3
+  notes: 'Nytt uttag på ny plats (t.ex. vid TV-bänk eller diskbänk).
+
+    Inkluderar schablon för dosa + ca 3 m kabel per uttag.
+
+    '
+  task_id: installera_nytt_vagguttag
+- label: Byta strömbrytare (1-knapp)
+  category: brytare_och_uttag
+  patterns:
+  - byta strömbrytare
+  - byta strömbrytaren
+  - byta brytare
+  - byta lampknapp
+  - byta ljusknapp
+  - byta strömbrytare i hallen
+  - byta strömbrytare i vardagsrummet
+  - ersätta strömbrytare
+  - gammal strömbrytare
+  - uppgradera strömbrytare
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 20
+  pricing_source: manual
+  materials: []
+  notes: 'Enkel 1-knapps brytare. Om du senare vill särskilja på
+
+    1- och 2-knapps kan vi lägga ett separat moment, t.ex.
+
+    byta_dubbel_strombrytare, med egen tid och egna patterns.
+
+    '
+  task_id: byta_strombrytare
+- label: Installera dimmer
+  category: brytare_och_uttag
+  patterns:
+  - installera dimmer
+  - sätta dimmer
+  - sätta in dimmer
+  - montera dimmer
+  - byta till dimmer
+  - byta strömbrytare till dimmer
+  - ersätta strömbrytare med dimmer
+  - dimmer till taklampan
+  - vill ha dimmer
+  - dimmer i vardagsrummet
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 30
+  pricing_source: manual
+  materials:
+  - ref: DIMMER-UNIV
+    description: Dimmer, universal, infälld
+    quantity_per_unit: 1
+  - ref: APPRAM-1FACK
+    description: Apparatram 1-fack
+    quantity_per_unit: 1
+  notes: 'Byte från vanlig strömbrytare till dimmer. Mönstren är
+
+    fokuserade på ordet "dimmer" och typiska formuleringar
+
+    som hantverkare/kunder använder.
+
+    '
+  task_id: installera_dimmer
+- label: Montera taklampa
+  category: belysning
+  patterns:
+  - montera taklampa
+  - sätta upp taklampa
+  - hänga upp taklampa
+  - hänga upp lampa i taket
+  - installera taklampa
+  - byta taklampa
+  - ny taklampa i hallen
+  - sätta upp ny taklampa
+  - montera lampa i taket
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 20
+  pricing_source: manual
+  materials: []
+  notes: 'Generellt moment för montering eller byte av taklampa.
+
+    Själva armaturen ingår normalt inte i materialet utan
+
+    tillhandahålls av kunden.
+
+    '
+  task_id: montera_taklampa
+- task_id: INSTALLERA-VAGGUTTAG-INFALLT
+  label: Installera infällt vägguttag
+  category: brytare_och_uttag
+  manual_time_minutes_per_unit: 30
+  time_source: gpt
+  description: Installation av nytt infällt jordat vägguttag, inklusive montering
+    och inkoppling mot befintlig matning.
+  quantity_type: per_unit
+  default_unit: st
+  room_type_hint: null
+  gpt_confidence: 0.9
+  patterns:
+  - sätta upp nytt vägguttag
+  - installera vägguttag
+  - montera vägguttag
+  materials:
+  - ref: VAGGUTTAG-INF-JORD
+    quantity_per_unit: 1.0
+    unit: st
+    description: Infällt jordat vägguttag
+  - ref: KOPPLINGSMATERIAL-VAGGUTTAG
+    quantity_per_unit: 1.0
+    unit: st
+    description: Kopplingsmaterial för vägguttag
+  _auto_generated: true
+- task_id: INSTALLERA-KRONBRYTARE
+  label: Installera kronbrytare
+  category: brytare_och_uttag
+  manual_time_minutes_per_unit: 30
+  time_source: gpt
+  description: Montering och inkoppling av kronbrytare för styrning av två ljuskällor.
+  quantity_type: per_unit
+  default_unit: st
+  room_type_hint: vardagsrum
+  gpt_confidence: 0.85
+  patterns:
+  - installera kronbrytare
+  - montera kron
+  - sätta in kronbrytare
+  materials:
+  - ref: BRYTARE-KRON-INF
+    quantity_per_unit: 1.0
+    unit: st
+    description: Infälld kronbrytare
+  _auto_generated: true
+  INSTALLERA-STROMBRYTARE-INFALLD:
+    label: Installera infälld strömbrytare
+    category: brytare_och_uttag
+    patterns:
+    - installera strömbrytare
+    - byta strömbrytare
+    - byta brytare
+    time_source: manual
+    atl_refs: []
+    manual_time_minutes_per_unit: 30
+  INSTALLERA-STROMBRYTARE-UTANPA:
+    label: Installera utanpåliggande strömbrytare
+    category: brytare_och_uttag
+    patterns:
+    - installera utanpåliggande strömbrytare
+    - montera utanpåliggande brytare
+    - sätta upp utanpåliggande brytare
+    time_source: manual
+    atl_refs: []
+    manual_time_minutes_per_unit: 35
+- task_id: INSTALLERA-APPARATDOSA-INFALLT
+  label: Installera apparatdosa infällt i vägg
+  category: brytare_och_uttag
+  manual_time_minutes_per_unit: 18
+  time_source: gpt
+  description: Montering av apparatdosa infällt i vägg för eluttag eller brytare.
+  quantity_type: per_unit
+  default_unit: st
+  room_type_hint: null
+  gpt_confidence: 0.9
+  patterns:
+  - installera apparatdosa i vägg
+  - montera apparatdosa infällt
+  materials:
+  - ref: APPARATDOSA-INF
+    quantity_per_unit: 1.0
+    unit: st
+    description: Infälld apparatdosa
+  _auto_generated: true

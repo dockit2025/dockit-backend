@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<title>{{project.id}}</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root { --fg:#111; --muted:#555; --line:#e6e6e6; --bg:#fff; font-size:14px; }
+  @page { size: A4; margin: 18mm; }
+  * { box-sizing:border-box }
+  body { color:var(--fg); background:var(--bg); font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif; line-height:1.35; margin:0; padding:18px }
+  h1,h2,h3 { margin:0 0 .6rem 0 }
+  .row { display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap }
+  .col { flex:1 1 280px }
+  .card { border:1px solid var(--line); border-radius:8px; padding:14px; margin:0 0 10px 0; background:#fff }
+  .muted { color: var(--muted) }
+  .small { font-size:.9rem }
+  table { width:100%; border-collapse:collapse; margin:6px 0 12px 0 }
+  th,td { padding:8px 10px; border-bottom:1px solid var(--line); vertical-align:top }
+  th { background:#f8f8f8; text-align:left }
+  tr:nth-child(even) td { background:#fbfbfb }
+  .right { text-align:right }
+  .nowrap { white-space:nowrap }
+  .sumgrid { width:100%; max-width:360px; margin-left:auto }
+  .sumgrid .line { display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px dashed var(--line) }
+  .sumgrid .line.total { border-bottom:0; font-weight:600; font-size:1.05rem }
+  .signature { height:70px; border-top:1px solid var(--line); margin-top:28px }
+  .page-break { page-break-before:always }
+</style>
+</head>
+<body>
+
+  <h1>Offert</h1>
+
+  <div class="row">
+    <div class="col card">
+      <h3>Leverantör</h3>
+      <div class="small" id="supplier-box">
+        {{supplier.name}}<br>
+        {{supplier.street}}<br>
+        {{supplier.zip_city}}<br>
+        {{supplier.orgno}}<br>
+        {{supplier.email}}
+      </div>
+    </div>
+    <div class="col card">
+      <h3>Kund</h3>
+      <div class="small" id="client-box">
+        {{client.name}}<br>
+        {{client.street}}<br>
+        {{client.zip_city}}<br>
+        {{client.orgno}}<br>
+        {{client.email}}
+      </div>
+    </div>
+    <div class="col card">
+      <h3>Uppgifter</h3>
+      <div class="small" id="meta-box">
+        Offertnr: {{project.id}}<br>
+        Datum: {{project.date}}<br>
+        Giltig t.o.m.: {{project.valid_until}}<br>
+        Projekt: {{project.title}}
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Arbetsbeskrivning</h3>
+    <p id="scope">{{notes.terms}}</p>
+  </div>
+
+  <div class="card">
+    <h3>Specifikation</h3>
+
+    <div class="small muted">Material</div>
+    <table aria-label="Material">
+      <thead>
+        <tr>
+          <th>Artikel</th>
+          <th>Benämning</th>
+          <th class="right">Enhet</th>
+          <th class="right">Antal</th>
+          <th class="right">À-pris</th>
+          <th class="right">Radsumma</th>
+          <th>Lev.</th>
+        </tr>
+      </thead>
+      <tbody id="material-rows">
+        {{#each material}}
+        <tr>
+          <td>{{sku}}</td>
+          <td>{{name}}</td>
+          <td class="right">{{unit}}</td>
+          <td class="right">{{qty}}</td>
+          <td class="right">{{unit_price}}</td>
+          <td class="right">{{row_total}}</td>
+          <td>{{supplier}}</td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+
+    <div class="small muted">Arbete (ATL)</div>
+    <table aria-label="Arbete">
+      <thead>
+        <tr>
+          <th>Arbetsmoment</th>
+          <th>Moment/Typ/Sort</th>
+          <th>Underlag/Variant</th>
+          <th class="right">Enhet</th>
+          <th class="right">Tid</th>
+          <th class="right">À-pris</th>
+          <th class="right">Radsumma</th>
+        </tr>
+      </thead>
+      <tbody id="labor-rows">
+        {{#each labor}}
+        <tr>
+          <td class="nowrap">{{arbetsmoment}}</td>
+          <td>{{moment}}{{#if notes}} <em>{{notes}}</em>{{/if}}</td>
+          <td>{{underlag}}</td>
+          <td class="right">{{unit}}</td>
+          <td class="right">{{time_total}}</td>
+          <td class="right">{{labor_rate}}</td>
+          <td class="right">{{row_total}}</td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+
+    <div class="sumgrid" id="totals-box">
+      <div class="line"><span>Material</span><span>{{sum_material}}</span></div>
+      <div class="line"><span>Arbete ({{sum_hours}} h)</span><span>{{sum_labor}}</span></div>
+      <div class="line"><span>Delsumma (exkl. moms)</span><span>{{subtotal_excl}}</span></div>
+      <div class="line"><span>Moms {{vat_percent}}&nbsp;%</span><span>{{vat_amount}}</span></div>
+      <div class="line total"><span>Totalsumma (inkl. moms)</span><span>{{total_incl}}</span></div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col card">
+      <h3>Villkor</h3>
+      <div class="small muted">
+        Betalningsvillkor 30 dagar netto om inget annat avtalats. Leveranstider enligt överenskommelse.
+      </div>
+    </div>
+  </div>
+
+  <div class="signature"></div>
+
+</body>
+</html>

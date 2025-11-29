@@ -1,0 +1,13 @@
+{
+  "customer_name": "sample",
+  "job_summary": "sample",
+  "lines": {
+    "kind": "sample",
+    "unit_price_sek": 1.0,
+    "description": "sample",
+    "ref": null,
+    "qty": 1.0
+  },
+  "customer_email": null,
+  "apply_rot": true
+}

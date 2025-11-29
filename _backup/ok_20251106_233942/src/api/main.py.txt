@@ -1,0 +1,21 @@
+main.py
+from fastapi import FastAPI
+from pydantic import BaseModel
+from typing import Dict, Any
+from src.controller.pipeline import run_pipeline
+
+app = FastAPI(title="Dockit AI Offert-API")
+
+class OfferIn(BaseModel):
+    offer: Dict[str, Any]
+    template_path: str = "templates/offer_template.html"
+
+@app.post("/render")
+def render_endpoint(payload: OfferIn):
+    out = run_pipeline(payload.offer, payload.template_path)
+    return out
+
+@app.post("/validate")
+def validate_endpoint(payload: OfferIn):
+    out = run_pipeline(payload.offer, payload.template_path)
+    return {"validator_report": out["validator_report"]}

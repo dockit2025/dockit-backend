@@ -1,0 +1,343 @@
+tasks:
+- label: Byta säkring
+  category: ovrigt
+  patterns:
+  - byta säkring
+  - byta propp
+  - ersätta säkring
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 10
+  pricing_source: manual
+  material_suggestions:
+  - säkring
+  notes: Byte av traditionell säkring eller propp.
+  task_id: byta_sakring
+- label: Byta dvärgbrytare
+  category: ovrigt
+  patterns:
+  - byta dvärgbrytare
+  - ersätta dvärgbrytare
+  - ny automatsäkring
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 25
+  pricing_source: manual
+  material_suggestions:
+  - dvärgbrytare
+  notes: Byte av enstaka dvärgbrytare i elcentral.
+  task_id: byta_dvargbrytare
+- label: Installera jordfelsbrytare
+  category: ovrigt
+  patterns:
+  - installera jordfelsbrytare
+  - montera jordfelsbrytare
+  - installera jfb
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 75
+  pricing_source: manual
+  material_suggestions:
+  - jordfelsbrytare
+  notes: Installation eller uppgradering till jordfelsbrytare i elcentral.
+  task_id: installera_jordfelsbrytare
+- label: Byta jordfelsbrytare
+  category: ovrigt
+  patterns:
+  - byta jordfelsbrytare
+  - ersätta jfb
+  - byte av jordfelsbrytare
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 45
+  pricing_source: manual
+  material_suggestions:
+  - jordfelsbrytare
+  notes: Direkt byte av befintlig jordfelsbrytare.
+  task_id: byta_jordfelsbrytare
+- label: Felsökning elcentral
+  category: ovrigt
+  patterns:
+  - felsöka elcentral
+  - problem i elcentral
+  - elcentral fungerar inte
+  - kortslutning i central
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 60
+  pricing_source: manual
+  material_suggestions: []
+  notes: Felsökning av central, grupper, jordfelsbrytare eller säkringar.
+  task_id: felsokning_elcentral
+- label: Installera laddbox
+  category: ovrigt
+  patterns:
+  - installera laddbox
+  - montera laddbox
+  - sätta upp laddbox
+  - installera elbilsladdare
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 240
+  pricing_source: manual
+  material_suggestions:
+  - laddbox
+  - kabel
+  notes: Installation av laddbox utan markarbete. Kabeldragning ingår.
+  task_id: installera_laddbox
+- label: Felsökning laddbox
+  category: ovrigt
+  patterns:
+  - laddbox fungerar inte
+  - problem med laddbox
+  - elbilen laddar inte
+  - laddstation fel
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 60
+  pricing_source: manual
+  material_suggestions: []
+  notes: Felsökning av laddbox, matning och kommunikation.
+  task_id: felsokning_laddbox
+- label: Installera motorvärmaruttag
+  category: ovrigt
+  patterns:
+  - installera motorvärmaruttag
+  - motorvärmaruttag installation
+  - eluttag för motorvärmare
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 90
+  pricing_source: manual
+  material_suggestions:
+  - motorvärmaruttag
+  - kabel
+  notes: Installation av motorvärmaruttag på fasad eller stolpe.
+  task_id: installera_motorvarmaruttag
+- label: Installera elelement
+  category: ovrigt
+  patterns:
+  - installera elelement
+  - montera elelement
+  - sätta upp värmeelement
+  - elradiator installation
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 60
+  pricing_source: manual
+  material_suggestions:
+  - elelement
+  notes: Installation av väggmonterat elelement med fast anslutning.
+  task_id: installera_elelement
+- label: Byta elelement
+  category: ovrigt
+  patterns:
+  - byta elelement
+  - ersätta elelement
+  - byta elradiator
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 40
+  pricing_source: manual
+  material_suggestions:
+  - elelement
+  notes: Byte av befintligt elelement.
+  task_id: byta_elelement
+- label: Installera termostat till element
+  category: ovrigt
+  patterns:
+  - installera termostat till element
+  - byta elementtermostat
+  - montera ny termostat radiator
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 30
+  pricing_source: manual
+  material_suggestions:
+  - termostat
+  notes: Byte eller installation av termostat till elradiator.
+  task_id: installera_termostat_till_element
+- label: Installera brandvarnare
+  category: ovrigt
+  patterns:
+  - installera brandvarnare
+  - sätta upp brandvarnare
+  - montera brandvarnare
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 20
+  pricing_source: manual
+  material_suggestions:
+  - brandvarnare
+  notes: Installation av en eller flera brandvarnare.
+  task_id: installera_brandvarnare
+- label: Byta brandvarnare
+  category: ovrigt
+  patterns:
+  - byta brandvarnare
+  - ersätta brandvarnare
+  - ny brandvarnare istället
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 15
+  pricing_source: manual
+  material_suggestions:
+  - brandvarnare
+  notes: Byte av brandvarnare.
+  task_id: byta_brandvarnare
+- label: Installera röksensor
+  category: ovrigt
+  patterns:
+  - installera röksensor
+  - montera röksensor
+  - uppkopplad brandvarnare installation
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 25
+  pricing_source: manual
+  material_suggestions:
+  - röksensor
+  notes: Installation av fristående eller smart röksensor.
+  task_id: installera_röksensor
+- label: Installera skymningsrelä
+  category: ovrigt
+  patterns:
+  - installera skymningsrelä
+  - montera skymningsrelä
+  - ljussensor installation
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 45
+  pricing_source: manual
+  material_suggestions:
+  - skymningsrelä
+  notes: Installation av skymningsrelä för utomhusbelysning.
+  task_id: installera_skymningsrelä
+- label: Byta skymningsrelä
+  category: ovrigt
+  patterns:
+  - byta skymningsrelä
+  - ersätta skymningsrelä
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 30
+  pricing_source: manual
+  material_suggestions:
+  - skymningsrelä
+  notes: Byte av skymningsrelä.
+  task_id: byta_skymningsrelä
+- label: Installera tidrelä
+  category: ovrigt
+  patterns:
+  - installera tidrelä
+  - montera tidrelä
+  - koppla in tidrelä
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 50
+  pricing_source: manual
+  material_suggestions:
+  - tidrelä
+  notes: Installation av tidrelä för styrning av belastning.
+  task_id: installera_tidrelä
+- label: Montera kabelvindor / kabelhållare
+  category: ovrigt
+  patterns:
+  - montera kabelvinda
+  - sätta upp kabelhållare
+  - kabelvinda installation
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 20
+  pricing_source: manual
+  material_suggestions: []
+  notes: Montering av kabelvinda/kabelhållare.
+  task_id: montera_kabelvindor
+- label: Fixa lösa kablar
+  category: ovrigt
+  patterns:
+  - fixa lösa kablar
+  - snygga till kablar
+  - sätta fast kablar
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 30
+  pricing_source: manual
+  material_suggestions:
+  - clips
+  - kabelkanal
+  notes: Åtgärd och försköning av lösa kablar.
+  task_id: losa_kablar_fixa
+- label: Montera timerrelaterat uttag
+  category: ovrigt
+  patterns:
+  - installera timer till uttag
+  - montera uttag med timer
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 35
+  pricing_source: manual
+  material_suggestions:
+  - timeruttag
+  notes: Installation av timerstyrt uttag.
+  task_id: montera_timer_uttag
+- label: Installera dörrklocka
+  category: ovrigt
+  patterns:
+  - installera dörrklocka
+  - montera dörrklocka
+  - koppla ringklocka
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 30
+  pricing_source: manual
+  material_suggestions:
+  - dörrklocka
+  notes: Installation av trådbunden dörrklocka. Ej ring video (se nedan).
+  task_id: installera_dorrklocka
+- label: Installera WiFi-ringklocka
+  category: ovrigt
+  patterns:
+  - installera ring doorbell
+  - installera wifi dörrklocka
+  - montera ring kamera
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 40
+  pricing_source: manual
+  material_suggestions:
+  - wifi dörrklocka
+  notes: Installation av WiFi- eller kamerabaserad dörrklocka.
+  task_id: installera_ringklocka_wifi
+- task_id: FLYTTA-GRUPPER-NORMCENTRAL
+  label: Flytta över befintliga grupper i normcentral
+  category: ovrigt
+  manual_time_minutes_per_unit: 15
+  time_source: gpt
+  description: Flytt och återanslutning av befintliga grupper vid byte av normcentral.
+  quantity_type: per_unit
+  default_unit: st
+  room_type_hint: null
+  gpt_confidence: 0.85
+  patterns:
+  - flytta över befintliga grupper
+  - återansluta grupper i elcentral
+  - koppla om grupper vid centralbyte
+  materials:
+  - ref: KOPPLINGSMATERIAL-NORMCENTRAL
+    quantity_per_unit: 1.0
+    unit: st
+    description: Kopplingsmaterial för grupper
+  _auto_generated: true
+
+  # Montera brandvarnare – schablon
+  MONTERA-BRANDVARNARE:
+    label: "Montera brandvarnare"
+    category: "ovrigt"
+    patterns:
+      - "installera brandvarnare"
+      - "montera brandvarnare"
+      - "sätta upp brandvarnare"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 15

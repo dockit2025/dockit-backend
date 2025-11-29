@@ -1,0 +1,20 @@
+{
+  "suggested_tasks": [
+    {
+      "task_id": "TEST-DUPP-1",
+      "title_sv": "Byta vägguttag – test",
+      "description_sv": "Testtask för att verifiera dubblettskyddet.",
+      "category": "brytare_och_uttag",
+      "patterns": ["byta testuttag i vardagsrum"],
+      "materials": ["TEST-MATERIAL-1"]
+    },
+    {
+      "task_id": "TEST-DUPP-1",
+      "title_sv": "Byta vägguttag – test",
+      "description_sv": "Testtask för att verifiera dubblettskyddet.",
+      "category": "brytare_och_uttag",
+      "patterns": ["byta testuttag i vardagsrum"],
+      "materials": ["TEST-MATERIAL-1"]
+    }
+  ]
+}

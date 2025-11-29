@@ -1,0 +1,19 @@
+Spara detta i minnet:
+
+Filer och paths:
+D:\dockit-ai\interpret_debug_api.py
+D:\dockit-ai\test_interpret.py
+D:\dockit-ai\knowledge\catalogs\price_catalog.json
+D:\dockit-ai\knowledge\catalogs\Storel-GN.csv
+D:\dockit-ai\mappings\
+D:\dockit-ai\mappings\badrum.yaml
+D:\dockit-ai\mappings\belysning.yaml
+D:\dockit-ai\mappings\brytare_och_uttag.yaml
+D:\dockit-ai\mappings\felsokning_och_service.yaml
+D:\dockit-ai\mappings\kok.yaml
+D:\dockit-ai\mappings\natverk_och_media.yaml
+D:\dockit-ai\mappings\ovrigt.yaml
+D:\dockit-ai\mappings\ror_och_vp.yaml
+D:\dockit-ai\src\server\api\quotes.py
+D:\dockit-ai\src\rot_calculator.py
+D:\dockit-ai\free_text_interpreter.py

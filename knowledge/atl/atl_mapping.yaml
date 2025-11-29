@@ -1,0 +1,33 @@
+# Frasmappning för Dockit AI (PHRASE_MAP-format)
+# Varje post kopplar en fri fras till ett ATL-moment och ev. varianter.
+# Tillåtna fält här: phrase, moment_code, variants (lista av str/int), notes, confidence
+
+- phrase: "byte elcentral"
+  moment_code: "CENTRAL_BYTE"
+  variants: ["in_conduit"]
+  notes: "Standardbyte av elcentral"
+  confidence: 0.9
+
+- phrase: "installera jordfelsbrytare"
+  moment_code: "JFB_INSTALL"
+  variants: []
+  notes: "Installation av jordfelsbrytare typ A"
+  confidence: 0.85
+
+- phrase: "dra infällda rör"
+  moment_code: "inf_llda_r_r_vp_16_20_mm_m"
+  variants: [0, -1, -2]  # 0=valv u-kantsarm, -1=ö-kantsarm, -2=planbjälklag (exempel)
+  notes: "VP 16–20 mm"
+  confidence: 0.8
+
+- phrase: "montera dubbeluttag"
+  moment_code: "UTTAG_DUBBEL_INF"
+  variants: ["in_wall"]
+  notes: "Infällt montage"
+  confidence: 0.8
+
+- phrase: "felsökning el"
+  moment_code: "FELSOK_EL"
+  variants: []
+  notes: "Allmän felsökning"
+  confidence: 0.7

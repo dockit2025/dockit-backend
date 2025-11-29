@@ -1,0 +1,254 @@
+DOCKIT – SYSTEMÖVERSIKT (FRI TEXT → OFFERT)
+
+========================================================
+1. ÖVERGRIPANDE FLÖDE
+========================================================
+
+Steg 1: Fri text in från användaren
+-----------------------------------
+- Användaren beskriver jobbet i fritext, t.ex.:
+  "Byta tre vägguttag i vardagsrummet, byta en strömbrytare
+   och installera en dimmer, dra infällda rör till ett nytt
+   uttag i sovrummet, installera en diskmaskin i köket, sätta
+   upp en taklampa i hallen och installera en laddbox på uppfarten."
+
+- Frontend skickar detta till backend via:
+  POST /quotes/draft
+
+  Payload (förenklat):
+    {
+      "customer_name": "...",
+      "customer_email": "...",
+      "apply_rot": true/false,
+      "hourly_rate": 800,
+      "job_summary": "<fri text>",
+      "lines": []  (tom vid auto-generering)
+    }
+
+
+Steg 2: Fri text → tasks + materials (tolkning)
+-----------------------------------------------
+- Funktion: interpret_free_text(...) i:
+    D:\dockit-ai\free_text_interpreter.py
+
+- Vad den gör:
+  1) Läser in alla mapping-filer i:
+        D:\dockit-ai\mappings\*.yaml
+     (t.ex. brytare_och_uttag.yaml, belysning.yaml, kök.yaml osv.)
+
+  2) Varje mapping-fil innehåller “tasks”, t.ex.:
+        - byta_vagguttag
+        - installera_dimmer
+        - montera_taklampa
+     med:
+        - label (mänsklig text)
+        - category
+        - patterns (frasexempel att matcha fri text)
+        - manual_time_minutes_per_unit
+        - materials (lista med material_ref + mängd)
+
+  3) Fri text delas upp i mindre segment (komma/mening).
+  4) För varje segment försöker tolken matcha patterns från tasks.
+  5) Varje träff → en task-post i resultatet.
+
+- Output-struktur (förenklat):
+    {
+      "free_text": "<original text>",
+      "tasks": [
+        {
+          "task_id": "...",
+          "label": "...",
+          "category": "...",
+          "mapping_file": "brytare_och_uttag.yaml",
+          "matched_pattern": "...",
+          "text_segment": "...",
+          "quantity": 1.0,
+          "time_source": "manual",
+          "time_minutes_per_unit": 30,
+          "time_minutes_total": 30,
+          "materials": [
+            {
+              "ref": "DIMMER-UNIV",
+              "description": "Dimmer, universal, infälld",
+              "quantity_per_unit": 1
+            },
+            ...
+          ]
+        },
+        ...
+      ],
+      "totals": {
+        "tasks_count": ...,
+        "total_time_minutes": ...,
+        "total_time_hours": ...
+      },
+      "meta": { ... }
+    }
+
+
+Steg 3: Bygga arbetsrader (work)
+--------------------------------
+- Funktion: _build_work_lines_from_interpretation(...) i:
+    D:\dockit-ai\src\services\quote_service.py
+
+- Input:
+  - interpretation (från interpret_free_text)
+  - hourly_rate (t.ex. 800 kr/h)
+
+- Logik:
+  - En rad per task:
+      kind: "work"
+      ref: task_id
+      description:
+        - snygg fras baserad på label + kundens text
+        - ex: "Byte av två vägguttag i vardagsrummet
+               och installation av en dimmer"
+      qty:
+        - primärt: total arbetstid i timmar (time_minutes_total / 60)
+        - fallback: task.quantity eller 1.0
+      unit_price_sek: hourly_rate
+      line_total_sek: qty * hourly_rate
+
+- Resultat: lista med arbetsrader som bas till offerten.
+
+
+Steg 4: Bygga materialrader (material)
+--------------------------------------
+- Funktion: _build_material_lines_from_interpretation(...) i:
+    D:\dockit-ai\src\services\quote_service.py
+
+- Input:
+  - interpretation (tasks[].materials)
+
+- Logik per material:
+  - ref:
+      m["ref"] / ["id"] / ["sku"] / ["article_number"] / ["material_id"]
+  - description:
+      m["description"] / ["name"] / ["label"] / "Material"
+  - qty:
+      1) m["quantity"] / ["qty"] om finns
+      2) annars: quantity_per_unit * task.quantity
+      3) annars: task.quantity
+      4) annars: 1.0
+
+  - unit_price_sek:
+      - sätts först till 0.0
+      - fylls senare av prislogiken
+  - line_total_sek:
+      qty * unit_price_sek
+
+- Resultat: lista med materialrader.
+
+
+Steg 5: Samla alla rader + markera ROT-berättigande
+----------------------------------------------------
+- I make_draft(...) i quote_service.py:
+
+  - Om payload.lines är tomt:
+      - work_lines = _build_work_lines_from_interpretation(...)
+      - material_lines = _build_material_lines_from_interpretation(...)
+      - out_lines = work_lines + material_lines
+
+  - För varje rad:
+      - line_type:
+          "work" om kind == "work" annars "material"
+      - is_rot_eligible:
+          true om line_type == "work", annars false
+
+- Dessa flaggor används senare vid ROT-beräkning.
+
+
+Steg 6: Prislogik för material (get_price)
+------------------------------------------
+- Funktion: get_price(customer_id, article_ref) i:
+    D:\dockit-ai\src\services\pricing.py
+
+- Kopplas in i make_draft:
+    - customer_id = kundens e-post (fallback: namn)
+    - för varje materialrad:
+        unit_price = get_price(customer_id, ref)
+        line_total = qty * unit_price
+
+- Prioritetsordning inne i get_price:
+    1) favorite_article (per kund + material_ref)
+    2) material_ref_map.json (Dockit-ref -> artikelnummer)
+    3) tolka article_ref som artikelnummer direkt
+    4) hämta pris från price_catalog.json
+    5) om inget hittas → 0.0 + logga saknat pris
+
+- Inblandade filer:
+    - D:\dockit-ai\knowledge\catalogs\material_ref_map.json
+    - D:\dockit-ai\knowledge\catalogs\price_catalog.json
+    - D:\dockit-ai\knowledge\customers\favorites.json
+
+
+Steg 7: ROT-beräkning (valfritt per offert)
+-------------------------------------------
+- ROT-logik i:
+    D:\dockit-ai\src\rot_calculator.py
+
+- I make_draft(...) i quote_service:
+    - Om payload.apply_rot är true:
+        - RotConfig skapas (rot_rate, max_per_person_sek, num_persons)
+        - apply_rot_to_lines(...) anropas med alla rader
+          (som har line_type, is_rot_eligible, total_price_sek)
+
+        - Resultat:
+            - updated_lines med ROT-data per rad
+            - rot_summary med total ROT
+
+    - rot_discount_sek = rot_summary["rot_amount_sek"]
+    - total_sek = subtotal_sek - rot_discount_sek
+
+
+Steg 8: Summering och svar till frontend (draft)
+------------------------------------------------
+- make_draft(...) returnerar ett dict med:
+    {
+      "id": None,
+      "title": "Preliminär offert för <kundnamn>",
+      "customer_name": "...",
+      "subtotal_sek": ...,
+      "rot_discount_sek": ...,
+      "total_sek": ...,
+      "hourly_rate_sek": ...,
+      "interpreted_work_hours": ...,
+      "lines": [
+        {
+          "kind": "work" / "material",
+          "ref": "...",
+          "description": "...",
+          "qty": ...,
+          "unit_price_sek": ...,
+          "line_total_sek": ...,
+          "line_type": "work" / "material",
+          "is_rot_eligible": true/false,
+          ... (ev. ROT-fält per rad)
+        },
+        ...
+      ],
+      "rot_summary": {...}  (om ROT används),
+      "interpretation": {...}  (hela tolkningen från free_text_interpreter)
+    }
+
+- Frontend kan:
+    - visa alla rader
+    - låta användaren ändra qty, pris, lägga till/ta bort rader
+    - låta användaren spara offerten
+
+
+Steg 9: Spara offerten i databasen
+----------------------------------
+- Endpoint: POST /quotes i:
+    D:\dockit-ai\src\server\api\quotes.py
+
+- Använder create_quote(...) i quote_service.py:
+    - Hittar eller skapar Customer
+    - Använder payload.lines som kommer från frontend (dvs. efter ev. justeringar)
+    - Räknar totals (subtotal, rot_discount, total)
+    - Skapar Quote i databasen
+    - Skapar QuoteLine-rader i databasen
+
+- Sen kan sparade offerter hämtas via:
+    - GET /quotes
+    - GET /quotes/{id}

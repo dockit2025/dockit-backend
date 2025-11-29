@@ -1,0 +1,176 @@
+from typing import List, Optional, Dict, Any
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy.orm import Session
+from sqlalchemy import select
+
+from src.server.db.session import get_session
+from src.server.models import Quote, QuoteLine, Customer
+
+router = APIRouter(prefix="/quotes", tags=["quotes"])
+
+# ------------------------------
+# Hjälp: lista offerter (återanvänds av main-proxy)
+# ------------------------------
+def _list_quotes_impl(skip: int, limit: int, session: Session) -> List[Dict[str, Any]]:
+    rows = session.exec(
+        select(Quote).offset(skip).limit(limit)
+    ).all()
+    out: List[Dict[str, Any]] = []
+    for q in rows:
+        cust_name: Optional[str] = None
+        if getattr(q, "customer_id", None) is not None:
+            cust = session.get(Customer, q.customer_id)
+            cust_name = cust.name if cust else None
+        out.append({
+            "id": q.id,
+            "title": getattr(q, "title", f"Offert #{q.id}"),
+            "customer_name": cust_name,
+            "subtotal_sek": getattr(q, "subtotal_sek", 0.0),
+            "rot_discount_sek": getattr(q, "rot_discount_sek", 0.0),
+            "total_sek": getattr(q, "total_sek", 0.0),
+        })
+    return out
+
+# ------------------------------
+# LISTA (statiska vägar först)
+# ------------------------------
+@router.get("", summary="Lista alla offerter")
+@router.get("/", include_in_schema=False)
+def list_quotes(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(50, ge=1, le=200),
+    session: Session = Depends(get_session),
+):
+    return _list_quotes_impl(skip=skip, limit=limit, session=session)
+
+@router.get("/__list", summary="Lista alla offerter (failsafe)")
+def list_quotes_failsafe(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(50, ge=1, le=200),
+    session: Session = Depends(get_session),
+):
+    return _list_quotes_impl(skip=skip, limit=limit, session=session)
+
+# ------------------------------
+# SKAPA (sparar i DB)
+# ------------------------------
+@router.post("", summary="Skapa offert")
+def create_quote(payload: Dict[str, Any], session: Session = Depends(get_session)):
+    """
+    Enkel skapande-endpoint:
+    Body kan t.ex. vara:
+    {
+      "title": "Testoffert",
+      "customer_id": null,
+      "subtotal_sek": 5000,
+      "rot_discount_sek": 500,
+      "total_sek": 4500
+    }
+    """
+    q = Quote(
+        title=payload.get("title", "Offert"),
+        customer_id=payload.get("customer_id"),
+        subtotal_sek=float(payload.get("subtotal_sek", 0.0)),
+        rot_discount_sek=float(payload.get("rot_discount_sek", 0.0)),
+        total_sek=float(payload.get("total_sek", 0.0)),
+    )
+    session.add(q)
+    session.commit()
+    session.refresh(q)
+    # Returnera i samma form som list/get
+    cust_name = None
+    if q.customer_id:
+        cust = session.get(Customer, q.customer_id)
+        cust_name = cust.name if cust else None
+    return {
+        "id": q.id,
+        "title": q.title,
+        "customer_name": cust_name,
+        "subtotal_sek": q.subtotal_sek,
+        "rot_discount_sek": q.rot_discount_sek,
+        "total_sek": q.total_sek,
+    }
+
+# ------------------------------
+# DRAFT (räkna ut utan att spara)
+# ------------------------------
+@router.post("/draft", summary="Beräkna offert (utan att spara)")
+def draft_quote(payload: Dict[str, Any]):
+    """
+    Accepterar frivilligt 'lines': [
+      {"kind": "work"|"material", "description": "...", "qty": 8, "unit_price_sek": 640}
+    ]
+    Räknar line_total om det saknas, summerar och lägger ROT 30% på arbete.
+    Om du skickar in färdiga subtotal/total används de, annars beräknas de.
+    """
+    lines = payload.get("lines", []) or []
+
+    work_sum = 0.0
+    mat_sum = 0.0
+    norm_lines = []
+    for l in lines:
+        kind = l.get("kind")
+        qty = float(l.get("qty", 0))
+        up = float(l.get("unit_price_sek", 0))
+        lt = float(l.get("line_total_sek", qty * up))
+        item = {
+            "kind": kind,
+            "ref": l.get("ref"),
+            "description": l.get("description"),
+            "qty": qty,
+            "unit_price_sek": up,
+            "line_total_sek": lt,
+        }
+        norm_lines.append(item)
+        if kind == "work":
+            work_sum += lt
+        else:
+            mat_sum += lt
+
+    subtotal = float(payload.get("subtotal_sek", work_sum + mat_sum))
+    rot = float(payload.get("rot_discount_sek", round(work_sum * 0.30, 2)))
+    total = float(payload.get("total_sek", subtotal - rot))
+
+    return {
+        "title": payload.get("title", "Preliminär offert"),
+        "customer_name": payload.get("customer_name"),
+        "subtotal_sek": subtotal,
+        "rot_discount_sek": rot,
+        "total_sek": total,
+        "lines": norm_lines,
+    }
+
+# ------------------------------
+# HÄMTA MED ID (läggs sist)
+# ------------------------------
+@router.get("/{quote_id}", summary="Hämta sparad offert med rader")
+def get_quote(quote_id: int, session: Session = Depends(get_session)):
+    quote = session.get(Quote, quote_id)
+    if not quote:
+        raise HTTPException(status_code=404, detail="Offerten hittades inte")
+
+    cust_name = None
+    if quote.customer_id:
+        cust = session.get(Customer, quote.customer_id)
+        cust_name = cust.name if cust else None
+
+    lines = session.exec(select(QuoteLine).where(QuoteLine.quote_id == quote_id)).all()
+    return {
+        "id": quote.id,
+        "title": quote.title,
+        "customer_name": cust_name,
+        "subtotal_sek": quote.subtotal_sek,
+        "rot_discount_sek": quote.rot_discount_sek,
+        "total_sek": quote.total_sek,
+        "lines": [
+            {
+                "kind": l.kind,
+                "ref": l.ref,
+                "description": l.description,
+                "qty": l.qty,
+                "unit_price_sek": l.unit_price_sek,
+                "line_total_sek": l.line_total_sek,
+            }
+            for l in lines
+        ],
+    }

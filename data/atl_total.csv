@@ -1,0 +1,6 @@
+id;kategori;arbetsmoment;enhet;atl_tid_h;pris_ex_moms;materialkod;material_enhet;kommentar;Synonymer
+EL-001;Installation;Kapslad dosa;st;0.40;0;DOSAKAPS;st;IP54 standard;kopplingsdosa, plintdosa, ute dosa, kapslad låda, ip54-dosa
+EL-014;Kabeldragning;Installationskabel i rör;meter;0.08;0;EKLK;meter;I befintligt rör om möjligt;tråddragning, dra kabel, mata fram kabel, ny rördragning, kabelmatning
+EL-031;Armatur;Montera takarmatur;st;0.35;0;ARMTAK;st;Utan dimmer;skruva upp lampa, taklampa, montera armatur
+EL-045;Styrning;Installera skymningsrelä;st;0.60;0;SKYMREL;st;Utomhus, kapslat;puck, skymningssensor, ljusrelä
+EL-052;Uttag;Montera dubbeluttag;st;0.30;0;UTTDUB;st;Infällt standard;jordat vägguttag, 2-vägsuttag, dubbelkontakt

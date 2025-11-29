@@ -1,0 +1,376 @@
+tasks:
+- task_id: montera_taklampa
+  label: Montera taklampa
+  category: belysning
+  patterns:
+  - montera taklampa
+  - sätta upp taklampa
+  - installera taklampa
+  - hänga upp taklampa
+  - montera plafond
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 20
+  pricing_source: manual
+  materials: []
+  material_suggestions:
+  - taklampa
+  notes: Standardinstallation av taklampa på befintlig takdosa.
+- task_id: byta_taklampa
+  label: Byta taklampa
+  category: belysning
+  patterns:
+  - byta taklampa
+  - ta ner taklampa och sätta upp ny
+  - ersätta taklampa
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 15
+  pricing_source: manual
+  materials: []
+  material_suggestions:
+  - taklampa
+  notes: Direkt byte av taklampa.
+- task_id: installera_takarmatur
+  label: Installera takarmatur
+  category: belysning
+  patterns:
+  - installera takarmatur
+  - sätta upp takarmatur
+  - montera takarmatur
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 25
+  pricing_source: manual
+  materials: []
+  material_suggestions:
+  - armatur
+  notes: Installation av takarmatur, t.ex. LED-panel eller lysrörsarmatur.
+- task_id: installera_vagglampa
+  label: Installera vägglampa
+  category: belysning
+  patterns:
+  - installera vägglampa
+  - montera vägglampa
+  - sätta upp vägglampa
+  - väggbelysning installation
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 25
+  pricing_source: manual
+  materials: []
+  material_suggestions:
+  - vägglampa
+  notes: Installation av vägglampa inklusive montering på befintlig punkt.
+- task_id: byta_vagglampa
+  label: Byta vägglampa
+  category: belysning
+  patterns:
+  - byta vägglampa
+  - ersätta vägglampa
+  - ta ner vägglampa och sätta upp ny
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 15
+  pricing_source: manual
+  materials: []
+  material_suggestions:
+  - vägglampa
+  notes: Byte av befintlig vägglampa.
+- task_id: installera_infallda_spotlights
+  label: Installera infällda spotlights
+  category: belysning
+  patterns:
+  - installera infällda spotlights
+  - installera spotlights i tak
+  - montera infällda spotlights
+  - installera downlights
+  - sätta in spotlights i taket
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 45
+  pricing_source: manual
+  materials: []
+  material_suggestions:
+  - spotlight
+  - driver
+  - kopplingsdosa
+  notes: Installation av infällda spotlights, inkl håltagning och anslutning. Tid
+    per spotlight.
+- task_id: installera_utanpa_spotlights
+  label: Installera utanpåliggande spotlights
+  category: belysning
+  patterns:
+  - installera utanpåliggande spotlights
+  - sätta upp spotlights på tak
+  - montera spotlights utanpå taket
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 30
+  pricing_source: manual
+  materials: []
+  material_suggestions:
+  - spotlight
+  - driver
+  notes: Montering av utanpåliggande spotlights på befintlig dosa.
+- task_id: byta_driver_belysning
+  label: Byta driver till belysning
+  category: belysning
+  patterns:
+  - byta driver
+  - driver trasig
+  - byta transformator till belysning
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 25
+  pricing_source: manual
+  materials: []
+  material_suggestions:
+  - driver
+  notes: Byte av LED-driver eller transformator.
+- task_id: installera_underskapsbelysning
+  label: Installera underskåpsbelysning
+  category: belysning
+  patterns:
+  - installera underskåpsbelysning
+  - sätta upp underskåpsbelysning
+  - byta underskåpsbelysning
+  - underskåpslampa
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 40
+  pricing_source: manual
+  materials: []
+  material_suggestions:
+  - underskåpsbelysning
+  - kabel
+  notes: Installation eller byte av underskåpsbelysning inkl ev. transformator.
+- task_id: installera_ledlist
+  label: Installera LED-list
+  category: belysning
+  patterns:
+  - installera ledlist
+  - sätta upp ledlist
+  - montera led strip
+  - montera ledlist för belysning
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 40
+  pricing_source: manual
+  materials: []
+  material_suggestions:
+  - ledlist
+  - driver
+  notes: Installation av LED-list för stämnings- eller arbetsbelysning.
+- task_id: installera_garderobsbelysning
+  label: Installera garderobsbelysning
+  category: belysning
+  patterns:
+  - installera garderobsbelysning
+  - sätta upp belysning i garderob
+  - montera garderobslampa
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 35
+  pricing_source: manual
+  materials: []
+  material_suggestions:
+  - garderobslampa
+  notes: Installation av belysning i garderob eller klädkammare.
+- task_id: installera_utelampa
+  label: Installera utelampa
+  category: belysning
+  patterns:
+  - installera utelampa
+  - montera utelampa
+  - sätta upp fasadbelysning
+  - installera utomhusbelysning
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 35
+  pricing_source: manual
+  materials: []
+  material_suggestions:
+  - utelampa
+  notes: Installation av utomhusarmatur på fasad.
+- task_id: byta_utelampa
+  label: Byta utelampa
+  category: belysning
+  patterns:
+  - byta utelampa
+  - ersätta utelampa
+  - byta fasadbelysning
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 20
+  pricing_source: manual
+  materials: []
+  material_suggestions:
+  - utelampa
+  notes: Byte av utelampa på befintlig anslutning.
+- task_id: installera_markbelysning
+  label: Installera markbelysning
+  category: belysning
+  patterns:
+  - installera markbelysning
+  - montera markspot
+  - sätta upp markspotlights
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 70
+  pricing_source: manual
+  materials: []
+  material_suggestions:
+  - markspot
+  - kabel
+  notes: Installation av markbelysning inklusive tätning och anslutning.
+- task_id: installera_pollare_belysning
+  label: Installera pollare
+  category: belysning
+  patterns:
+  - installera pollare
+  - sätta upp pollare
+  - montera trädgårdspollare
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 60
+  pricing_source: manual
+  materials: []
+  material_suggestions:
+  - pollare
+  - kabel
+  notes: Installation av pollare eller trädgårdsbelysning.
+- task_id: felsokning_belysning
+  label: Felsökning belysning
+  category: belysning
+  patterns:
+  - felsöka belysningen
+  - belysningen fungerar inte
+  - lamporna funkar inte
+  - belysningen blinkar
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 45
+  pricing_source: manual
+  materials: []
+  material_suggestions: []
+  notes: Felsökning av belysning inne eller ute.
+- task_id: byta_trasig_lampa
+  label: Byta trasig lampa
+  category: belysning
+  patterns:
+  - byta lampa
+  - byta glödlampa
+  - lampa trasig
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 10
+  pricing_source: manual
+  materials: []
+  material_suggestions:
+  - ljuskälla
+  notes: Byte av enstaka ljuskälla.
+- task_id: INSTALLERA-SPOTLIGHT-TAK
+  label: Installera spotlight i tak
+  category: belysning
+  manual_time_minutes_per_unit: 30
+  time_source: gpt
+  description: Montering och inkoppling av infälld eller utanpåliggande spotlight
+    i tak, inklusive anslutning till befintlig elinstallation.
+  quantity_type: per_unit
+  default_unit: st
+  room_type_hint: null
+  gpt_confidence: 0.95
+  patterns:
+  - montera spotlight i tak
+  - installera spotlight i tak
+  - sätta upp spotlights i tak
+  materials:
+  - ref: SPOTLIGHT-INF-TAK
+    quantity_per_unit: 1.0
+    unit: st
+    description: Infälld eller utanpåliggande spotlight
+  - ref: KOPPLINGSMATERIAL-SPOTLIGHT
+    quantity_per_unit: 1.0
+    unit: st
+    description: Kopplingsmaterial för spotlight
+  _auto_generated: true
+- task_id: INSTALLERA-DIMMER
+  label: Installera dimmer
+  category: belysning
+  manual_time_minutes_per_unit: 30
+  time_source: gpt
+  description: Montering och inkoppling av dimmer för styrning av belysning.
+  quantity_type: per_unit
+  default_unit: st
+  room_type_hint: vardagsrum
+  gpt_confidence: 0.85
+  patterns:
+  - installera dimmer
+  - montera dimmer
+  - sätta in dimmer
+  materials:
+  - ref: DIMMER-INF-VAGG
+    quantity_per_unit: 1.0
+    unit: st
+    description: Infälld dimmer
+  _auto_generated: true
+- task_id: DRA-MATNING-UTEBELYSNING
+  label: Dra matning till utebelysning
+  category: belysning
+  manual_time_minutes_per_unit: 45
+  time_source: gpt
+  description: Dragning av elkabel och anslutning till utomhusbelysning, inklusive
+    koppling via skymningsrelä.
+  quantity_type: per_unit
+  default_unit: st
+  room_type_hint: utomhus
+  gpt_confidence: 0.9
+  patterns:
+  - dra matning till led-pollare i trädgård
+  - dra kabel till utebelysning med skymningsrelä
+  - koppla utomhusbelysning via skymningsrelä
+  materials:
+  - ref: KABEL-UTOMHUS
+    quantity_per_unit: 10.0
+    unit: m
+    description: Utomhuskabel, uppskattad längd per pollare
+  - ref: SKYMNINGSRELA
+    quantity_per_unit: 1.0
+    unit: st
+    description: Skymningsrelä
+  _auto_generated: true
+- task_id: INSTALLERA-KOPPLINGSDOSA-TAK
+  label: Installera kopplingsdosa i tak
+  category: belysning
+  manual_time_minutes_per_unit: 18
+  time_source: gpt
+  description: Montering och inkoppling av kopplingsdosa i tak för framtida belysning
+    eller elinstallation.
+  quantity_type: per_unit
+  default_unit: st
+  room_type_hint: null
+  gpt_confidence: 0.9
+  patterns:
+  - sätta upp kopplingsdosa i taket
+  - installera kopplingsdosa i tak
+  - montera kopplingsdosa för belysning
+  materials:
+  - ref: KOPPLINGSDOSA-TAK
+    quantity_per_unit: 1.0
+    unit: st
+    description: Kopplingsdosa för tak
+  _auto_generated: true
+
+  # Montera taklampa / plafond – schablon
+  MONTERA-TAKLAMPA:
+    label: "Montera taklampa eller plafond"
+    category: "belysning"
+    patterns:
+      - "montera taklampa"
+      - "sätta upp taklampa"
+      - "installera taklampa"
+      - "montera plafond"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 25

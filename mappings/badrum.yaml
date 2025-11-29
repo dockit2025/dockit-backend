@@ -1,0 +1,414 @@
+# file: knowledge/dockit/dockit_custom_mapping.yaml
+# Beskrivning:
+#   Hög-nivå "kundvänliga" arbetsmoment som kan kopplas mot:
+#     - ATL (Del 7) via ATLLoader + atl_mapping.yaml, eller
+#     - manuella tider där ATL saknar relevanta rader.
+#
+# Struktur per task:
+#   tasks:
+#     some_task_id:
+#       label: "Synlig text"
+#       category: "fri kategorietikett"
+#       patterns:                # fraser som elektriker säger
+#         - "..."
+#       time_source: "atl" | "manual"
+#       atl_refs:                # används när time_source == "atl"
+#         - mapping_key: "..."   # nyckel som finns i atl_mapping.yaml
+#           # alternativt: search_text: "fri söksträng mot ATL"
+#           # variant: 0        # valfritt, om vi vill låsa till viss variant
+#           # top_k: 5          # valfritt, annars används default
+#       manual_time_minutes_per_unit: 60   # endast när time_source == "manual"
+#       pricing_source: "manual" | "pricelist"
+#       material_suggestions:
+#         - "sökterm mot prislista"
+#       notes: "Fri kommentar"
+
+version: 0.2
+description: "Dockit custom mapping för vanliga lägenhetsjobb (service/installation)"
+
+tasks:
+
+  tasks:
+
+  # ---------------------------------------------------------
+  # BADRUM – VENTILATION
+  # ---------------------------------------------------------
+
+  installera_badrumsflakt:
+    label: "Installera badrumsfläkt"
+    category: "badrum"
+    patterns:
+      - "installera badrumsfläkt"
+      - "montera badrumsfläkt"
+      - "sätta upp badrumsfläkt"
+      - "badrumsfläkt installation"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 60
+    pricing_source: "manual"
+    material_suggestions:
+      - "badrumsfläkt"
+    notes: "Installation eller byte av badrumsfläkt inkl. fast anslutning."
+
+  byta_badrumsflakt:
+    label: "Byta badrumsfläkt"
+    category: "badrum"
+    patterns:
+      - "byta badrumsfläkt"
+      - "ersätta badrumsfläkt"
+      - "ny badrumsfläkt istället för den gamla"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 40
+    pricing_source: "manual"
+    material_suggestions:
+      - "badrumsfläkt"
+    notes: "Direkt byte av badrumsfläkt utan ny matning."
+
+  installera_fuktstyrd_flakt:
+    label: "Installera fuktstyrd badrumsfläkt"
+    category: "badrum"
+    patterns:
+      - "installera fuktstyrd fläkt"
+      - "installera fuktstyrd badrumsfläkt"
+      - "sätta upp fläkt med fuktstyrning"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 70
+    pricing_source: "manual"
+    material_suggestions:
+      - "badrumsfläkt fuktstyrd"
+    notes: "Installation av fläkt med fuktstyrning."
+
+  installera_flakt_med_timer:
+    label: "Installera badrumsfläkt med timer"
+    category: "badrum"
+    patterns:
+      - "installera fläkt med timer"
+      - "installera badrumsfläkt med timer"
+      - "montera fläkt med timerfunktion"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 70
+    pricing_source: "manual"
+    material_suggestions:
+      - "badrumsfläkt med timer"
+    notes: "Installation av fläkt med timerfunktion."
+
+  felsokning_badrumsflakt:
+    label: "Felsökning badrumsfläkt"
+    category: "badrum"
+    patterns:
+      - "felsöka badrumsfläkt"
+      - "fläkten fungerar inte i badrummet"
+      - "badrumsfläkten funkar ej"
+      - "problemen med badrumsfläkten"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 45
+    pricing_source: "manual"
+    material_suggestions: []
+    notes: "Riktad felsökning av badrumsfläkt."
+
+  # ---------------------------------------------------------
+  # BADRUM – GOLVVÄRME
+  # ---------------------------------------------------------
+
+  installera_golvvarmetermostat:
+    label: "Installera golvvärmetermostat"
+    category: "badrum"
+    patterns:
+      - "installera golvvärmetermostat"
+      - "sätta upp golvvärmetermostat"
+      - "byta golvvärmetermostat"
+      - "montera termostat golvvärme"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 45
+    pricing_source: "manual"
+    material_suggestions:
+      - "golvvärmetermostat"
+    notes: "Installation eller byte av termostat till elgolvvärme."
+
+  byta_golvvarmegivare:
+    label: "Byta golvvärmegivare"
+    category: "badrum"
+    patterns:
+      - "byta golvvärmegivare"
+      - "ny givare golvvärme"
+      - "golvvärmesensor behöver bytas"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 35
+    pricing_source: "manual"
+    material_suggestions:
+      - "golvvärmegivare"
+    notes: "Byte av golvvärmegivare i befintligt rör."
+
+  installera_smart_golvvarmestyrning:
+    label: "Installera smart styrning till golvvärme"
+    category: "badrum"
+    patterns:
+      - "installera smart termostat golvvärme"
+      - "installera wifi termostat golvvärme"
+      - "byta till smart golvvärmetermostat"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 55
+    pricing_source: "manual"
+    material_suggestions:
+      - "smart termostat"
+    notes: "Installation av smart/WiFi-styrd termostat."
+
+  felsokning_golvvarme:
+    label: "Felsökning golvvärme"
+    category: "badrum"
+    patterns:
+      - "felsöka golvvärmen"
+      - "golvvärmen fungerar inte"
+      - "golvvärmen är trasig"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 60
+    pricing_source: "manual"
+    material_suggestions: []
+    notes: "Felsökning av golvvärme, givare och termostat."
+
+  # ---------------------------------------------------------
+  # BADRUM – BELYSNING
+  # ---------------------------------------------------------
+
+  installera_spegelbelysning_badrum:
+    label: "Installera spegelbelysning i badrum"
+    category: "badrum"
+    patterns:
+      - "installera spegelbelysning"
+      - "sätta upp spegellampa"
+      - "montera badrumsspegellampa"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 45
+    pricing_source: "manual"
+    material_suggestions:
+      - "spegellampa"
+    notes: "Montering av spegellampa i badrum."
+
+  byta_spegelbelysning:
+    label: "Byta spegelbelysning i badrum"
+    category: "badrum"
+    patterns:
+      - "byta spegelbelysning"
+      - "byta spegellampa"
+      - "ersätta spegelbelysning"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 30
+    pricing_source: "manual"
+    material_suggestions:
+      - "spegellampa"
+    notes: "Direkt byte av spegellampa."
+
+  installera_downlights_badrum:
+    label: "Installera downlights i badrum"
+    category: "badrum"
+    patterns:
+      - "installera downlights i badrum"
+      - "montera spotlights i badrummet"
+      - "installera spottar i badrum"
+      - "sätta in IP44 spotlights"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 50
+    pricing_source: "manual"
+    material_suggestions:
+      - "IP44 spotlights"
+      - "driver"
+    notes: "Installation av downlights i badrum. Tid per spotlight."
+
+  byta_driver_badrumsbelysning:
+    label: "Byta driver till badrumsbelysning"
+    category: "badrum"
+    patterns:
+      - "byta driver badrumsbelysning"
+      - "driver trasig i badrummet"
+      - "badrumsbelysning driver byte"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 25
+    pricing_source: "manual"
+    material_suggestions:
+      - "driver"
+    notes: "Byte av transformator/driver i badrumsarmatur."
+
+  # ---------------------------------------------------------
+  # BADRUM – UTTAG, SKÅP OCH INSTALLATIONER
+  # ---------------------------------------------------------
+
+  installera_ip44_uttag_badrum:
+    label: "Installera IP44-uttag i badrum"
+    category: "badrum"
+    patterns:
+      - "installera uttag i badrum"
+      - "installera ip44 uttag i badrum"
+      - "nytt uttag i badrummet"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 45
+    pricing_source: "manual"
+    material_suggestions:
+      - "ip44 uttag"
+    notes: "Installation av IP44-klassat uttag i badrum, i godkänd zon."
+
+  flytta_uttag_badrum:
+    label: "Flytta uttag i badrum"
+    category: "badrum"
+    patterns:
+      - "flytta uttag i badrummet"
+      - "flytta ip44 uttag"
+      - "ändra placering av uttag i badrum"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 70
+    pricing_source: "manual"
+    material_suggestions:
+      - "kabel"
+      - "ip44 uttag"
+    notes: "Flytt av badrumsuttag inklusive kort kabeldragning."
+
+  installera_rakapparatuttag:
+    label: "Installera rakapparatuttag"
+    category: "badrum"
+    patterns:
+      - "installera rakapparatuttag"
+      - "montera rakapparatuttag"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 40
+    pricing_source: "manual"
+    material_suggestions:
+      - "rakapparatuttag"
+    notes: "Installation av transformatorbaserat uttag för rakapparat."
+
+  installera_spegelskåp_badrum:
+    label: "Installera spegelskåp i badrum"
+    category: "badrum"
+    patterns:
+      - "installera spegelskåp"
+      - "montera spegelskåp"
+      - "sätta upp spegelskåp med el"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 60
+    pricing_source: "manual"
+    material_suggestions:
+      - "spegelskåp"
+    notes: "Installation av spegelskåp med el och belysning."
+
+  installera_eluttag_i_spegelskåp:
+    label: "Installera eluttag i spegelskåp"
+    category: "badrum"
+    patterns:
+      - "installera uttag i spegelskåp"
+      - "montera uttag i spegelskåp"
+      - "eluttag i spegelskåp"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 40
+    pricing_source: "manual"
+    material_suggestions:
+      - "ip44 uttag"
+    notes: "Installation av extra uttag inuti spegelskåp."
+
+  # ---------------------------------------------------------
+  # BADRUM – DOLDA JOBB / FÖRBEREDELSER / ELDRAGNINGAR
+  # ---------------------------------------------------------
+
+  dra_ny_matning_badrum:
+    label: "Dra ny matning till badrum"
+    category: "badrum"
+    patterns:
+      - "dra ny matning till badrum"
+      - "ny elmatning till badrum"
+      - "dra kabel till badrum"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 90
+    pricing_source: "manual"
+    material_suggestions:
+      - "kabel"
+    notes: "Dragning av ny matning från närliggande punkt."
+
+  dra_kabel_badrum_renovering:
+    label: "Dra kabel vid badrumsrenovering"
+    category: "badrum"
+    patterns:
+      - "dra kabel i badrummet"
+      - "elinstallation vid badrumsrenovering"
+      - "dra nya rör i badrummet"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 120
+    pricing_source: "manual"
+    material_suggestions:
+      - "kabel"
+      - "vp rör"
+    notes: "Nyinstallation av el i samband med badrumsrenovering."
+
+  installera_kopplingsdosa_ip44:
+    label: "Installera kopplingsdosa IP44"
+    category: "badrum"
+    patterns:
+      - "installera kopplingsdosa i badrum"
+      - "ip44 kopplingsdosa"
+      - "sätta upp kopplingsdosa badrum"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 35
+    pricing_source: "manual"
+    material_suggestions:
+      - "ip44 kopplingsdosa"
+    notes: "Montering av fuktskyddad kopplingsdosa."
+
+  forbered_el_badrumsrenovering:
+    label: "Förbereda el inför badrumsrenovering"
+    category: "badrum"
+    patterns:
+      - "förbereda el inför badrumsrenovering"
+      - "el inför badrumsrenovering"
+      - "förarbete el badrum"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 60
+    pricing_source: "manual"
+    material_suggestions: []
+    notes: "Frånkoppling, märkning och förberedelse inför renovering."
+
+  installera_skyddsutjamning_badrum:
+    label: "Installera skyddsutjämning i badrum"
+    category: "badrum"
+    patterns:
+      - "installera skyddsutjämning i badrum"
+      - "potentialutjämning i badrum"
+      - "jordning badrum"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 45
+    pricing_source: "manual"
+    material_suggestions:
+      - "jordledare"
+    notes: "Installation eller komplettering av skyddsutjämning."
+
+  felsokning_jordfelsbrytare_badrum:
+    label: "Felsökning jordfelsbrytarproblem i badrum"
+    category: "badrum"
+    patterns:
+      - "jordfelsbrytaren löser ut i badrummet"
+      - "fel i badrummet orsakar jordfel"
+      - "felsöka jordfel i badrum"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 60
+    pricing_source: "manual"
+    material_suggestions: []
+    notes: "Riktad felsökning vid jordfelsbrytarutlösningar."
+

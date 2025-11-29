@@ -1,0 +1,353 @@
+
+=== TREE: src\server\api ===
+D:\dockit-ai\src\server\api\__init__.py
+D:\dockit-ai\src\server\api\health.py
+D:\dockit-ai\src\server\api\health.py.bak_20251106_160540
+D:\dockit-ai\src\server\api\quotes_list.py
+D:\dockit-ai\src\server\api\quotes.py
+D:\dockit-ai\src\server\api\quotes.py.bak_20251106_154052
+D:\dockit-ai\src\server\api\quotes.py.bak_20251106_155458
+D:\dockit-ai\src\server\api\quotes.py.bak_20251106_155616
+D:\dockit-ai\src\server\api\quotes.py.bak_20251106_155847
+D:\dockit-ai\src\server\api\quotes.py.bak_20251106_160437
+D:\dockit-ai\src\server\api\quotes.py.bak_20251106_160818
+D:\dockit-ai\src\server\api\quotes.py.bak_addget_20251106_175255
+D:\dockit-ai\src\server\api\quotes.py.bak_addlist_20251106_162304
+D:\dockit-ai\src\server\api\quotes.py.bak_canonical_20251106_181641
+D:\dockit-ai\src\server\api\quotes.py.bak_clean_20251106_163623
+D:\dockit-ai\src\server\api\quotes.py.bak_debug_20251106_165416
+D:\dockit-ai\src\server\api\quotes.py.bak_dedup_20251106_161554
+D:\dockit-ai\src\server\api\quotes.py.bak_dedup2_20251106_161648
+D:\dockit-ai\src\server\api\quotes.py.bak_finalfix
+D:\dockit-ai\src\server\api\quotes.py.bak_fix_20251106_160911
+D:\dockit-ai\src\server\api\quotes.py.bak_list_20251106_163207
+D:\dockit-ai\src\server\api\quotes.py.bak_listfix_20251106_175802
+D:\dockit-ai\src\server\api\quotes.py.bak_no_create_20251106_174716
+D:\dockit-ai\src\server\api\quotes.py.bak_norm_20251106_161415
+D:\dockit-ai\src\server\api\quotes.py.bak_routefix_20251106_161145
+D:\dockit-ai\src\server\api\system.py
+D:\dockit-ai\src\server\api\__pycache__\__init__.cpython-311.pyc
+D:\dockit-ai\src\server\api\__pycache__\health.cpython-311.pyc
+D:\dockit-ai\src\server\api\__pycache__\quotes_list.cpython-311.pyc
+D:\dockit-ai\src\server\api\__pycache__\quotes.cpython-311.pyc
+D:\dockit-ai\src\server\api\__pycache__\system.cpython-311.pyc
+
+=== TREE: src\server ===
+D:\dockit-ai\src\server\__init__.py
+D:\dockit-ai\src\server\main.py
+D:\dockit-ai\src\server\main.py.bak
+D:\dockit-ai\src\server\main.py.bak_20251106_155243
+D:\dockit-ai\src\server\api\__init__.py
+D:\dockit-ai\src\server\api\health.py
+D:\dockit-ai\src\server\api\health.py.bak_20251106_160540
+D:\dockit-ai\src\server\api\quotes_list.py
+D:\dockit-ai\src\server\api\quotes.py
+D:\dockit-ai\src\server\api\quotes.py.bak_20251106_154052
+D:\dockit-ai\src\server\api\quotes.py.bak_20251106_155458
+D:\dockit-ai\src\server\api\quotes.py.bak_20251106_155616
+D:\dockit-ai\src\server\api\quotes.py.bak_20251106_155847
+D:\dockit-ai\src\server\api\quotes.py.bak_20251106_160437
+D:\dockit-ai\src\server\api\quotes.py.bak_20251106_160818
+D:\dockit-ai\src\server\api\quotes.py.bak_addget_20251106_175255
+D:\dockit-ai\src\server\api\quotes.py.bak_addlist_20251106_162304
+D:\dockit-ai\src\server\api\quotes.py.bak_canonical_20251106_181641
+D:\dockit-ai\src\server\api\quotes.py.bak_clean_20251106_163623
+D:\dockit-ai\src\server\api\quotes.py.bak_debug_20251106_165416
+D:\dockit-ai\src\server\api\quotes.py.bak_dedup_20251106_161554
+D:\dockit-ai\src\server\api\quotes.py.bak_dedup2_20251106_161648
+D:\dockit-ai\src\server\api\quotes.py.bak_finalfix
+D:\dockit-ai\src\server\api\quotes.py.bak_fix_20251106_160911
+D:\dockit-ai\src\server\api\quotes.py.bak_list_20251106_163207
+D:\dockit-ai\src\server\api\quotes.py.bak_listfix_20251106_175802
+D:\dockit-ai\src\server\api\quotes.py.bak_no_create_20251106_174716
+D:\dockit-ai\src\server\api\quotes.py.bak_norm_20251106_161415
+D:\dockit-ai\src\server\api\quotes.py.bak_routefix_20251106_161145
+D:\dockit-ai\src\server\api\system.py
+D:\dockit-ai\src\server\api\__pycache__\__init__.cpython-311.pyc
+D:\dockit-ai\src\server\api\__pycache__\health.cpython-311.pyc
+D:\dockit-ai\src\server\api\__pycache__\quotes_list.cpython-311.pyc
+D:\dockit-ai\src\server\api\__pycache__\quotes.cpython-311.pyc
+D:\dockit-ai\src\server\api\__pycache__\system.cpython-311.pyc
+D:\dockit-ai\src\server\db\__init__.py
+D:\dockit-ai\src\server\db\session.py
+D:\dockit-ai\src\server\db\session.py.bak_20251106_160324
+D:\dockit-ai\src\server\db\__pycache__\__init__.cpython-311.pyc
+D:\dockit-ai\src\server\db\__pycache__\session.cpython-311.pyc
+D:\dockit-ai\src\server\models\__init__.py
+D:\dockit-ai\src\server\models\customer.py
+D:\dockit-ai\src\server\models\material.py
+D:\dockit-ai\src\server\models\quote.py
+D:\dockit-ai\src\server\models\work_item.py
+D:\dockit-ai\src\server\models\__pycache__\__init__.cpython-311.pyc
+D:\dockit-ai\src\server\models\__pycache__\customer.cpython-311.pyc
+D:\dockit-ai\src\server\models\__pycache__\material.cpython-311.pyc
+D:\dockit-ai\src\server\models\__pycache__\quote.cpython-311.pyc
+D:\dockit-ai\src\server\models\__pycache__\work_item.cpython-311.pyc
+D:\dockit-ai\src\server\schemas\common.py
+D:\dockit-ai\src\server\schemas\quote.py
+D:\dockit-ai\src\server\schemas\__pycache__\common.cpython-311.pyc
+D:\dockit-ai\src\server\schemas\__pycache__\quote.cpython-311.pyc
+D:\dockit-ai\src\server\services\quote_service.py
+D:\dockit-ai\src\server\services\quote_service.py.bak_20251106_160236
+D:\dockit-ai\src\server\services\__pycache__\quote_service.cpython-311.pyc
+D:\dockit-ai\src\server\settings\__init__.py
+D:\dockit-ai\src\server\settings\config.py
+D:\dockit-ai\src\server\settings\__pycache__\__init__.cpython-311.pyc
+D:\dockit-ai\src\server\settings\__pycache__\config.cpython-311.pyc
+D:\dockit-ai\src\server\setttings\config.py
+D:\dockit-ai\src\server\__pycache__\__init__.cpython-311.pyc
+D:\dockit-ai\src\server\__pycache__\main.cpython-311.pyc
+
+=== FILE: src\server\main.py ===
+from contextlib import asynccontextmanager
+from fastapi import FastAPI, Depends
+from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.orm import Session
+
+from src.server.db.session import init_db, get_session
+from src.server.api import system
+from src.server.api import quotes
+from src.server.api.quotes import _list_quotes_impl  # vår säkra list-funktion
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("Initierar databasen...")
+    init_db()
+    yield
+    print("Avslutar appen...")
+
+app = FastAPI(lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Inkludera routers (som innan)
+app.include_router(system.router)
+app.include_router(quotes.router)
+
+# --- HÅRD PROXY: tvinga fram GET /quotes och /quotes/__list via appen själv ---
+
+@app.get("/quotes", tags=["quotes"], summary="Lista alla offerter (proxy)")
+@app.get("/quotes/", include_in_schema=False)
+def list_quotes_proxy(skip: int = 0, limit: int = 50, session: Session = Depends(get_session)):
+    return _list_quotes_impl(skip=skip, limit=limit, session=session)
+
+@app.get("/quotes/__list", tags=["quotes"], summary="Lista alla offerter (proxy failsafe)")
+def list_quotes_proxy2(skip: int = 0, limit: int = 50, session: Session = Depends(get_session)):
+    return _list_quotes_impl(skip=skip, limit=limit, session=session)
+
+
+=== FILE: src\server\api\__init__.py ===
+# 14) src/server/api/__init__.py  (om du vill ha explicit export)
+# tom eller: from .health import router as health_router
+
+
+
+=== FILE: src\server\api\quotes.py ===
+from typing import List
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy.orm import Session
+from sqlalchemy import select
+
+from src.server.db.session import get_session
+from src.server.models import Quote, QuoteLine, Customer
+
+router = APIRouter(prefix="/quotes", tags=["quotes"])
+
+# ----- LIST (3 vägar): "", "/", "/__list" -----
+def _list_quotes_impl(skip: int, limit: int, session: Session):
+    rows = session.exec(select(Quote).offset(skip).limit(limit)).all()
+    out: List[dict] = []
+    for q in rows:
+        cust_name = None
+        if getattr(q, "customer_id", None) is not None:
+            cust = session.get(Customer, q.customer_id)
+            cust_name = cust.name if cust else None
+        out.append({
+            "id": q.id,
+            "title": getattr(q, "title", f"Offert #{q.id}"),
+            "customer_name": cust_name,
+            "subtotal_sek": getattr(q, "subtotal_sek", 0),
+            "rot_discount_sek": getattr(q, "rot_discount_sek", 0),
+            "total_sek": getattr(q, "total_sek", 0),
+        })
+    return out
+
+@router.get("", summary="Lista alla offerter")
+@router.get("/", include_in_schema=False)
+def list_quotes(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(50, ge=1, le=200),
+    session: Session = Depends(get_session),
+):
+    return _list_quotes_impl(skip=skip, limit=limit, session=session)
+
+@router.get("/__list", summary="Lista alla offerter (failsafe)")
+def list_quotes_failsafe(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(50, ge=1, le=200),
+    session: Session = Depends(get_session),
+):
+    return _list_quotes_impl(skip=skip, limit=limit, session=session)
+
+# ----- GET BY ID (läggs sist så den inte skuggar statiska vägar) -----
+@router.get("/{quote_id}", summary="Hämta sparad offert med rader")
+def get_quote(quote_id: int, session: Session = Depends(get_session)):
+    quote = session.get(Quote, quote_id)
+    if not quote:
+        raise HTTPException(status_code=404, detail="Offerten hittades inte")
+
+    cust_name = None
+    if quote.customer_id:
+        cust = session.get(Customer, quote.customer_id)
+        cust_name = cust.name if cust else None
+
+    lines = session.exec(select(QuoteLine).where(QuoteLine.quote_id == quote_id)).all()
+    return {
+        "id": quote.id,
+        "title": quote.title,
+        "customer_name": cust_name,
+        "subtotal_sek": quote.subtotal_sek,
+        "rot_discount_sek": quote.rot_discount_sek,
+        "total_sek": quote.total_sek,
+        "lines": [
+            {
+                "kind": l.kind,
+                "ref": l.ref,
+                "description": l.description,
+                "qty": l.qty,
+                "unit_price_sek": l.unit_price_sek,
+                "line_total_sek": l.line_total_sek,
+            }
+            for l in lines
+        ],
+    }
+
+
+=== FILE: src\server\api\system.py ===
+from fastapi import APIRouter
+from fastapi.routing import APIRoute
+
+router = APIRouter(tags=["system"])
+
+@router.get("/__debug/routes")
+def list_routes():
+    out = []
+    app_router = router.parent if router.parent else router
+    for r in app_router.routes:
+        if isinstance(r, APIRoute):
+            fn = r.endpoint
+            out.append({
+                "path": r.path,
+                "methods": sorted(list(r.methods or [])),
+                "name": r.name,
+                "endpoint": f"{getattr(fn, '__module__', '?')}.{getattr(fn, '__name__', '?')}",
+            })
+    return out
+
+
+=== FILE: src\server\db\session.py ===
+from sqlmodel import SQLModel, create_engine, Session
+from src.server.settings.config import settings
+
+connect_args = {}
+if settings.database_url.startswith("sqlite"):
+    connect_args = {"check_same_thread": False}
+
+engine = create_engine(settings.database_url, echo=settings.debug, connect_args=connect_args)
+
+def init_db() -> None:
+    # Se till att modellerna laddas (EN gång, via src.server.*)
+    from src.server.models import __all_models  # noqa: F401
+    SQLModel.metadata.create_all(engine)
+
+def get_session():
+    with Session(engine) as session:
+        yield session
+
+
+
+=== FILE: src\server\models\__init__.py ===
+# 8) src/server/models/__init__.py  (ersätt om tom)
+from .customer import Customer
+from .material import Material
+from .work_item import WorkItem
+from .quote import Quote, QuoteLine
+
+__all_models = [Customer, Material, WorkItem, Quote, QuoteLine]
+
+
+
+=== FILE: src\server\models\customer.py ===
+# 4) src/server/models/customer.py
+from sqlmodel import SQLModel, Field
+from typing import Optional
+
+class Customer(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    name: str
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    address: Optional[str] = None
+    orgnr: Optional[str] = None
+
+
+
+=== FILE: src\server\models\quote.py ===
+# 7) src/server/models/quote.py
+from sqlmodel import SQLModel, Field
+from typing import Optional
+
+class Quote(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    customer_id: Optional[int] = Field(default=None, foreign_key="customer.id")
+    title: str
+    subtotal_sek: float = 0.0
+    rot_discount_sek: float = 0.0
+    total_sek: float = 0.0
+
+class QuoteLine(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    quote_id: int = Field(foreign_key="quote.id")
+    kind: str                  # "work" | "material"
+    ref: Optional[str] = None  # t.ex. SKU
+    description: str
+    qty: float
+    unit_price_sek: float
+    line_total_sek: float
+
+
+
+=== FILE: src\server\models\quoteline.py ===
+[MISSING] src\server\models\quoteline.py
+
+=== OPENAPI: /quotes* paths ===
+PATH: /quotes/draft
+METHODS: post
+PATH: /quotes
+METHODS: post
+PATH: /quotes/{quote_id}
+METHODS: get
+
+=== OPTIONS /quotes (Allow header) ===
+[OPTIONS /quotes failed] 
+{
+  "detail": "Method Not Allowed"
+}
+
+=== GET /quotes ===
+
+{
+  "detail": "Method Not Allowed"
+}
+
+=== GET /quotes/ ===
+
+{
+  "detail": "Method Not Allowed"
+}

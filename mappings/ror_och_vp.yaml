@@ -1,0 +1,296 @@
+tasks:
+- task_id: lagga_kabel_i_list
+  label: Lägga kabel i list
+  category: ror_och_vp
+  patterns:
+  - lägga list till ett nytt vägguttag med kabel
+  - lägga list till ett nytt vägguttag
+  - lägga list till uttag
+  - lägga list med kabel
+  - lägga kabel i list
+  time_source: manual
+  manual_time_minutes_per_unit: 5
+  materials:
+  - ref: KANAL-PLAST
+    description: Plastkanal/list för utanpåliggande kabel (m)
+    quantity_per_unit: 1
+  - ref: EKLK-3G1.5
+    description: Kabel 3G1,5 i list (m)
+    quantity_per_unit: 1
+- label: Dra flexrör
+  category: ror_och_vp
+  patterns:
+  - dra flexrör
+  - dra flex rör
+  - dra flexslang
+  - dra flex slang
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 4
+  pricing_source: manual
+  materials: []
+  notes: 'Generellt moment för flexrör när inget mer specifikt passar.
+
+    Tiden är en grov uppskattning (4 min/m). Justera vid behov.
+
+    '
+  task_id: dra_flexror
+- label: Dra flexrör på vägg
+  category: ror_och_vp
+  patterns:
+  - dra flexrör på vägg
+  - dra flex rör på vägg
+  - flexrör på vägg
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 4
+  pricing_source: manual
+  materials: []
+  notes: 'Förenklad modell för flexrör utanpå vägg. Ej ATL-kopplad ännu.
+
+    '
+  task_id: dra_flexror_vagg
+- label: Dra flexrör i tak
+  category: ror_och_vp
+  patterns:
+  - dra flexrör i tak
+  - dra flex rör i tak
+  - flexrör i tak
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 4
+  pricing_source: manual
+  materials: []
+  notes: 'Förenklad modell för flexrör i tak. Ej ATL-kopplad ännu.
+
+    '
+  task_id: dra_flexror_tak
+- label: Dra flexrör i golv
+  category: ror_och_vp
+  patterns:
+  - dra flexrör i golv
+  - dra flex rör i golv
+  - flexrör i golv
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 4
+  pricing_source: manual
+  materials: []
+  notes: 'Förenklad modell för flexrör i golv. Ej ATL-kopplad ännu.
+
+    '
+  task_id: dra_flexror_golv
+- label: Dra kabel i rör
+  category: ror_och_vp
+  patterns:
+  - dra kabel i rör
+  - dra kabel i vp rör
+  - dra kabel i vp-rör
+  - dra kabel genom vp rör
+  - dra kabel genom vp-rör
+  - dra kabel i flexrör
+  - dra kabel i flex rör
+  time_source: atl
+  atl_refs:
+  - moment: Kabeldragning i rör
+    variant: 0
+  manual_time_minutes_per_unit: 0
+  pricing_source: manual
+  materials:
+  - ref: EKLK-3G1.5
+    description: Kabel 3G1,5 i rör
+    quantity_per_unit: 1
+  notes: 'Tiden per meter (ca 3,6 min/m) hämtas från ATL-momentet
+
+    "Kabeldragning i rör". Material: 1 m EKLK 3G1,5 per meter rör.
+
+    '
+  task_id: dra_kabel_i_ror
+- label: Dra VP-rör infällt i vägg
+  category: ror_och_vp
+  patterns:
+  - dra vp rör infällt i vägg
+  - dra vp-rör infällt i vägg
+  - dra vp rör i vägg
+  - dra vp-rör i vägg
+  - infällt vp rör i vägg
+  - spåra och lägga vp rör
+  - förlägga vp rör i vägg
+  time_source: atl
+  atl_refs:
+  - moment: Infällda rör (VP 16–20 mm)
+    variant: 0
+  manual_time_minutes_per_unit: 0
+  pricing_source: manual
+  materials: []
+  notes: 'Använder ATL-momentet "Infällda rör (VP 16–20 mm)".
+
+    10 meter ger ca 18 minuter (1,8 min/m).
+
+    '
+  task_id: dra_vp_ror_infalld_vagg
+- label: Dra VP-rör infällt i tak
+  category: ror_och_vp
+  patterns:
+  - dra vp rör infällt i tak
+  - dra vp-rör infällt i tak
+  - dra vp rör i tak infällt
+  - dra vp-rör i tak infällt
+  time_source: atl
+  atl_refs:
+  - moment: Infällda rör (VP 16–20 mm)
+    variant: 0
+  manual_time_minutes_per_unit: 0
+  pricing_source: manual
+  materials: []
+  notes: 'Samma ATL-moment som för infällda rör i vägg.
+
+    Här används samma tid per meter som vägg/golv.
+
+    '
+  task_id: dra_vp_ror_infalld_tak
+- label: Dra VP-rör infällt i golv
+  category: ror_och_vp
+  patterns:
+  - dra vp rör i golv
+  - dra vp-rör i golv
+  - dra vp rör infällt i golv
+  - dra vp-rör infällt i golv
+  time_source: atl
+  atl_refs:
+  - moment: Infällda rör (VP 16–20 mm)
+    variant: 0
+  manual_time_minutes_per_unit: 0
+  pricing_source: manual
+  materials: []
+  notes: 'Infällda rör i golv, kopplad mot samma ATL-moment
+
+    "Infällda rör (VP 16–20 mm)".
+
+    '
+  task_id: dra_vp_ror_infalld_golv
+- label: Dra VP-rör utanpåliggande på vägg
+  category: ror_och_vp
+  patterns:
+  - dra vp rör utanpåliggande på vägg
+  - dra vp-rör utanpåliggande på vägg
+  - dra vp rör utanpå vägg
+  - dra vp-rör utanpå vägg
+  - utanpåliggande vp rör på vägg
+  - utanpåliggande vp-rör på vägg
+  time_source: atl
+  atl_refs:
+  - moment: Utvändiga rör (VP 16–20 mm)
+    variant: 0
+  manual_time_minutes_per_unit: 0
+  pricing_source: manual
+  materials: []
+  notes: 'Utanpåliggande VP på vägg. Tid per meter hämtas från
+
+    "Utvändiga rör (VP 16–20 mm)" i ATL.
+
+    '
+  task_id: dra_vp_ror_utanpa_vagg
+- label: Dra VP-rör utanpåliggande i tak
+  category: ror_och_vp
+  patterns:
+  - dra vp rör i tak utanpåliggande
+  - dra vp-rör i tak utanpåliggande
+  - dra utanpåliggande vp rör i tak
+  - dra utanpåliggande vp-rör i tak
+  time_source: atl
+  atl_refs:
+  - moment: Utvändiga rör (VP 16–20 mm)
+    variant: 0
+  manual_time_minutes_per_unit: 0
+  pricing_source: manual
+  materials: []
+  notes: 'Utanpåliggande VP i tak, samma ATL-moment som vägg.
+
+    '
+  task_id: dra_vp_ror_utanpa_tak
+- label: Dra kabelkanal på vägg
+  category: ror_och_vp
+  patterns:
+  - dra kabelkanal på vägg
+  - dra kanal på vägg
+  - dra plastkanal på vägg
+  - sätta kabelkanal på vägg
+  - dra utanpåliggande kanal
+  - utanpåliggande kanal
+  - dra kanal utanpåliggande
+  - sätta utanpåliggande kanal
+  - kanal på väggen
+  - kabelkanal på väggen
+  time_source: atl
+  atl_refs:
+  - moment: Kanal – plast
+    variant: 0
+  manual_time_minutes_per_unit: 0
+  pricing_source: manual
+  materials:
+  - ref: KANAL-PLAST
+    description: Kabelkanal plast
+    quantity_per_unit: 1
+  - ref: EKLK-3G1.5
+    description: Kabel 3G1,5 i kanal
+    quantity_per_unit: 1
+  notes: 'Tiden hämtas från ATL-momentet "Kanal – plast"
+
+    (ca 9,6 min/m i våra tester).
+
+    Material per meter: 1 m kanal + 1 m EKLK 3G1,5.
+
+    '
+  task_id: dra_kabelkanal_vagg
+- label: ATL-test – infällda rör
+  category: ror_och_vp
+  patterns:
+  - atl test infällda rör
+  time_source: atl
+  atl_refs:
+  - moment: Infällda rör (VP 16–20 mm)
+    variant: 0
+  manual_time_minutes_per_unit: 0
+  pricing_source: manual
+  materials: []
+  notes: 'Används bara för att verifiera ATL-kopplingen mot
+
+    "Infällda rör (VP 16–20 mm)".
+
+    '
+  task_id: atl_test_infallda_ror
+- task_id: INSTALLERA-KOPPLINGSDOSA-TAK
+  label: Installera kopplingsdosa i tak
+  category: ror_och_vp
+  manual_time_minutes_per_unit: 18
+  time_source: gpt
+  description: Montering och inkoppling av kopplingsdosa i tak för framtida belysning eller elinstallation.
+  quantity_type: per_unit
+  default_unit: st
+  room_type_hint: null
+  gpt_confidence: 0.9
+  patterns:
+  - sätta upp kopplingsdosa i tak
+  - installera kopplingsdosa i tak
+  - montera kopplingsdosa för belysning
+  materials:
+  - ref: KOPPLINGSDOSA-TAK
+    quantity_per_unit: 1.0
+    unit: st
+    description: Kopplingsdosa för tak
+  _auto_generated: true
+- task_id: INSTALLERA-APPARATDOSA-INFALLD
+  label: "Installera infälld apparatdosa"
+  category: "ror_och_vp"
+  patterns:
+  - "installera apparatdosa"
+  - "montera apparatdosa"
+  - "sätta apparatdosa"
+  time_source: "manual"
+  atl_refs: []
+  manual_time_minutes_per_unit: 20
+  pricing_source: manual
+  materials: []
+  notes: "Schablonmoment för infälld apparatdosa. Kan ATL-kopplas senare."
+

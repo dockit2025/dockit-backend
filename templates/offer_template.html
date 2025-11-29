@@ -1,0 +1,95 @@
+<!-- templates/offer_template.html (v1.4.2 – no templatemarkers) -->
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <title>Offert {{project.id}} &ndash; {{project.title}}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    html,body{margin:0;padding:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#111}
+    .wrap{max-width:980px;margin:0 auto;padding:24px}
+    h1{font-size:22px;margin:0 0 12px}
+    h2{font-size:18px;margin:24px 0 8px}
+    table{border-collapse:collapse;width:100%}
+    th,td{border-bottom:1px solid #ddd;padding:8px;vertical-align:top}
+    th{text-align:left;background:#fafafa}
+    .grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+    .box{border:1px solid #eee;padding:12px;border-radius:6px}
+    .muted{color:#666}
+    .mono{font-variant-numeric:tabular-nums}
+    #totals-box{margin-top:8px;border:1px solid #eee;border-radius:6px;padding:12px}
+    #totals-box .line{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px dashed #e5e5e5}
+    #totals-box .line:last-child{border-bottom:none}
+    #totals-box .total{font-weight:600}
+    .small{font-size:12px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Offert {{project.id}} &ndash; {{project.title}}</h1>
+
+    <div class="grid">
+      <div class="box" id="supplier-box">
+        <h2>Leverantör</h2>
+        {{supplier.name}}<br>
+        {{supplier.street}}<br>
+        {{supplier.zip_city}}<br>
+        Org.nr: {{supplier.orgno}}<br>
+        {{supplier.email}}
+      </div>
+      <div class="box" id="client-box">
+        <h2>Kund</h2>
+        {{client.name}}<br>
+        {{client.street}}<br>
+        {{client.zip_city}}<br>
+        Org.nr: {{client.orgno}}<br>
+        {{client.email}}
+      </div>
+      <div class="box" id="meta-box">
+        <h2>Metainfo</h2>
+        Offertnr: {{project.id}}<br>
+        Datum: {{project.date}}<br>
+        Giltig t.o.m.: {{project.valid_until}}<br>
+        Projekt: {{project.title}}
+      </div>
+    </div>
+
+    <h2>Material</h2>
+    <table aria-label="Material">
+      <thead>
+        <tr>
+          <th>Artikel</th>
+          <th>Benämning</th>
+          <th>Enhet</th>
+          <th>Antal</th>
+          <th>&Agrave;-pris</th>
+          <th>Radsumma</th>
+          <th>Lev.</th>
+        </tr>
+      </thead>
+      <tbody id="material-rows"></tbody>
+    </table>
+
+    <h2>Arbete</h2>
+    <table aria-label="Arbete">
+      <thead>
+        <tr>
+          <th>Arbetsmoment</th>
+          <th>Moment/Typ/Sort</th>
+          <th>Underlag/Variant</th>
+          <th>Enhet</th>
+          <th>Tid</th>
+          <th>&Agrave;-pris</th>
+          <th>Radsumma</th>
+        </tr>
+      </thead>
+      <tbody id="labor-rows"></tbody>
+    </table>
+
+    <h2>Sammanställning</h2>
+    <div id="totals-box"></div>
+
+    <p class="small muted">{{notes.terms}}</p>
+  </div>
+</body>
+</html>

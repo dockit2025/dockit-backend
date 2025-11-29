@@ -1,0 +1,153 @@
+profiles:
+  # VP-rör 16 mm infällt i vägg – materialläge
+  - id: "vp_16_inomhus_torr_infalt_vagg"
+    label: "VP-rör 16 mm infällt i vägg"
+    category: "ror_och_vp"
+    description: "Infälld förläggning av VP-rör 16 mm i vägg för eldragning."
+    matches:
+      material_ref: "VP-ROR-16MM"
+      environment: "inomhus_torr_infalt_vagg"
+      work_type: "installation"
+    tasks:
+      - task_id: "dra_vp_ror_infalld_vagg"
+        quantity_per_unit: 1.0
+        unit: "m"
+
+  # Infällt vägguttag – materialläge
+  - id: "vagguttag_infalt_installation"
+    label: "Installera infällt vägguttag"
+    category: "brytare_och_uttag"
+    description: "Installation av infällt jordat vägguttag i torr inomhusmiljö."
+    matches:
+      material_ref: "VAGGUTTAG-INF"
+      environment: "inomhus_torr_infalt"
+      work_type: "installation"
+    tasks:
+      - task_id: "INSTALLERA-VAGGUTTAG-INFALLT"
+        quantity_per_unit: 1.0
+        unit: "st"
+
+  # Dimmer – materialläge
+  - id: "dimmer_infalt_installation"
+    label: "Installera universaldimmer"
+    category: "belysning"
+    description: "Byte från befintlig strömbrytare till universaldimmer i befintlig apparatdosa."
+    matches:
+      material_ref: "DIMMER-UNIV"
+      environment: "inomhus_torr_infalt"
+      work_type: "installation"
+    tasks:
+      - task_id: "INSTALLERA-DIMMER"
+        quantity_per_unit: 1.0
+        unit: "st"
+
+  # Kabelkanal på vägg – materialläge
+  - id: "kabelkanal_inomhus_torr_utanpa_vagg"
+    label: "Kabelkanal på vägg"
+    category: "ror_och_vp"
+    description: "Utanpåliggande kabelkanal på vägg för dragning av kabel."
+    matches:
+      material_ref: "KABELKANAL-VIT"
+      environment: "inomhus_torr_utanpa_vagg"
+      work_type: "installation"
+    tasks:
+      - task_id: "dra_kabelkanal_vagg"
+        quantity_per_unit: 1.0
+        unit: "m"
+  # Kabel 3G1,5 i rör infällt i vägg – materialläge
+  - id: "kabel_3g1_5_infalt_ror_vagg"
+    label: "Kabel 3G1,5 i rör, infällt i vägg"
+    category: "ror_och_vp"
+    description: "Kabel 3G1,5 dragen i VP-rör infällt i vägg."
+    matches:
+      material_ref: "KABEL-3G1.5"
+      environment: "inomhus_torr_infalt_vagg"
+      work_type: "installation"
+    tasks:
+      - task_id: "dra_kabel_i_ror"
+        quantity_per_unit: 1.0
+        unit: "m"
+
+  # Kabel 3G1,5 i kabelkanal på vägg – materialläge
+  - id: "kabel_3g1_5_kanal_vagg"
+    label: "Kabel 3G1,5 i kabelkanal på vägg"
+    category: "ror_och_vp"
+    description: "Kabel 3G1,5 dragen i kabelkanal på vägg."
+    matches:
+      material_ref: "KABEL-3G1.5"
+      environment: "inomhus_torr_utanpa_vagg"
+      work_type: "installation"
+    tasks:
+      - task_id: "dra_kabelkanal_vagg"
+        quantity_per_unit: 1.0
+        unit: "m"
+
+  # VP-rör 20 mm infällt i vägg – materialläge
+  - id: "vp_20_infalt_vagg"
+    label: "VP-rör 20 mm infällt i vägg"
+    category: "ror_och_vp"
+    description: "Infälld förläggning av VP-rör 20 mm i vägg."
+    matches:
+      material_ref: "VP-ROR-20"
+      environment: "inomhus_torr_infalt_vagg"
+      work_type: "installation"
+    tasks:
+      - task_id: "dra_vp_ror_infalld_vagg"
+        quantity_per_unit: 1.0
+        unit: "m"
+
+  # VP-rör 20 mm utanpå vägg – materialläge
+  - id: "vp_20_utanpa_vagg"
+    label: "VP-rör 20 mm utanpå vägg"
+    category: "ror_och_vp"
+    description: "Utanpåliggande förläggning av VP-rör 20 mm på vägg."
+    matches:
+      material_ref: "VP-ROR-20"
+      environment: "inomhus_torr_utanpa_vagg"
+      work_type: "installation"
+    tasks:
+      - task_id: "dra_vp_ror_utanpa_vagg"
+        quantity_per_unit: 1.0
+        unit: "m"
+
+  # Infälld strömbrytare – materialläge
+  - id: "strombrytare_infalt_installation"
+    label: "Installera infälld strömbrytare"
+    category: "brytare_och_uttag"
+    description: "Installation eller byte av infälld strömbrytare i befintlig apparatdosa."
+    matches:
+      material_ref: "STROMBRYTARE"
+      environment: "inomhus_torr_infalt"
+      work_type: "installation"
+    tasks:
+      - task_id: "byta_strombrytare"
+        quantity_per_unit: 1.0
+        unit: "st"
+
+  # Infälld spotlight i tak – materialläge
+  - id: "spotlight_infalt_tak"
+    label: "Installera infälld spotlight i tak"
+    category: "belysning"
+    description: "Montering av infälld spotlight i innertak."
+    matches:
+      material_ref: "SPOTLIGHT"
+      environment: "inomhus_torr_infalt_tak"
+      work_type: "installation"
+    tasks:
+      - task_id: "INSTALLERA-SPOTLIGHT-TAK"
+        quantity_per_unit: 1.0
+        unit: "st"
+
+  # Infälld kronbrytare – materialläge
+  - id: "kronbrytare_infalt_installation"
+    label: "Installera infälld kronbrytare"
+    category: "brytare_och_uttag"
+    description: "Installation eller byte av infälld kronbrytare i befintlig apparatdosa."
+    matches:
+      material_ref: "KRONBRYTARE"
+      environment: "inomhus_torr_infalt"
+      work_type: "installation"
+    tasks:
+      - task_id: "installera-kronbrytare"
+        quantity_per_unit: 1.0
+        unit: "st"

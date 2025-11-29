@@ -1,0 +1,445 @@
+# file: knowledge/dockit/dockit_custom_mapping.yaml
+# Beskrivning:
+#   Hög-nivå "kundvänliga" arbetsmoment som kan kopplas mot:
+#     - ATL (Del 7) via ATLLoader + atl_mapping.yaml, eller
+#     - manuella tider där ATL saknar relevanta rader.
+#
+# Struktur per task:
+#   tasks:
+#     some_task_id:
+#       label: "Synlig text"
+#       category: "fri kategorietikett"
+#       patterns:                # fraser som elektriker säger
+#         - "..."
+#       time_source: "atl" | "manual"
+#       atl_refs:                # används när time_source == "atl"
+#         - mapping_key: "..."   # nyckel som finns i atl_mapping.yaml
+#       manual_time_minutes_per_unit: 60   # endast när time_source == "manual"
+#       pricing_source: "manual" | "pricelist"
+#       material_suggestions:
+#         - "sökterm mot prislista"
+#       notes: "Fri kommentar"
+
+version: 0.2
+description: "Dockit custom mapping för vanliga lägenhetsjobb (service/installation)"
+
+tasks:
+
+  # ---------------------------------------------------------
+  # BRYTARE & VÄGGUTTAG – STANDARD BYTE
+  # ---------------------------------------------------------
+
+  byta_strombrytare:
+    label: "Byta strömbrytare"
+    category: "brytare_och_uttag"
+    patterns:
+      - "byta strömbrytare"
+      - "byta en strömbrytare"
+      - "byta brytare"
+      - "byta knapp"
+      - "ersätta strömbrytare"
+      - "ersätta en gammal strömbrytare"
+      - "byta strömbrytare i hallen"
+      - "byta strömbrytare i vardagsrummet"
+      - "ny strömbrytare istället för den gamla"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 20
+    pricing_source: "manual"
+    material_suggestions:
+      - "strömbrytare"
+    notes: "Byte av befintlig strömbrytare på samma plats."
+
+  byta_dubbel_strombrytare:
+    label: "Byta dubbel strömbrytare"
+    category: "brytare_och_uttag"
+    patterns:
+      - "byta dubbel strömbrytare"
+      - "byta tvåvägsbrytare"
+      - "byta dubbel knapp"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 25
+    pricing_source: "manual"
+    material_suggestions:
+      - "dubbel strömbrytare"
+    notes: "Byte av befintlig dubbel brytare, samma inkoppling."
+
+  byta_vagguttag:
+    label: "Byta vägguttag"
+    category: "brytare_och_uttag"
+    patterns:
+      - "byta vägguttag"
+      - "byta eluttag"
+      - "byta uttag"
+      - "ersätta vägguttag"
+      - "ersätta eluttag"
+      - "byta gamla uttag mot nya"
+      - "byta två vägguttag i köket"
+      - "byta tre uttag i vardagsrummet"
+      - "byta alla vägguttag i lägenheten"
+      - "uppgradera vägguttagen"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 18
+    pricing_source: "manual"
+    material_suggestions:
+      - "vägguttag"
+    notes: "Byte av befintligt vägguttag. Tid per uttag."
+    materials:
+      - ref: "VEGGUTTAG-1V-JORD"
+        description: "Vägguttag 1-vägs, jordat"
+        quantity_per_unit: 1
+      - ref: "APPRAM-1FACK"
+        description: "Apparatram 1-fack"
+        quantity_per_unit: 1
+
+  byta_dubbel_vagguttag:
+    label: "Byta dubbelvägguttag"
+    category: "brytare_och_uttag"
+    patterns:
+      - "byta dubbelvägguttag"
+      - "byta dubbeluttag"
+      - "ersätta dubbelvägguttag"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 22
+    pricing_source: "manual"
+    material_suggestions:
+      - "dubbelvägguttag"
+    notes: "Byte av dubbeluttag på befintlig plats."
+
+  byta_jordat_vagguttag:
+    label: "Byta jordat vägguttag"
+    category: "brytare_och_uttag"
+    patterns:
+      - "byta jordat uttag"
+      - "byta jordat vägguttag"
+      - "byta till jordat uttag"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 20
+    pricing_source: "manual"
+    material_suggestions:
+      - "jordat vägguttag"
+    notes: "Byte till jordat uttag i utrymme där jordning redan finns."
+
+  # ---------------------------------------------------------
+  # BRYTARE & VÄGGUTTAG – NYINSTALLATION / KOMPLETTERING
+  # ---------------------------------------------------------
+
+  installera_ny_strombrytare:
+    label: "Installera ny strömbrytare"
+    category: "brytare_och_uttag"
+    patterns:
+      - "installera ny strömbrytare"
+      - "sätta upp ny strömbrytare"
+      - "dra fram ny brytare"
+      - "komplettera med en extra strömbrytare"
+      - "sätta en strömbrytare till"
+      - "montera en ny strömbrytare vid dörren"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 40
+    pricing_source: "manual"
+    material_suggestions:
+      - "strömbrytare"
+      - "apparatdosa"
+      - "kabel"
+    notes: "Nyinstallation av strömbrytare från närliggande matning."
+
+  installera_nytt_vagguttag:
+    label: "Installera nytt vägguttag"
+    category: "brytare_och_uttag"
+    patterns:
+      - "sätta upp nytt vägguttag"
+      - "installera nytt uttag"
+      - "dra fram nytt vägguttag"
+      - "komplettera med ett extra uttag"
+      - "sätta in ett extra vägguttag"
+      - "nytt uttag vid soffan"
+      - "sätta upp uttag vid tv-bänken"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 45
+    pricing_source: "manual"
+    material_suggestions:
+      - "vägguttag"
+      - "kabel"
+      - "apparatdosa"
+    notes: "Nyinstallation av vägguttag med kort kabeldragning från befintlig punkt."
+
+  installera_extra_uttag_balkong:
+    label: "Installera uttag på balkong"
+    category: "brytare_och_uttag"
+    patterns:
+      - "installera uttag på balkongen"
+      - "sätta upp eluttag på balkong"
+      - "balkonguttag"
+      - "eluttag ute på balkongen"
+      - "extra uttag på balkongen"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 60
+    pricing_source: "manual"
+    material_suggestions:
+      - "utomhusuttag"
+      - "kabel"
+    notes: "Nyinstallation av uttag på balkong/fasad från befintlig grupp."
+
+  installera_dubbelt_vagguttag_ny:
+    label: "Installera nytt dubbelvägguttag"
+    category: "brytare_och_uttag"
+    patterns:
+      - "installera nytt dubbeluttag"
+      - "sätta upp dubbelvägguttag"
+      - "nytt dubbeluttag vid tv"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 50
+    pricing_source: "manual"
+    material_suggestions:
+      - "dubbelvägguttag"
+      - "kabel"
+      - "apparatdosa"
+    notes: "Nyinstallation av dubbeluttag."
+
+  installera_utanpasittande_uttag:
+    label: "Installera utanpåliggande uttag"
+    category: "brytare_och_uttag"
+    patterns:
+      - "installera utanpåliggande uttag"
+      - "sätta upp utanpåliggande vägguttag"
+      - "montera utanpåliggande eluttag"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 40
+    pricing_source: "manual"
+    material_suggestions:
+      - "utanpåliggande uttag"
+      - "kabelkanal"
+    notes: "Installation av utanpåliggande uttag med kort synlig kabel."
+
+  # ---------------------------------------------------------
+  # DIMMER & STYRNING
+  # ---------------------------------------------------------
+
+  installera_dimmer:
+    label: "Installera dimmer"
+    category: "brytare_och_uttag"
+    patterns:
+      - "installera dimmer"
+      - "montera dimmer"
+      - "sätta in dimmer"
+      - "byta strömbrytare mot dimmer"
+      - "byta till dimmer"
+      - "dimmer till taklampan"
+      - "sätta dimmer i vardagsrummet"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 30
+    pricing_source: "manual"
+    material_suggestions:
+      - "dimmer"
+    notes: "Installation eller byte till dimmer i befintlig apparatdosa."
+
+  byta_dimmer:
+    label: "Byta dimmer"
+    category: "brytare_och_uttag"
+    patterns:
+      - "byta dimmer"
+      - "ersätta dimmer"
+      - "dimmern fungerar inte"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 20
+    pricing_source: "manual"
+    material_suggestions:
+      - "dimmer"
+    notes: "Byte av befintlig dimmer."
+
+  installera_smart_brytare:
+    label: "Installera smart brytare"
+    category: "brytare_och_uttag"
+    patterns:
+      - "installera smart brytare"
+      - "installera wifi brytare"
+      - "byta till smart strömbrytare"
+      - "montera zigbee brytare"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 40
+    pricing_source: "manual"
+    material_suggestions:
+      - "smart brytare"
+    notes: "Installation av smart/WiFi/Zigbee-brytare."
+
+  installera_trappkoppling:
+    label: "Installera trappkoppling (två brytare)"
+    category: "brytare_och_uttag"
+    patterns:
+      - "installera trappkoppling"
+      - "två brytare till samma lampa"
+      - "brytare i varsin ände av rummet"
+      - "trappkoppling för lampan"
+      - "brytare uppe och nere i trappan"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 60
+    pricing_source: "manual"
+    material_suggestions:
+      - "trappbrytare"
+      - "kabel"
+    notes: "Installation av två brytare för samma ljuspunkt med kompletterande kabeldragning."
+
+  byta_trappkoppling:
+    label: "Byta trappkoppling"
+    category: "brytare_och_uttag"
+    patterns:
+      - "byta trappkoppling"
+      - "byta trappbrytare"
+      - "byta två brytare för samma lampa"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 40
+    pricing_source: "manual"
+    material_suggestions:
+      - "trappbrytare"
+    notes: "Byte av befintliga trappbrytare utan större omdragning."
+
+  installera_korskoppling:
+    label: "Installera korskoppling (tre eller fler brytare)"
+    category: "brytare_och_uttag"
+    patterns:
+      - "installera korskoppling"
+      - "tre brytare till samma lampa"
+      - "korskoppling i korridor"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 75
+    pricing_source: "manual"
+    material_suggestions:
+      - "korsomkopplare"
+      - "trappbrytare"
+      - "kabel"
+    notes: "Installation av korskoppling med tre eller fler brytare."
+
+  installera_rorelsevakt_inne:
+    label: "Installera rörelsevakt inomhus"
+    category: "brytare_och_uttag"
+    patterns:
+      - "installera rörelsevakt inne"
+      - "sätta upp rörelsevakt i hallen"
+      - "rörelsevakt till belysning inomhus"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 40
+    pricing_source: "manual"
+    material_suggestions:
+      - "rörelsevakt"
+    notes: "Installation av rörelsevakt för inomhusbelysning."
+
+  installera_rorelsevakt_ute:
+    label: "Installera rörelsevakt utomhus"
+    category: "brytare_och_uttag"
+    patterns:
+      - "installera rörelsevakt ute"
+      - "sätta upp rörelsevakt ute"
+      - "rörelsevakt till utelampa"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 45
+    pricing_source: "manual"
+    material_suggestions:
+      - "rörelsevakt"
+    notes: "Installation av rörelsevakt för utomhusbelysning."
+
+  installera_timer_brytare:
+    label: "Installera timerbrytare"
+    category: "brytare_och_uttag"
+    patterns:
+      - "installera timerbrytare"
+      - "montera timer till belysning"
+      - "installera vipptimer"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 35
+    pricing_source: "manual"
+    material_suggestions:
+      - "timerbrytare"
+    notes: "Installation av timerfunktion för styrning av belysning eller uttag."
+
+  # ---------------------------------------------------------
+  # FLYTT AV BRYTARE & UTTAG
+  # ---------------------------------------------------------
+
+  flytta_vagguttag:
+    label: "Flytta vägguttag"
+    category: "brytare_och_uttag"
+    patterns:
+      - "flytta vägguttag"
+      - "flytta eluttag"
+      - "förlägga om uttag"
+      - "flytta uttaget en bit"
+      - "flytta uttag från ena väggen till den andra"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 90
+    pricing_source: "manual"
+    material_suggestions:
+      - "kabel"
+      - "apparatdosa"
+      - "vägguttag"
+    notes: "Flytt av vägguttag inom samma rum/väggyta."
+
+  flytta_strombrytare:
+    label: "Flytta strömbrytare"
+    category: "brytare_och_uttag"
+    patterns:
+      - "flytta strömbrytare"
+      - "flytta brytare"
+      - "flytta lampknapp"
+      - "flytta strömbrytaren till andra sidan dörren"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 90
+    pricing_source: "manual"
+    material_suggestions:
+      - "kabel"
+      - "apparatdosa"
+      - "strömbrytare"
+    notes: "Flytt av befintlig strömbrytare inom samma rum/väggyta."
+
+  # ---------------------------------------------------------
+  # FELSÖKNING – BRYTARE & UTTAG
+  # ---------------------------------------------------------
+
+  felsokning_strombrytare:
+    label: "Felsökning strömbrytare"
+    category: "brytare_och_uttag"
+    patterns:
+      - "felsöka strömbrytare"
+      - "brytaren fungerar inte"
+      - "lampan tänds inte med brytaren"
+      - "problem med strömbrytare"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 45
+    pricing_source: "manual"
+    material_suggestions: []
+    notes: "Riktad felsökning av brytare/inkoppling."
+
+  felsokning_uttag:
+    label: "Felsökning vägguttag"
+    category: "brytare_och_uttag"
+    patterns:
+      - "felsöka vägguttag"
+      - "uttag fungerar inte"
+      - "eluttag utan spänning"
+      - "vägguttag som gnistrar"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 45
+    pricing_source: "manual"
+    material_suggestions: []
+    notes: "Riktad felsökning av ett eller några uttag."

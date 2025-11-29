@@ -1,0 +1,39 @@
+# src/server/api/quotes.py
+
+from typing import List
+from fastapi import APIRouter, Depends
+from sqlmodel import Session, select
+
+from ..db.session import get_session
+from ..models.quote import Quote
+
+# Scheman och tjänster
+from src.server.schemas.quote import QuoteDraftIn, QuoteDraftOut
+from src.server.services.quote_service import make_draft
+
+router = APIRouter(prefix="/quotes", tags=["quotes"])
+
+# -------------------------
+# POST /quotes/draft
+# -------------------------
+@router.post("/draft", response_model=QuoteDraftOut)
+def create_draft(payload: QuoteDraftIn):
+    return make_draft(payload)
+
+# -------------------------
+# GET /quotes  (list)
+# Stöd både /quotes och /quotes/
+# -------------------------
+@router.get("")
+@router.get("/")
+def list_quotes(skip: int = 0, limit: int = 50, session: Session = Depends(get_session)):
+    results = session.exec(select(Quote).offset(skip).limit(limit)).all()
+    return results
+
+
+# --- DEBUG: visa vilken modulfil som körs ---
+@router.get("/__debug_path")
+def debug_quotes_module_path():
+    import os
+    return {"__file__": __file__, "cwd": os.getcwd()}
+# --- END DEBUG ---

@@ -1,0 +1,95 @@
+<!-- templates/offer_template.html (v1.4.2 – no templatemarkers) -->
+<!doctype html>
+<html lang="sv">
+<head>
+ <meta charset="UTF-8">
+ <title>Offert 2025–041 &ndash; Belysning och uttag – Majorna</title>
+ <meta name="viewport" content="width=device-width, initial-scale=1">
+ <style>
+ html,body{margin:0;padding:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#111}
+ .wrap{max-width:980px;margin:0 auto;padding:24px}
+ h1{font-size:22px;margin:0 0 12px}
+ h2{font-size:18px;margin:24px 0 8px}
+ table{border-collapse:collapse;width:100%}
+ th,td{border-bottom:1px solid #ddd;padding:8px;vertical-align:top}
+ th{text-align:left;background:#fafafa}
+ .grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+ .box{border:1px solid #eee;padding:12px;border-radius:6px}
+ .muted{color:#666}
+ .mono{font-variant-numeric:tabular-nums}
+ #totals-box{margin-top:8px;border:1px solid #eee;border-radius:6px;padding:12px}
+ #totals-box .line{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px dashed #e5e5e5}
+ #totals-box .line:last-child{border-bottom:none}
+ #totals-box .total{font-weight:600}
+ .small{font-size:12px}
+ </style>
+</head>
+<body>
+ <div class="wrap">
+ <h1>Offert 2025–041 &ndash; Belysning och uttag – Majorna</h1>
+
+ <div class="grid">
+ <div class="box" id="supplier-box">
+ <h2>Leverantör</h2>
+ Dockit El & Data AB<br>
+ Industrivägen 10<br>
+ 417 05 Göteborg<br>
+ Org.nr: 5599991234<br>
+ info@dockit.se
+ </div>
+ <div class="box" id="client-box">
+ <h2>Kund</h2>
+ Poseidon AB<br>
+ Exempelgatan 1<br>
+ 414 51 Göteborg<br>
+ Org.nr: 5560342462<br>
+ kontakt@poseidon.se
+ </div>
+ <div class="box" id="meta-box">
+ <h2>Metainfo</h2>
+ Offertnr: 2025–041<br>
+ Datum: 2025–11–03<br>
+ Giltig t.o.m.: 2025–12–01<br>
+ Projekt: Belysning och uttag – Majorna
+ </div>
+ </div>
+
+ <h2>Material</h2>
+ <table aria-label="Material">
+ <thead>
+ <tr>
+ <th>Artikel</th>
+ <th>Benämning</th>
+ <th>Enhet</th>
+ <th>Antal</th>
+ <th>&Agrave;-pris</th>
+ <th>Radsumma</th>
+ <th>Lev.</th>
+ </tr>
+ </thead>
+ <tbody id="material-rows"><tr><td class='mono'>DOSAKAPS</td><td>Kapslad dosa IP54</td><td class='mono'>st</td><td class='mono'>2,00</td><td class='mono'>89,50 kr</td><td class='mono'>179,00 kr</td><td>Storel</td></tr><tr><td class='mono'>EKLK-3G1.5</td><td>Kabel 3G1.5</td><td class='mono'>m</td><td class='mono'>12,00</td><td class='mono'>18,90 kr</td><td class='mono'>226,80 kr</td><td>Storel</td></tr></tbody>
+ </table>
+
+ <h2>Arbete</h2>
+ <table aria-label="Arbete">
+ <thead>
+ <tr>
+ <th>Arbetsmoment</th>
+ <th>Moment/Typ/Sort</th>
+ <th>Underlag/Variant</th>
+ <th>Enhet</th>
+ <th>Tid</th>
+ <th>&Agrave;-pris</th>
+ <th>Radsumma</th>
+ </tr>
+ </thead>
+ <tbody id="labor-rows"><tr><td>Kapslad dosa</td><td>Montering</td><td>IP54</td><td class='mono'>st</td><td class='mono'>0,80 h</td><td class='mono'>920,00 kr</td><td class='mono'>736,00 kr</td></tr><tr><td>Installationskabel i rör</td><td>Kabeldragning</td><td>Befintligt rör</td><td class='mono'>m</td><td class='mono'>0,96 h</td><td class='mono'>920,00 kr</td><td class='mono'>883,20 kr</td></tr></tbody>
+ </table>
+
+ <h2>Sammanställning</h2>
+ <div id="totals-box"><div class='line'><span>Material</span><span>405,80 kr</span></div><div class='line'><span>Arbete (1,76 h)</span><span>1 619,20 kr</span></div><div class='line'><span>Delsumma (exkl. moms)</span><span>2 025,00 kr</span></div><div class='line'><span>Moms 25&nbsp;%</span><span>506,25 kr</span></div><div class='line total'><span>Totalsumma (inkl. moms)</span><span>2 531,25 kr</span></div></div>
+
+ <p class="small muted">Standardvillkor enligt AB 04/ABT 06 om ej annat avtalats.</p>
+ </div>
+</body>
+</html>

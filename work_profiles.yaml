@@ -1,0 +1,31 @@
+profiles:
+  - id: "kabel_3g1_5_list_torr_inne"
+    label: "Kabel 3G1,5 i list (torr inomhus)"
+    material_refs:
+      - "KABEL-3G1.5"
+    environment: "torr_inne"
+    install_type: "utanpa_list"
+    task_id: "lagga_kabel_i_list"
+    time_source: "manual"
+    manual_time_minutes_per_unit: 5
+
+  - id: "vp_ror_20_infalt_torr_inne"
+    label: "20 mm VP-rör infällt i vägg (torr inomhus)"
+    material_refs:
+      - "VP-ROR-20"
+    environment: "torr_inne"
+    install_type: "infalt_vagg"
+    task_id: "dra_vp_ror_infalld_vagg"
+    time_source: "atl"
+    atl_moment: "Infällda rör (VP 16–20 mm)"
+    atl_variant: 0
+
+  - id: "vagguttag_infalt_torr_inne"
+    label: "Vägguttag infällt (torr inomhus)"
+    material_refs:
+      - "VEGGUTTAG"
+    environment: "torr_inne"
+    install_type: "infalt"
+    task_id: "installera_nytt_vagguttag"
+    time_source: "manual"
+    manual_time_minutes_per_unit: 45

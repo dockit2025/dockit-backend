@@ -1,0 +1,353 @@
+tasks:
+- label: Installera nätverksuttag (RJ45)
+  category: natverk_media
+  patterns:
+  - installera nätverksuttag
+  - installera rj45 uttag
+  - sätta upp nätverksuttag
+  - montera rj45
+  - dra fram nätverksuttag
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 45
+  pricing_source: manual
+  material_suggestions:
+  - rj45 uttag
+  - nätverkskabel
+  notes: Installation av RJ45-uttag från befintlig nätverkskabel eller närliggande
+    dosa.
+  task_id: installera_rj45_uttag
+- label: Flytta nätverksuttag
+  category: natverk_media
+  patterns:
+  - flytta nätverksuttag
+  - flytta rj45 uttag
+  - flytta datanätverksuttag
+  - flytta internetuttag
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 60
+  pricing_source: manual
+  material_suggestions:
+  - nätverkskabel
+  - rj45 uttag
+  notes: Flytt av befintligt nätverksuttag inom samma rum eller närliggande vägg.
+  task_id: flytta_rj45_uttag
+- label: Dra ny nätverkskabel
+  category: natverk_media
+  patterns:
+  - dra ny nätverkskabel
+  - ny internetkabel
+  - dra kabel för nätverk
+  - cat6 kabel installation
+  - nätverkskabel till tv
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 75
+  pricing_source: manual
+  material_suggestions:
+  - cat6 kabel
+  - clips
+  notes: Installation av ny nätverkskabel mellan två punkter.
+  task_id: installera_ny_nätverkskabel
+- label: Terminera nätverkskabel
+  category: natverk_media
+  patterns:
+  - terminera nätverkskabel
+  - krimpa nätverkskabel
+  - montera rj45 kontakt
+  - montera nätverkskontakt
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 20
+  pricing_source: manual
+  material_suggestions:
+  - rj45 kontakt
+  notes: Terminering av nätverkskabel till RJ45.
+  task_id: terminera_nätverkskabel
+- label: Installera patchpanel
+  category: natverk_media
+  patterns:
+  - installera patchpanel
+  - montera patchpanel
+  - koppla nätverkskablar i patchpanel
+  - terminera patchpanel
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 90
+  pricing_source: manual
+  material_suggestions:
+  - patchpanel
+  notes: Installation av patchpanel inklusive terminering av kablar.
+  task_id: installera_patchpanel
+- label: Installera nätverksswitch
+  category: natverk_media
+  patterns:
+  - installera switch
+  - montera nätverksswitch
+  - koppla in switch
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 30
+  pricing_source: manual
+  material_suggestions:
+  - switch
+  notes: Installation av switch i rack eller löst.
+  task_id: installera_switch
+- label: Installera mediaskåp
+  category: natverk_media
+  patterns:
+  - installera mediaskåp
+  - sätta upp mediaskåp
+  - montera media skåp
+  - centralisera nätverkskablar
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 120
+  pricing_source: manual
+  material_suggestions:
+  - mediaskåp
+  - patchpanel
+  notes: Installation av mediaskåp för centralisering av nätverk och media.
+  task_id: installera_mediaskap
+- label: Installera wifi-accesspunkt
+  category: natverk_media
+  patterns:
+  - installera wifi accesspunkt
+  - sätta upp accesspunkt
+  - montera unifi accesspunkt
+  - installera takmonterad accesspunkt
+  - wifi punkt installation
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 40
+  pricing_source: manual
+  material_suggestions:
+  - accesspunkt
+  - nätverkskabel
+  notes: Installation av accesspunkt med nätverkskabel, t.ex. UniFi.
+  task_id: installera_wifi_accesspunkt
+- label: Felsökning wifi
+  category: natverk_media
+  patterns:
+  - wifi fungerar inte
+  - problemet med wifi
+  - dålig wifi täckning
+  - internet fungerar inte trådlöst
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 45
+  pricing_source: manual
+  material_suggestions: []
+  notes: Felsökning av trådlöst nätverk, accesspunkt eller router.
+  task_id: felsokning_wifi
+- label: Installera tv-uttag
+  category: natverk_media
+  patterns:
+  - installera tv uttag
+  - montera antennuttag
+  - sätta upp tv-uttag
+  - koax uttag installation
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 40
+  pricing_source: manual
+  material_suggestions:
+  - tv-uttag
+  - koaxkabel
+  notes: Installation av tv-/koaxuttag.
+  task_id: installera_tv_uttag
+- label: Flytta tv-uttag
+  category: natverk_media
+  patterns:
+  - flytta tv uttag
+  - flytta antennuttag
+  - flytta koax uttag
+  - ändra placering tv-uttag
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 60
+  pricing_source: manual
+  material_suggestions:
+  - koaxkabel
+  - tv-uttag
+  notes: Flytt av koaxuttag inom samma rum/vägg.
+  task_id: flytta_tv_uttag
+- label: Installera mediauttag (TV + nätverk)
+  category: natverk_media
+  patterns:
+  - installera mediauttag
+  - kombinerat tv och nätverksuttag
+  - tv och internet uttag
+  - installera nätverk vid tv
+  - mediauttag installation
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 50
+  pricing_source: manual
+  material_suggestions:
+  - tv-uttag
+  - nätverksuttag
+  - apparatdosa
+  notes: Installation av kombinerat mediauttag vid tv.
+  task_id: installera_mediauttag
+- label: Installera strömmatning till väggmonterad TV
+  category: natverk_media
+  patterns:
+  - dra el till tv på väggen
+  - installera eluttag bakom tv
+  - dra strömkabel till tv
+  - eluttag för väggmonterad tv
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 60
+  pricing_source: manual
+  material_suggestions:
+  - vägguttag
+  - kabel
+  notes: Installation av ström till väggmonterad TV.
+  task_id: installera_tv_vaggfaste_strom
+- label: Installera HDMI genom väggen
+  category: natverk_media
+  patterns:
+  - installera hdmi i väggen
+  - dra hdmi kabel genom väggen
+  - montera hdmi uttag
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 45
+  pricing_source: manual
+  material_suggestions:
+  - hdmi-kabel
+  notes: Installation av HDMI-kabel genom vägg/dosa.
+  task_id: installera_hdmi_i_vaggen
+- label: Installera strömmatning för soundbar
+  category: natverk_media
+  patterns:
+  - dra el till soundbar
+  - installera uttag för soundbar
+  - el till ljudsystem
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 40
+  pricing_source: manual
+  material_suggestions:
+  - vägguttag
+  notes: Installation av ström bakom soundbar eller väggfäste.
+  task_id: installera_soundbar_strom
+- label: Installera smart hub
+  category: natverk_media
+  patterns:
+  - installera smart hub
+  - installera homekit hub
+  - hub installation
+  - installera zigbee hub
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 30
+  pricing_source: manual
+  material_suggestions:
+  - smart hub
+  notes: Installation av central smart hem-hubb.
+  task_id: installera_smart_hub
+- label: Felsökning nätverk
+  category: natverk_media
+  patterns:
+  - internet fungerar inte
+  - nätverket fungerar inte
+  - ingen internet
+  - nätverksproblem
+  - nätverket är långsamt
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 50
+  pricing_source: manual
+  material_suggestions: []
+  notes: Felsökning av nätverk, router, kablage eller switch.
+  task_id: felsokning_natverk
+- label: Felsökning TV-signal
+  category: natverk_media
+  patterns:
+  - tv fungerar inte
+  - ingen tv signal
+  - tv antenn fungerar inte
+  - problem med tv-uttag
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 45
+  pricing_source: manual
+  material_suggestions: []
+  notes: Felsökning av antenn/koax eller IPTV.
+  task_id: felsokning_tv_signal
+- label: Felsökning media vid TV
+  category: natverk_media
+  patterns:
+  - tv får ingen ström
+  - soundbar fungerar inte
+  - tv fungerar inte med hdmi
+  - problem med mediauttag
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 45
+  pricing_source: manual
+  material_suggestions: []
+  notes: Felsökning av TV-relaterad ström, HDMI eller mediauttag.
+  task_id: felsokning_media_vid_tv
+- task_id: INSTALLERA-MEDIACENTRAL
+  label: Installera mediacentral
+  category: natverk_och_media
+  manual_time_minutes_per_unit: 60
+  time_source: gpt
+  description: Montering och inkoppling av mediacentral för nätverk och media i bostad.
+  quantity_type: per_unit
+  default_unit: st
+  room_type_hint: klädkammare
+  gpt_confidence: 0.9
+  patterns:
+  - installera mediacentral
+  - montera mediacentral i klädkammare
+  - sätta upp mediacentral
+  materials:
+  - ref: MEDIACENTRAL-TOM
+    quantity_per_unit: 1.0
+    unit: st
+    description: Mediacentral tom
+  _auto_generated: true
+- task_id: DRA-NATVERKSKABEL
+  label: Dra nätverkskabel till datauttag
+  category: natverk_och_media
+  manual_time_minutes_per_unit: 6
+  time_source: gpt
+  description: Dragning och montering av nätverkskabel till nytt eller befintligt
+    datauttag, inklusive fastsättning och anslutning.
+  quantity_type: per_meter
+  default_unit: m
+  room_type_hint: null
+  gpt_confidence: 0.9
+  patterns:
+  - dra nätverkskabel till datauttag
+  - installera nätverkskabel till uttag
+  - dra kabel till datauttag
+  materials:
+  - ref: KABEL-NATVERK-CAT6
+    quantity_per_unit: 1.0
+    unit: m
+    description: Nätverkskabel Cat6
+  - ref: DATAUTTAG-INF
+    quantity_per_unit: 0.05
+    unit: m
+    description: Datauttag, uppskattat per meter
+  _auto_generated: true
+
+  # Installera infällt nätverksuttag – schablon
+  INSTALLERA-NATVERKSUTTAG-INFALLT:
+    label: "Installera infällt nätverksuttag"
+    category: "natverk_och_media"
+    patterns:
+      - "installera nätverksuttag"
+      - "montera nätverksuttag"
+      - "installera rj45-uttag"
+      - "montera rj45-uttag"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 35

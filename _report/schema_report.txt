@@ -1,0 +1,21 @@
+
+=== POST /quotes/draft body ===
+type: object
+required: customer_name, job_summary, lines
+properties:
+  - customer_name : type=string format= nullable=
+  - customer_email : type= format= nullable=
+  - job_summary : type=string format= nullable=
+  - lines : type=array format= nullable=
+  - apply_rot : type=boolean format= nullable=
+
+=== POST /quotes body ===
+type: object
+required: customer_name, job_summary, lines
+properties:
+  - customer_name : type=string format= nullable=
+  - customer_email : type= format= nullable=
+  - job_summary : type=string format= nullable=
+  - lines : type=array format= nullable=
+  - apply_rot : type=boolean format= nullable=
+

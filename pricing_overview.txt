@@ -1,0 +1,298 @@
+DOCKIT – PRIS- OCH MATERIALSYSTEM (VERSION 1.0 – ÖVERSIKT)
+
+========================================================
+1. FILER OCH MAPPAR (NUVARANDE ARKITEKTUR)
+========================================================
+
+Kod / logik:
+- D:\dockit-ai\src\services\pricing.py
+    - Laddar grossistprislista (price_catalog.json)
+    - Laddar material_ref_map.json (Dockit-ref -> artikelnummer)
+    - Laddar kundspecifika prislistor (knowledge\customers\<customer_id>\price_list.json)
+    - Använder favorites (get_favorite_article) för att välja artikelnummer
+    - Loggar saknade priser + saknade mappings
+
+- D:\dockit-ai\src\services\quote_service.py
+    - make_draft:
+        - fri text -> interpret_free_text(...) -> tasks + materials
+        - bygger arbets- och materialrader
+        - sätter line_type + is_rot_eligible
+        - bestämmer customer_id (e-post eller namn)
+        - för varje materialrad:
+              unit_price = get_price(customer_id, ref)
+              line_total = qty * unit_price
+
+- D:\dockit-ai\src\services\favorites.py
+    - register_favorite_article(customer_id, material_ref, article_number)
+    - get_favorite_article(customer_id, material_ref)
+    - sparas i knowledge\customers\favorites.json
+
+- D:\dockit-ai\src\server\api\quotes.py
+    - POST /quotes/draft
+        -> kallar make_draft(...)
+    - POST /quotes/favorite-material
+        -> kallar register_favorite_article(...)
+    - GET /quotes/{id}, POST /quotes (spara offert) m.m.
+
+
+Data / pris / customers:
+- Grossistprislista (normaliserad):
+    - D:\dockit-ai\knowledge\catalogs\price_catalog.json
+    - Struktur: lista med rader
+        [
+          {
+            "artikelnummer": "0000110",
+            "benamning": "EKKJ 3X2,5/2,5",
+            "enhet": "M",
+            "materialgrupp": "00DEC",
+            "gn_pris": 55.0
+          },
+          ...
+        ]
+
+- Grossistråfil (ursprung):
+    - D:\dockit-ai\knowledge\catalogs\Storel-GN.csv
+    - Semikolon-separerad CSV från grossisten
+    - Uppdateras när du får ny prisfil
+
+- Referensmapping (Dockit-ref -> artikelnummer):
+    - D:\dockit-ai\knowledge\catalogs\material_ref_map.json
+    - Struktur (dict):
+        {
+          "DIMMER-UNIV": "0000110",
+          "APPRAM-1FACK": "0000120",
+          ...
+        }
+
+- Kundspecifika prislistor:
+    - D:\dockit-ai\knowledge\customers\<customer_id>\price_list.json
+    - Exempel (<customer_id> = "test@example.com"):
+        D:\dockit-ai\knowledge\customers\test@example.com\price_list.json
+
+      Innehåll:
+        {
+          "0000120": 199.0,
+          "0000999": 49.5
+        }
+
+- Kund-specifika favoritartiklar:
+    - D:\dockit-ai\knowledge\customers\favorites.json
+    - Hanteras via favorites.py + API /quotes/favorite-material
+
+Loggar:
+- D:\dockit-ai\knowledge\logs\missing_prices.jsonl
+    - Rad per saknat pris:
+        {"ts": "...", "type": "missing_price", "customer_id": "...", "article_ref": "...", "article_number": "..."}
+
+- D:\dockit-ai\knowledge\logs\missing_material_mappings.jsonl
+    - Rad per saknad material_ref-mapping:
+        {"ts": "...", "type": "missing_material_mapping", "material_ref": "..."}
+
+
+========================================================
+2. PRISLOGIK – PRIORITETSORDNING
+========================================================
+
+All prislogik går via:
+
+    get_price(customer_id, article_ref)
+
+Där:
+- customer_id = i första hand kundens e-post, annars namn
+- article_ref = material_ref (t.ex. "DIMMER-UNIV") eller ett artikelnummer
+
+Prioritetsordning:
+
+1) FAVORITARTIKEL PER KUND
+   - favorites.get_favorite_article(customer_id, material_ref)
+   - Om finns -> detta artikelnummer används
+   - T.ex. för APPRAM-1FACK kan kunden föredra 0000120 istället för 0000110
+
+2) material_ref_map.json
+   - material_ref -> artikelnummer
+   - Används när ingen favorit finns
+   - Exempel:
+        "DIMMER-UNIV"    -> "0000110"
+        "APPRAM-1FACK"   -> "0000120"
+
+3) Kundens prislista (price_list.json)
+   - När artikelnumret är bestämt:
+        - Försök hämta pris från knowledge\customers\<customer_id>\price_list.json
+        - Om finns -> används
+        - Exempel:
+            get_price("test@example.com", "0000120") -> 199.0
+
+4) Grossistpris (price_catalog.json)
+   - Om ingen kundpris finns -> hämta gn_pris från price_catalog.json
+   - Exempel:
+        get_price(None, "0000120") -> 97.0 (GN-pris)
+
+5) Om varken 3 eller 4 ger träff:
+   - Returnera 0.0
+   - Logga på stderr + i missing_prices.jsonl
+
+
+========================================================
+3. ARBETSFLÖDE NÄR DU FÅR NY GROSSISTPRISLISTA
+========================================================
+
+När grossisten skickar ny Storel-GN.csv (t.ex. 2025 års lista):
+
+1) Stoppa backend (om den körs):
+    - Ctrl + C i terminalen där uvicorn kör.
+
+2) Lägg in CSV:
+    - Ersätt den gamla filen:
+        D:\dockit-ai\knowledge\catalogs\Storel-GN.csv
+      med den nya från grossisten (samma filnamn, samma format).
+
+3) Kör normaliseringsscriptet:
+    - Från projektroten:
+        cd D:\dockit-ai
+        .\.venv\Scripts\Activate.ps1
+        python .\normalize_storel_to_price_catalog.py
+
+    - Scriptet läser Storel-GN.csv och skriver ut en fräsch:
+        D:\dockit-ai\knowledge\catalogs\price_catalog.json
+
+4) Starta om backend:
+    - cd D:\dockit-ai
+    - .\.venv\Scripts\Activate.ps1
+    - uvicorn src.server.main:app --reload
+
+5) Klart:
+    - All prislogik använder nu den nya prislistan.
+
+
+========================================================
+4. LÄGGA TILL / JUSTERA MATERIAL_REF-MAPPING
+========================================================
+
+Syfte:
+- Koppla Dockit-interna materialrefs (DIMMER-UNIV, APPRAM-1FACK, m.m.)
+  till riktiga grossistartiklar.
+
+Workflow:
+
+1) Öppna logg för saknade mappings:
+    - D:\dockit-ai\knowledge\logs\missing_material_mappings.jsonl
+    - Här ser du alla material_ref som saknar mapping.
+
+2) Välj rätt artikelnummer:
+    - Leta upp rätt artikelnummer i Storel-GN.csv (eller i grossistens system).
+    - Alternativt: du vet redan vilken artikel som ska användas.
+
+3) Lägg in i material_ref_map.json:
+    - Öppna:
+        D:\dockit-ai\knowledge\catalogs\material_ref_map.json
+
+    - Lägg till/ändra:
+        {
+          "DIMMER-UNIV": "0000110",
+          "APPRAM-1FACK": "0000120",
+          "NY-REF": "1234567"
+        }
+
+4) Starta om backend (eller rensa cache genom restart):
+    - uvicorn src.server.main:app --reload
+    - (mappingen cache:as, så restart är enklast)
+
+5) Nästa gång offert körs:
+    - material_ref -> artikelnummer via mappingen
+    - get_price(...) kan hitta priset.
+
+
+========================================================
+5. KUNDENS EGEN PRISLISTA (price_list.json)
+========================================================
+
+Syfte:
+- Överstyra grossistpris per artikelnummer för en viss kund/firma
+  (alldeles oberoende av vad GN-priset är).
+
+Struktur:
+- Plats:
+    knowledge\customers\<customer_id>\price_list.json
+
+- Exempel (kund = test@example.com):
+    D:\dockit-ai\knowledge\customers\test@example.com\price_list.json
+
+  Innehåll:
+    {
+      "0000120": 199.0,
+      "0000999": 49.5
+    }
+
+Prioritet:
+1) Favoritartikel bestämmer VILKET artikelnummer vi använder.
+2) Kundens prislista bestämmer VAD det kostar.
+3) Grossistpris används bara om det saknas kundpris.
+
+Typiskt workflow:
+- Kund får bättre pris på vissa artiklar
+- Du lägger in deras nettopris (exkl. moms) i deras egna price_list.json
+- Offertsystemet använder automatiskt deras pris vid nästa /quotes/draft.
+
+
+========================================================
+6. FAVORITARTIKLAR PER KUND
+========================================================
+
+Syfte:
+- Hantera preferenser som:
+    - “Jag vill alltid använda Schneider istället för Elko”
+    - “Använd alltid den här dimmern när material_ref = DIMMER-UNIV”
+
+Lagring:
+- D:\dockit-ai\knowledge\customers\favorites.json
+
+API:
+- POST /quotes/favorite-material
+    - Body (exempel):
+        {
+          "customer_email": "test@example.com",
+          "material_ref": "APPRAM-1FACK",
+          "article_number": "0000120"
+        }
+
+Effekt:
+1) favorites.register_favorite_article(...) sparar kopplingen:
+    (customer_id = "test@example.com", material_ref = "APPRAM-1FACK") -> "0000120"
+
+2) Vid nästa /quotes/draft:
+    - pricing._resolve_article_number(...) kollar:
+        a) favoritartikel (per kund + material_ref)
+        b) material_ref_map.json
+        c) fallback (material_ref som artikelnummer)
+
+3) get_price(...) slår pris på det valda artikelnumret (kundpris eller grossistpris).
+
+Koppling till varumärken:
+- På sikt kan man bygga en struktur där:
+    - material_ref har ett “brand” eller “family”
+    - kundens favoritartiklar styr vilka varumärken som föreslås först
+- Grunden finns redan genom favorites + kundprislistor.
+
+
+========================================================
+7. LOGGAR – HUR DU ANVÄNDER DEM FÖR ATT FÖRBÄTTRA SYSTEMET
+========================================================
+
+1) Saknade material_ref-mappings:
+    - Fil:
+        D:\dockit-ai\knowledge\logs\missing_material_mappings.jsonl
+    - Användning:
+        - Öppna filen ibland
+        - Gå igenom vilka material_ref som saknar mapping
+        - Lägg in dem i material_ref_map.json
+        - Nästa gång försvinner de från loggen
+
+2) Saknade priser:
+    - Fil:
+        D:\dockit-ai\knowledge\logs\missing_prices.jsonl
+    - Användning:
+        - Leta upp artiklar som saknar pris
+        - Antingen:
+            a) lägg in dem i grossistkatalogen (vid nästa CSV-normalisering)
+            b) eller lägg in kundpris i kundens price_list.json
+        - Bra sätt att se vilka artiklar som behöver bättre datakvalitet

@@ -1,0 +1,27 @@
+{
+  "suggested_tasks": [
+    {
+      "task_ref": "BYTA-VAGGUTTAG",
+      "title_sv": "Byta vägguttag",
+      "description_sv": "Byte av befintligt vägguttag till ett nytt, inklusive demontering och återmontage.",
+      "category": "brytare_och_uttag",
+      "estimated_hours_per_unit": 0.33,
+      "quantity_type": "per_unit",
+      "default_unit": "st",
+      "patterns": ["Byta två vägguttag i vardagsrummet"],
+      "default_materials": [
+        {
+          "material_ref_hint": "APPRAM-1FACK",
+          "qty_per_unit": 1.0,
+          "unit": "st",
+          "note": "Ram för 1-facks vägguttag"
+        }
+      ],
+      "room_type_hint": "vardagsrum",
+      "confidence": 0.95,
+      "notes_internal": "",
+      "source_segment_id": "testseg_0001",
+      "source_segment_text": "Byta två vägguttag i vardagsrummet"
+    }
+  ]
+}

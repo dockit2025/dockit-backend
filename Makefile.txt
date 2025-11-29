@@ -1,0 +1,17 @@
+Makefile
+.PHONY: setup test run api format
+
+setup:
+\tpython -m venv .venv && . .venv/bin/activate && pip install -r requirements.txt
+
+test:
+\tpytest
+
+api:
+\tuvicorn src.api.main:app --reload
+
+render:
+\tpython -m src.cli render examples/offer_input.json > out.html
+
+validate:
+\tpython -m src.cli validate out.html

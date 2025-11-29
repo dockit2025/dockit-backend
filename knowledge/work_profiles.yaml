@@ -1,0 +1,71 @@
+# Dockit – Work profiles för material-läget
+#
+# Varje profil säger:
+# - vilket material_ref den gäller för (matches.material_ref)
+# - vilket arbetsmoment (task_id) som ska användas
+# - hur många arbetsenheter per material-enhet (quantity_per_unit)
+
+profiles:
+
+  installera_vagguttag_infalt_standard:
+    label: "Installera infällt vägguttag (standard)"
+    category: "brytare_och_uttag"
+    description: "Standardinstallation av infällt vägguttag i torr inomhusmiljö, t.ex. vardagsrum eller sovrum."
+    environment_hint: "inomhus_torr_infalt"
+    main_task_ref: "INSTALLERA-VAGGUTTAG-INFALLT"
+    additional_task_refs: []
+    matches:
+      material_ref: "VAGGUTTAG-INF"
+      environment: "inomhus_torr_infalt"
+      work_type: "installation"
+    tasks:
+      - task_id: "INSTALLERA-VAGGUTTAG-INFALLT"
+        quantity_per_unit: 1.0
+
+  installera_dimmer_standard:
+    label: "Installera dimmer (ersätter befintlig brytare)"
+    category: "belysning"
+    description: "Byte från vanlig strömbrytare till dimmer i befintlig apparatdosa."
+    environment_hint: "inomhus_torr_infalt"
+    main_task_ref: "INSTALLERA-DIMMER"
+    additional_task_refs: []
+    matches:
+      material_ref: "DIMMER"
+      environment: "inomhus_torr_infalt"
+      work_type: "installation"
+    tasks:
+      - task_id: "INSTALLERA-DIMMER"
+        quantity_per_unit: 1.0
+
+  lagga_vp_ror_infalld_vagg:
+    label: "Lägga VP-rör infällt i vägg"
+    category: "ror_och_vp"
+    description: "Infälld förläggning av VP-rör i vägg för ny eller flyttad punkt."
+    environment_hint: "inomhus_torr_infalt_vagg"
+    main_task_ref: "dra_vp_ror_infalld_vagg"
+    additional_task_refs: []
+    matches:
+      material_ref: "VP-ROR-16MM"
+      environment: "inomhus_torr_infalt_vagg"
+      work_type: "installation"
+    tasks:
+      # quantity_per_unit = timmar/”enhet” styrs av _estimate_task_time_minutes.
+      # Här är enheten meter, så quantity_units = antal meter rör.
+      - task_id: "dra_vp_ror_infalld_vagg"
+        quantity_per_unit: 1.0
+
+  lagga_kabelkanal_vagg:
+    label: "Lägga kabelkanal på vägg"
+    category: "ror_och_vp"
+    description: "Utanpåliggande kabelkanal på vägg för dragning av kabel."
+    environment_hint: "inomhus_torr_utanpa_vagg"
+    main_task_ref: "dra_kabelkanal_vagg"
+    additional_task_refs: []
+    matches:
+      material_ref: "KABELKANAL-VIT"
+      environment: "inomhus_torr_utanpa_vagg"
+      work_type: "installation"
+    tasks:
+      # quantity_units = antal meter kabelkanal
+      - task_id: "dra_kabelkanal_vagg"
+        quantity_per_unit: 1.0

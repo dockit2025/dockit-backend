@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "schemas/offer_json.schema.json",
+  "title": "Offer JSON",
+  "type": "object",
+  "required": ["mode","customer","supplier","project","work_items","totals","render"],
+  "properties": {
+    "mode": { "type": "string", "enum": ["quick","accurate"] },
+    "voice_input_raw": { "type": "string" },
+    "customer": { "type": "object" },
+    "supplier": { "type": "object" },
+    "project": { "type": "object" },
+    "work_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["atl_id","title","qty","unit","atl_time_h","ai_confidence","pricing"],
+        "properties": {
+          "atl_id": { "type": "string" },
+          "title": { "type": "string" },
+          "qty": { "type": "number" },
+          "unit": { "type": "string" },
+          "atl_time_h": { "type": "number" },
+          "ai_confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+          "unresolved": { "type": "boolean" },
+          "raw_phrase": { "type": "string" },
+          "notes": { "type": "string" },
+          "pricing": {
+            "type": "object",
+            "required": ["labor_cost","material_cost","line_total"],
+            "properties": {
+              "labor_cost": { "type": "number" },
+              "material_cost": { "type": "number" },
+              "line_total": { "type": "number" }
+            }
+          }
+        }
+      }
+    },
+    "materials": { "type": "array" },
+    "totals": { "type": "object" },
+    "render": {
+      "type": "object",
+      "required": ["currency","html","passed_validation"],
+      "properties": {
+        "currency": { "type": "string", "enum": ["SEK","EUR"] },
+        "html": { "type": "string" },
+        "passed_validation": { "type": "boolean" },
+        "warnings": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

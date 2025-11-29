@@ -1,0 +1,21 @@
+from fastapi import FastAPI
+from contextlib import asynccontextmanager
+from src.server.api import quotes, system
+from src.server.db.session import init_db
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("Initierar databasen...")
+    init_db()
+    yield
+    print("Avslutar appen...")
+
+app = FastAPI(
+    title="Dockit AI - Hantverksassistenten",
+    version="0.1.0",
+    lifespan=lifespan
+)
+
+app.include_router(system.router)
+app.include_router(quotes.router)
+

@@ -1,0 +1,99 @@
+@media print {
+  @page { size: A4; margin: 12mm; }
+  .no-print { display: none !important; }
+
+  html, body { background: #fff !important; }
+  .print-card { 
+    background: #fff; 
+    color: #000; 
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; 
+    max-width: 175mm; 
+    margin: 0 auto; 
+    padding-top: 4mm;
+  }
+
+  /* --- HEADER --- */
+  .print-header { 
+    display: grid; 
+    grid-template-columns: 1fr auto; 
+    align-items: end; 
+    margin-bottom: 8mm; 
+    border-bottom: 1px solid #ccc; 
+    padding-bottom: 3mm; 
+  }
+
+  .brand .logo { 
+    width: 40mm; 
+    height: auto; 
+    display: block; 
+  }
+
+  .meta { 
+    font-size: 12px; 
+    text-align: right; 
+    color: #333; 
+    line-height: 1.4; 
+    margin-top: 3mm; 
+  }
+
+  /* --- TITLAR & TEXT --- */
+  .print-title { 
+    font-size: 24px; 
+    font-weight: 800; 
+    margin: 0 0 6mm 0; 
+    letter-spacing: .2px; 
+  }
+
+  .print-meta  { 
+    font-size: 13px; 
+    color: #111; 
+    margin: 0 0 2mm 0; 
+  }
+
+  /* --- TABELL --- */
+  .print-table { 
+    width: 100%; 
+    border-collapse: collapse; 
+    margin-top: 6mm; 
+  }
+
+  .print-table th { 
+    background-color: #f7f7f7; 
+    font-weight: 600; 
+  }
+
+  .print-table th, .print-table td { 
+    border-bottom: 1px solid #ddd; 
+    padding: 6px 4px; 
+    text-align: left; 
+    vertical-align: top; 
+    font-size: 13px; 
+  }
+
+  /* --- SUMMERING --- */
+  .print-summary { 
+    margin-top: 8mm; 
+    width: 55mm; 
+    margin-left: auto; 
+    font-size: 14px; 
+  }
+
+  .print-summary-row { 
+    display: grid; 
+    grid-template-columns: 1fr auto; 
+    gap: 6px; 
+    margin: 3px 0; 
+  }
+
+  /* Färg på totalbeloppet */
+  .print-summary-row:last-child strong {
+    color: #00B894;
+  }
+
+  /* --- FOOTER --- */
+  .print-footer { 
+    margin-top: 10mm; 
+    font-size: 11px; 
+    color: #444; 
+  }
+}

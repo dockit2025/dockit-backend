@@ -1,0 +1,317 @@
+- phrase: "infällda rör"
+  synonyms: ["dragning i rör", "vp", "vp16", "vp 16", "vp20", "vp 20", "installationsrör", "skyddsrör", "flexrör", "elrör", "kabel i rör", "förläggning i rör", "rördragning"]
+  search: "Infällda rör (VP 16–20 mm)"
+  default_variant: -3
+  unit_hint: "m"
+
+- phrase: "infällda rör 25–50"
+  synonyms: ["vp25", "vp 25", "vp32", "vp 32", "vp40", "vp 40", "större vp", "installationsrör 25", "installationsrör 32", "installationsrör 40"]
+  search: "Infällda rör (VP 25–50 mm)"
+  default_variant: -3
+  unit_hint: "m"
+
+- phrase: "utvändiga rör 16–20"
+  synonyms: ["utanpåliggande rör", "rör utanpå vägg", "rör på vägg", "vp på vägg", "utanpå vp 16", "utanpå vp 20"]
+  search: "Utvändiga rör (VP 16–20 mm)"
+  default_variant: 0
+  unit_hint: "m"
+
+- phrase: "utvändiga rör 25–50"
+  synonyms: ["utanpåliggande rör 25", "rör på vägg 32", "utanpå vp 25", "utanpå vp 32", "utanpå vp 40"]
+  search: "Utvändiga rör (VP 25–50 mm)"
+  default_variant: 0
+  unit_hint: "m"
+
+- phrase: "maskin inbilning av rör"
+  synonyms: ["spårning", "fräsning för rör", "bilning för rör", "spårfräs rör"]
+  search: "Maskin inbilning av rör"
+  default_variant: 0
+  unit_hint: "m"
+
+- phrase: "kabelkanal"
+  synonyms: ["plastkanal", "kanal", "listkanal", "installationskanal", "minikanal", "kabel-list", "kabellist", "kapa kabelkanal"]
+  search: "Ilägga/ordna ledare i kabelkanal inkl. lock"
+  default_variant: 0
+  unit_hint: "m"
+
+- phrase: "kapa kabelkanal"
+  synonyms: ["kapning kabelkanal", "kapning kanal", "kapa listkanal"]
+  search: "Kapa kabelkanal av plast"
+  default_variant: 0
+  unit_hint: "kapning"
+
+- phrase: "kabelstege"
+  synonyms: ["stege", "kabelstege montage", "ledning på stege", "uttag på stege"]
+  search: "Dosa m. uttag på stege"
+  default_variant: 0
+  unit_hint: "dosa"
+
+- phrase: "vägguttag"
+  synonyms: ["apparatuttag", "dubbeluttag", "trippeluttag", "230v-uttag", "400v-uttag", "eluttag", "uttag på kanal", "uttagsenhet"]
+  search: "Vägguttag snabbkoppling"
+  default_variant: 0
+  unit_hint: "st"
+
+- phrase: "uttagsenhet snabbkoppling"
+  synonyms: ["snabbkopplingsuttag", "uttagsenhet", "uttag på stege/ränna"]
+  search: "Snabbkopplingssystem - uttagsenhet"
+  default_variant: 0
+  unit_hint: "st"
+
+- phrase: "apparatdosa"
+  synonyms: ["väggdosa", "infälld dosa", "dosa för uttag", "apparatdosa för vägguttag"]
+  search: "Apparatdosa inkl. montering och anslutning av vägguttag"
+  default_variant: 0
+  unit_hint: "st"
+
+- phrase: "vägguttag montage"
+  synonyms: ["montage vägguttag", "montera vägguttag", "i jackning och uppordning", "snabbkoppling vägguttag"]
+  search: "Vägguttag med snabbkoppling inkl. ijackning och uppordning av kablage – montage"
+  default_variant: 0
+  unit_hint: "uttag"
+
+- phrase: "takkontakt"
+  synonyms: ["lamputtag", "dcl", "takkontakt dcl", "lamputtag tak"]
+  search: ""
+  default_variant: 0
+  unit_hint: "st"
+
+- phrase: "downlight"
+  synonyms: ["infälld spot", "spotlight infälld", "spot", "downlight ip44", "downlight ip65", "dimmerbar downlight"]
+  search: ""
+  default_variant: 0
+  unit_hint: "st"
+
+- phrase: "plafond"
+  synonyms: ["takplafond", "led-plafond", "plafondarmatur", "rund takarmatur"]
+  search: ""
+  default_variant: 0
+  unit_hint: "st"
+
+- phrase: "armatur linjär"
+  synonyms: ["linjärarmatur", "rörarmatur", "lysrörsarmatur", "led-armatur linjär", "pendlad armatur"]
+  search: ""
+  default_variant: 0
+  unit_hint: "st"
+
+- phrase: "belysningsskena"
+  synonyms: ["skena för spot", "3-fas skena", "1-fas skena", "belysningsskenesystem"]
+  search: ""
+  default_variant: 0
+  unit_hint: "m"
+
+- phrase: "nödbelysning"
+  synonyms: ["nödljus", "reservbelysning", "led-nöd", "armatur nöd"]
+  search: ""
+  default_variant: 0
+  unit_hint: "st"
+
+- phrase: "strömbrytare"
+  synonyms: ["brytare", "enkelbrytare", "dubbelbrytare", "trapp", "kors", "återfjädrande", "tryckknapp"]
+  search: ""
+  default_variant: 0
+  unit_hint: "st"
+
+- phrase: "dimmer"
+  synonyms: ["väggdimmer", "dosdimmer", "dali-dimmer", "plejd dimmer", "casambi dimmer"]
+  search: ""
+  default_variant: 0
+  unit_hint: "st"
+
+- phrase: "rörelsevakt"
+  synonyms: ["rörelsesensor", "närvarosensor", "pir-sensor", "mikrovågssensor"]
+  search: ""
+  default_variant: 0
+  unit_hint: "st"
+
+- phrase: "ljusrelä"
+  synonyms: ["skymningsrelä", "fotocell", "dagsljusrelä"]
+  search: ""
+  default_variant: 0
+  unit_hint: "st"
+
+- phrase: "tidrelä"
+  synonyms: ["timerrelä", "astrour", "tidstyrning"]
+  search: ""
+  default_variant: 0
+  unit_hint: "st"
+
+- phrase: "jordfelsbrytare"
+  synonyms: ["jfb", "jordfelsautomat", "rcbo", "jordfelsskydd"]
+  search: ""
+  default_variant: 0
+  unit_hint: "st"
+
+- phrase: "dvärgbrytare"
+  synonyms: ["automatsäkring", "säkring dvärg", "mcB", "normsäkring"]
+  search: ""
+  default_variant: 0
+  unit_hint: "st"
+
+- phrase: "elcentral"
+  synonyms: ["normcentral", "undercentral", "kapsling norm", "fördelningscentral"]
+  search: ""
+  default_variant: 0
+  unit_hint: "st"
+
+- phrase: "huvudbrytare"
+  synonyms: ["säkerhetsbrytare", "lastfrånskiljare", "lastbrytare"]
+  search: ""
+  default_variant: 0
+  unit_hint: "st"
+
+- phrase: "plint"
+  synonyms: ["kopplingsplint", "nollskena", "jordskena", "fördelningsplint"]
+  search: ""
+  default_variant: 0
+  unit_hint: "st"
+
+- phrase: "kabelrör mark"
+  synonyms: ["kabelskyddsrör", "slang i mark", "jordförläggning rör", "rör i mark"]
+  search: ""
+  default_variant: -8
+  unit_hint: "m"
+
+- phrase: "kabel i kanal"
+  synonyms: ["dragning i kanal", "förläggning i kanal", "installationskanal kabel"]
+  search: "Ilägga/ordna ledare i kabelkanal inkl. lock"
+  default_variant: 0
+  unit_hint: "m"
+
+- phrase: "nätverksuttag"
+  synonyms: ["rj45", "datauttag", "cat6-uttag", "cat6a-uttag", "cat7-uttag"]
+  search: ""
+  default_variant: 0
+  unit_hint: "st"
+
+- phrase: "patchpanel"
+  synonyms: ["nätverkspanel", "cat6 patchpanel", "cat6a patchpanel", "lcs panel"]
+  search: ""
+  default_variant: 0
+  unit_hint: "st"
+
+- phrase: "fiber"
+  synonyms: ["fiberkabel", "fiberuttag", "fibersvets", "os2", "om3", "om4"]
+  search: ""
+  default_variant: 0
+  unit_hint: "m"
+
+- phrase: "cee-uttag"
+  synonyms: ["industriuttag", "blått uttag", "rött uttag", "cee 16a", "cee 32a"]
+  search: ""
+  default_variant: 0
+  unit_hint: "st"
+
+- phrase: "perilex"
+  synonyms: ["spisuttag perilex", "3-fas spisuttag", "perilex uttag"]
+  search: ""
+  default_variant: 0
+  unit_hint: "st"
+
+- phrase: "spisuttag"
+  synonyms: ["spis uttag", "spiskontakt", "spis anslutning", "perilex spis"]
+  search: ""
+  default_variant: 0
+  unit_hint: "st"
+
+- phrase: "laddbox"
+  synonyms: ["laddstation", "elbilsladdare", "mode3", "typ2", "evse"]
+  search: ""
+  default_variant: 0
+  unit_hint: "st"
+
+- phrase: "värmekabel"
+  synonyms: ["frostvakt", "takvärmekabel", "rännvärme", "markvärmekabel"]
+  search: ""
+  default_variant: 0
+  unit_hint: "m"
+
+- phrase: "golvvärme el"
+  synonyms: ["elgolvvärme", "värmematta", "termostat golvvärme"]
+  search: ""
+  default_variant: 0
+  unit_hint: "m²"
+
+- phrase: "märkning"
+  synonyms: ["kabelmärkning", "ledningsmärkning", "märkband", "märkbricka"]
+  search: ""
+  default_variant: 0
+  unit_hint: "st"
+
+- phrase: "håltagning"
+  synonyms: ["borrning", "borrhål", "pluggning", "infästning", "skruvning"]
+  search: ""
+  default_variant: 0
+  unit_hint: "st"
+
+- phrase: "ankarskena"
+  synonyms: ["montageskena", "c-skena", "bärskena", "montageprofil"]
+  search: ""
+  default_variant: 0
+  unit_hint: "m"
+
+- phrase: "kabelränna"
+  synonyms: ["ränna", "kabelränna montage", "ledning i ränna"]
+  search: ""
+  default_variant: 0
+  unit_hint: "m"
+
+- phrase: "kabelskydd"
+  synonyms: ["kabelskyddsrör", "skyddsslang", "kabelskydd mark"]
+  search: ""
+  default_variant: 0
+  unit_hint: "m"
+
+- phrase: "styrsystem belysning"
+  synonyms: ["dali", "knx belysning", "casambi", "plejd", "zigbee belysning"]
+  search: ""
+  default_variant: 0
+  unit_hint: "st"
+
+- phrase: "elmätare"
+  synonyms: ["energimätare", "kwh-mätare", "mätare el"]
+  search: ""
+  default_variant: 0
+  unit_hint: "st"
+
+- phrase: "kontaktor"
+  synonyms: ["motorkontaktor", "styrkontaktor"]
+  search: ""
+  default_variant: 0
+  unit_hint: "st"
+
+- phrase: "motorskydd"
+  synonyms: ["överlastrelä", "motorskyddsbrytare"]
+  search: ""
+  default_variant: 0
+  unit_hint: "st"
+
+- phrase: "styrkabel"
+  synonyms: ["signalkabel", "styrledning", "ykcy", "j-h(st)h"]
+  search: ""
+  default_variant: 0
+  unit_hint: "m"
+
+- phrase: "coax"
+  synonyms: ["antennkabel", "tv-kabel", "koaxial"]
+  search: ""
+  default_variant: 0
+  unit_hint: "m"
+
+- phrase: "kameraövervakning"
+  synonyms: ["ip-kamera", "övervakningskamera", "cctv"]
+  search: ""
+  default_variant: 0
+  unit_hint: "st"
+
+- phrase: "brandvarnare"
+  synonyms: ["röklarm", "brandlarm", "optisk brandvarnare"]
+  search: ""
+  default_variant: 0
+  unit_hint: "st"
+
+- phrase: "porttelefon"
+  synonyms: ["dörrtelefoni", "porttelefonsystem", "ringklocka system"]
+  search: ""
+  default_variant: 0
+  unit_hint: "st"

@@ -1,0 +1,21 @@
+# 11) src/server/services/quote_service.py
+from typing import Tuple
+from server.schemas.quote import QuoteDraftIn, QuoteDraftOut
+
+def compute_subtotals(payload: QuoteDraftIn) -> Tuple[float, float, float]:
+    subtotal = sum(l.qty * l.unit_price_sek for l in payload.lines)
+    work_sum = sum(l.qty * l.unit_price_sek for l in payload.lines if l.kind.lower() == "work")
+    rot = 0.30 * work_sum if payload.apply_rot else 0.0  # v0: enkel ROT
+    total = max(subtotal - rot, 0.0)
+    return subtotal, rot, total
+
+def make_draft(payload: QuoteDraftIn) -> QuoteDraftOut:
+    subtotal, rot, total = compute_subtotals(payload)
+    title = f"Preliminär offert för {payload.customer_name}"
+    return QuoteDraftOut(
+        title=title,
+        subtotal_sek=round(subtotal, 2),
+        rot_discount_sek=round(rot, 2),
+        total_sek=round(total, 2),
+        lines=payload.lines
+    )

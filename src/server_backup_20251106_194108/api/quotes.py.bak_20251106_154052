@@ -1,0 +1,10 @@
+# 13) src/server/api/quotes.py
+from fastapi import APIRouter
+from server.schemas.quote import QuoteDraftIn, QuoteDraftOut
+from server.services.quote_service import make_draft
+
+router = APIRouter(prefix="/quotes", tags=["quotes"])
+
+@router.post("/draft", response_model=QuoteDraftOut)
+def create_draft(payload: QuoteDraftIn):
+    return make_draft(payload)

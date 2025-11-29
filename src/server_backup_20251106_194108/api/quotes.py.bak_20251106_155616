@@ -1,0 +1,24 @@
+# 13) src/server/api/quotes.py
+from fastapi import APIRouter
+from server.schemas.quote import QuoteDraftIn, QuoteDraftOut
+from server.services.quote_service import make_draft
+
+router = APIRouter(prefix="/quotes", tags=["quotes"])
+
+@router.post("/draft", response_model=QuoteDraftOut)
+def create_draft(payload: QuoteDraftIn):
+    return make_draft(payload)
+
+# --- Added: GET /quotes list endpoint ---
+from typing import List
+from fastapi import Depends
+from sqlmodel import Session, select
+from ..db.session import get_session
+from ..models.quote import Quote
+from ..schemas.quote import QuoteRead
+
+@router.get("/", response_model=List[QuoteRead])
+def list_quotes(skip: int = 0, limit: int = 50, session: Session = Depends(get_session)):
+    return session.exec(select(Quote).offset(skip).limit(limit)).all()
+# --- End added section ---
+

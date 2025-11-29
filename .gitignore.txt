@@ -1,0 +1,10 @@
+.gitignore
+.venv/
+__pycache__/
+*.pyc
+.env
+.env.*
+.DS_Store
+out.html
+.cache/
+coverage/

@@ -1,0 +1,13 @@
+{
+  "customer_name": "",
+  "job_summary": "",
+  "lines": {
+    "kind": "",
+    "unit_price_sek": 0,
+    "description": "",
+    "ref": null,
+    "qty": 0
+  },
+  "customer_email": null,
+  "apply_rot": false
+}

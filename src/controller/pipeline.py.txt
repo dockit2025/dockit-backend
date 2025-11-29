@@ -1,0 +1,13 @@
+pipeline.py
+from typing import Dict
+from src.core.render import render_offer
+from src.core.cleanup import cleanup
+from src.core.validate import validate
+
+def run_pipeline(offer: Dict, template_path: str) -> Dict:
+    """Minimal pipeline (MERGE/MATERIAL kan liggga före i din app).
+       Här: render → cleanup → validate."""
+    result = render_offer(offer, template_path)
+    html = cleanup(result["html"])
+    report = validate(html)
+    return {"html": html, "totals": result["totals"], "validator_report": report}

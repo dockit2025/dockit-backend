@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Offer JSON",
+  "type": "object",
+  "required": ["supplier","client","project","pricing","material","labor"],
+  "properties": {
+    "supplier": {
+      "type": "object",
+      "required": ["name","street","zip_city","orgno","email"],
+      "properties": {
+        "name": {"type":"string"},
+        "street": {"type":"string"},
+        "zip_city": {"type":"string"},
+        "orgno": {"type":"string","pattern":"^\\d{6,}$"},
+        "email": {"type":"string"}
+      }
+    },
+    "client": { "$ref": "#/properties/supplier" },
+    "project": {
+      "type": "object",
+      "required": ["id","title","valid_until","date"],
+      "properties": {
+        "id": {"type":"string"},
+        "title": {"type":"string"},
+        "valid_until": {"type":"string"},
+        "date": {"type":"string"}
+      }
+    },
+    "pricing": {
+      "type": "object",
+      "required": ["labor_rate","vat_rate"],
+      "properties": {
+        "labor_rate": {"type":"number"},
+        "vat_rate": {"type":"number"}
+      }
+    },
+    "material": {
+      "type": "array",
+      "items": {
+        "type":"object",
+        "required": ["sku","name","unit","qty","unit_price","supplier"],
+        "properties": {
+          "sku":{"type":"string"},
+          "name":{"type":"string"},
+          "unit":{"type":"string"},
+          "qty":{"type":"number"},
+          "unit_price":{"type":"number"},
+          "supplier":{"type":"string"}
+        }
+      }
+    },
+    "labor": {
+      "type": "array",
+      "items": {
+        "type":"object",
+        "required": ["arbetsmoment","moment","underlag","unit","qty","time_per_unit"],
+        "properties": {
+          "arbetsmoment":{"type":"string"},
+          "moment":{"type":"string"},
+          "underlag":{"type":"string"},
+          "unit":{"type":"string"},
+          "qty":{"type":"number"},
+          "time_per_unit":{"type":"number"},
+          "time_total":{"type":["number","null"]},
+          "notes":{"type":"string"}
+        }
+      }
+    },
+    "notes": {
+      "type": "object",
+      "properties": { "terms": {"type":"string"} }
+    }
+  }
+}

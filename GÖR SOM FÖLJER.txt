@@ -1,0 +1,37 @@
+GÖR SOM FÖLJER:
+
+
+Starta Python 
+python
+
+Avsluta Python
+exit()
+
+Starta Backend:
+cd D:\dockit-ai
+.\.venv\Scripts\Activate.ps1
+
+
+Starta server:
+uvicorn src.server.main:app --reload --host 127.0.0.1 --port 8000
+
+Starta om server:
+uvicorn src.server.main:app --reload
+
+
+Testa GPT: 
+python D:\dockit-ai\src\services\task_suggestions_review.py --gpt
+
+
+API Nyckel
+
+$env:OPENAI_API_KEY = "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"
+
+
+
+setx OPENAI_API_KEY "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"
+
+
+
+$env:OPENAI_API_KEY = "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"
+python -c "import os; print('OPENAI_API_KEY i Python nu:', os.getenv('OPENAI_API_KEY'))"

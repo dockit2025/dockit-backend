@@ -1,0 +1,333 @@
+# file: knowledge/dockit/dockit_custom_mapping.yaml
+# Beskrivning:
+#   Hög-nivå "kundvänliga" arbetsmoment som kan kopplas mot:
+#     - ATL (Del 7) via ATLLoader + atl_mapping.yaml, eller
+#     - manuella tider där ATL saknar relevanta rader.
+#
+# Struktur per task:
+#   tasks:
+#     some_task_id:
+#       label: "Synlig text"
+#       category: "fri kategorietikett"
+#       patterns:                # fraser som elektriker säger
+#         - "..."
+#       time_source: "atl" | "manual"
+#       atl_refs:                # används när time_source == "atl"
+#         - mapping_key: "..."   # nyckel som finns i atl_mapping.yaml
+#           # alternativt: search_text: "fri söksträng mot ATL"
+#           # variant: 0        # valfritt, om vi vill låsa till viss variant
+#           # top_k: 5          # valfritt, annars används default
+#       manual_time_minutes_per_unit: 60   # endast när time_source == "manual"
+#       pricing_source: "manual" | "pricelist"
+#       material_suggestions:
+#         - "sökterm mot prislista"
+#       notes: "Fri kommentar"
+
+version: 0.2
+description: "Dockit custom mapping för vanliga lägenhetsjobb (service/installation)"
+
+tasks:
+
+  tasks:
+
+  # ---------------------------------------------------------
+  # KÖK – SPIS / UGN / HÄLL
+  # ---------------------------------------------------------
+
+  installera_spis_ugn:
+    label: "Installera spis/ugn"
+    category: "kok"
+    patterns:
+      - "installera spis"
+      - "installera ugn"
+      - "ansluta spis"
+      - "ansluta ugn"
+      - "koppla in spis"
+      - "koppla in ugn"
+      - "byta spis"
+      - "byta ugn"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 60
+    pricing_source: "manual"
+    material_suggestions:
+      - "anslutningskabel spis"
+    notes: "Elanslutning eller byte av spis/ugn. Förutsätter framdragen grupp."
+
+  byta_spis_ugn:
+    label: "Byta spis/ugn"
+    category: "kok"
+    patterns:
+      - "byta spis"
+      - "byta ugn"
+      - "ersätta spis"
+      - "ersätta ugn"
+      - "ta bort gammal spis och sätta dit ny"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 45
+    pricing_source: "manual"
+    material_suggestions:
+      - "anslutningskabel spis"
+    notes: "Byte av spis/ugn på befintlig anslutning."
+
+  installera_hall:
+    label: "Installera häll"
+    category: "kok"
+    patterns:
+      - "installera häll"
+      - "installera induktionshäll"
+      - "koppla in häll"
+      - "byta häll"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 60
+    pricing_source: "manual"
+    material_suggestions:
+      - "anslutningskabel häll"
+    notes: "Installation eller byte av häll, separat från ugn."
+
+  # ---------------------------------------------------------
+  # KÖK – DISKMASKIN / ANDRA VITVAROR
+  # ---------------------------------------------------------
+
+  installera_diskmaskin:
+    label: "Installera diskmaskin"
+    category: "kok"
+    patterns:
+      - "installera diskmaskin"
+      - "ansluta diskmaskin"
+      - "koppla in diskmaskin"
+      - "byta diskmaskin"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 60
+    pricing_source: "manual"
+    material_suggestions:
+      - "anslutningskabel diskmaskin"
+    notes: "Elanslutning/byte av diskmaskin. Vatten/avlopp hanteras av VVS."
+
+  installera_inbyggd_mikro:
+    label: "Installera inbyggd mikro"
+    category: "kok"
+    patterns:
+      - "installera inbyggd mikro"
+      - "koppla in inbyggd mikro"
+      - "montera inbyggd mikrovågsugn"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 45
+    pricing_source: "manual"
+    material_suggestions:
+      - "anslutningskabel mikro"
+    notes: "Installation av inbyggd mikrovågsugn i kök."
+
+  installera_uttag_for_kyl_frys:
+    label: "Installera uttag för kyl/frys"
+    category: "kok"
+    patterns:
+      - "installera uttag för kyl"
+      - "installera uttag för frys"
+      - "nytt uttag bakom kyl och frys"
+      - "eluttag till kyl och frys"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 40
+    pricing_source: "manual"
+    material_suggestions:
+      - "vägguttag"
+    notes: "Installation av uttag för kyl/frys i kök."
+
+  # ---------------------------------------------------------
+  # KÖK – KÖKSFLÄKT / SPISFLÄKT
+  # ---------------------------------------------------------
+
+  installera_kokflakt:
+    label: "Installera köksfläkt"
+    category: "kok"
+    patterns:
+      - "installera köksfläkt"
+      - "montera köksfläkt"
+      - "sätta upp köksfläkt"
+      - "koppla in köksfläkt"
+      - "byta köksfläkt"
+      - "byta spisfläkt"
+      - "installera spisfläkt"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 60
+    pricing_source: "manual"
+    material_suggestions:
+      - "köksfläkt"
+    notes: "Installation eller byte av köksfläkt/spisfläkt, elanslutning ingår."
+
+  installera_kolfilterflakt:
+    label: "Installera kolfilterfläkt"
+    category: "kok"
+    patterns:
+      - "installera kolfilterfläkt"
+      - "montera kolfilterfläkt"
+      - "byta till kolfilterfläkt"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 60
+    pricing_source: "manual"
+    material_suggestions:
+      - "kolfilterfläkt"
+    notes: "Installation av kolfilterfläkt där ingen kanal används."
+
+  # ---------------------------------------------------------
+  # KÖK – UTTAG ÖVER BÄNK / KÖKSBÄNK
+  # ---------------------------------------------------------
+
+  installera_uttagsrad_kok:
+    label: "Installera uttagsrad ovan bänkskiva"
+    category: "kok"
+    patterns:
+      - "installera uttag ovan bänkskiva"
+      - "sätta upp uttagsrad i köket"
+      - "fler uttag över köksbänken"
+      - "extra uttag över diskbänken"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 75
+    pricing_source: "manual"
+    material_suggestions:
+      - "vägguttag"
+      - "apparatdosor"
+      - "kabel"
+    notes: "Installation eller komplettering av uttagsrad ovan bänkskiva."
+
+  flytta_uttagsgrupp_kok:
+    label: "Flytta uttagsgrupp i kök"
+    category: "kok"
+    patterns:
+      - "flytta uttagen över bänken"
+      - "dra om uttag ovan bänkskiva"
+      - "flytta uttagsgrupp i köket"
+      - "justera placering av köksuttag"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 120
+    pricing_source: "manual"
+    material_suggestions:
+      - "kabel"
+      - "apparatdosor"
+      - "vägguttag"
+    notes: "Omflyttning/omdragning av uttag ovan bänkskiva i samband med köksrenovering."
+
+  installera_utanpasittande_uttagslist_kok:
+    label: "Installera utanpåliggande uttagslist i kök"
+    category: "kok"
+    patterns:
+      - "installera uttagslist i kök"
+      - "sätta upp utanpåliggande uttagsskena"
+      - "montera multibox ovan bänken"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 50
+    pricing_source: "manual"
+    material_suggestions:
+      - "uttagslist"
+      - "kabelkanal"
+    notes: "Installation av utanpåliggande uttagslist med synlig förläggning."
+
+  # ---------------------------------------------------------
+  # KÖK – ALLMÄN EL VID KÖKSRENOVERING
+  # ---------------------------------------------------------
+
+  forbereda_el_koksrenovering:
+    label: "Förbereda el inför köksrenovering"
+    category: "kok"
+    patterns:
+      - "förbereda el inför köksrenovering"
+      - "el inför köksrenovering"
+      - "förarbete el kök"
+      - "riva el i kök innan renovering"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 60
+    pricing_source: "manual"
+    material_suggestions: []
+    notes: "Frånkoppling, märkning och förberedelser inför köksrenovering."
+
+  nyinstallation_el_kok_renovering:
+    label: "Nyinstallation el i kök vid renovering"
+    category: "kok"
+    patterns:
+      - "dra ny el i köket"
+      - "ny elinstallation vid köksrenovering"
+      - "dra nya grupper i kök"
+      - "nya uttag och grupper i kök"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 180
+    pricing_source: "manual"
+    material_suggestions:
+      - "kabel"
+      - "apparatdosor"
+      - "vägguttag"
+    notes: "Övergripande nyinstallation av el i samband med större köksrenovering."
+
+  installera_matning_till_kok:
+    label: "Installera ny matning till kök"
+    category: "kok"
+    patterns:
+      - "dra ny matning till köket"
+      - "ny grupp till köket"
+      - "extra säkring till köket"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 90
+    pricing_source: "manual"
+    material_suggestions:
+      - "kabel"
+    notes: "Ny matning från central till kök, t.ex. för spis eller extra grupper."
+
+  # ---------------------------------------------------------
+  # KÖK – FELSÖKNING
+  # ---------------------------------------------------------
+
+  felsokning_koksuttag:
+    label: "Felsökning köksuttag"
+    category: "kok"
+    patterns:
+      - "uttag i köket fungerar inte"
+      - "köksuttag dött"
+      - "problem med uttag ovan bänkskiva"
+      - "kökets uttag funkar inte"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 45
+    pricing_source: "manual"
+    material_suggestions: []
+    notes: "Felsökning av uttag i kök, ofta belastnings- eller fuktrelaterat."
+
+  felsokning_kok_belysning:
+    label: "Felsökning köksbelysning"
+    category: "kok"
+    patterns:
+      - "köksbelysningen fungerar inte"
+      - "lamporna i köket funkar inte"
+      - "belysning över bänken är död"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 45
+    pricing_source: "manual"
+    material_suggestions: []
+    notes: "Felsökning av belysning i kök, inkl. underskåpsbelysning."
+
+  felsokning_vitvaror_kok:
+    label: "Felsökning vitvaror i kök"
+    category: "kok"
+    patterns:
+      - "fel på vitvaror i köket"
+      - "köksmaskiner får ingen ström"
+      - "spis och diskmaskin fungerar inte"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 60
+    pricing_source: "manual"
+    material_suggestions: []
+    notes: "Övergripande felsökning av matningar till vitvaror i kök."
+

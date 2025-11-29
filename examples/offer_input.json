@@ -1,0 +1,15 @@
+{
+  "supplier": { "name": "Dockit El & Data AB", "street": "Industrivägen 10", "zip_city": "417 05 Göteborg", "orgno": "5599991234", "email": "info@dockit.se" },
+  "client":   { "name": "Poseidon AB", "street": "Exempelgatan 1", "zip_city": "414 51 Göteborg", "orgno": "5560342462", "email": "kontakt@poseidon.se" },
+  "project":  { "id": "2025–041", "title": "Belysning och uttag – Majorna", "valid_until": "2025–12–01", "date": "2025–11–03" },
+  "pricing":  { "labor_rate": 920.0, "vat_rate": 0.25 },
+  "material": [
+    { "sku": "DOSAKAPS", "name": "Kapslad dosa IP54", "unit": "st", "qty": 2, "unit_price": 89.5, "supplier": "Storel" },
+    { "sku": "EKLK-3G1.5", "name": "Kabel 3G1.5", "unit": "m", "qty": 12, "unit_price": 18.9, "supplier": "Storel" }
+  ],
+  "labor": [
+    { "arbetsmoment": "Kapslad dosa", "moment": "Montering", "underlag": "IP54", "unit": "st", "qty": 2, "time_per_unit": 0.40, "time_total": 0.80, "notes": "" },
+    { "arbetsmoment": "Installationskabel i rör", "moment": "Kabeldragning", "underlag": "Befintligt rör", "unit": "m", "qty": 12, "time_per_unit": 0.08, "time_total": 0.96, "notes": "" }
+  ],
+  "notes": { "terms": "Standardvillkor enligt AB 04/ABT 06 om ej annat avtalats." }
+}

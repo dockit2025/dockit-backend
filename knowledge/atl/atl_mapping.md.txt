@@ -1,0 +1,88 @@
+# ATL – kolumnmapping, prioritet och dataintegritet
+
+## Kolumn per underlag/variant
+| Underlag/variant                                              | Kolumn |
+|---------------------------------------------------------------|:------:|
+| Installationsrör                                              |  -3    |
+| Hylla/Stege inkl. naj                                         |   0    |
+| Betong/Tegel/Lättbetong/Stål ≤5 mm inkl. borrning             |  -1    |
+| Trä / strips / clips / stål ≤3 mm / bultpistol (exkl. borrn)  |  -2    |
+| Ankarskena h/v med polklammer / strips                        |  -4    |
+| Bärlina / blockerad kanal / kabelskyddsrör                    |  -5    |
+| Installationskanal                                            |  -6    |
+| Jord / öppen kanal – med kabelspel                            |  -8    |
+| Jord / öppen kanal – utan kabelspel                           |  -9    |
+
+---
+
+## Prioritetsregler
+- **Kabel i rör** (fraser: ”i rör”, ”i installationsrör”, ”dragning i rör”) ⇒ använd kolumn **−3** oavsett väggunderlag.  
+- **Övriga moment** (t.ex. dosor, fästen, boxar) ⇒ använd kolumn baserat på väggunderlag (t.ex. betong, trä osv).  
+- Om både ”i rör” och ett väggunderlag nämns:
+  - **Kabel** = −3
+  - **Övrigt material / dosor** = enligt väggunderlaget.
+- Om posten har ett eget fält `Tid` i CSV ⇒ använd det (överstyr kolumn).
+- **Tid beräkning:** `Tid = tid_per_enhet × kvantitet`. Avrunda till två decimaler.
+- Alla tidsvärden returneras numeriskt, **inte formatterat**.
+
+---
+
+## Grundregel för radval och “Arbetsmoment”
+- När en ATL-rad väljs från **Del7_ATL_Total**:
+  - Följande fält ska bäras med oförändrat till offert-raden:
+    - `Arbetsmoment` (OBLIGATORISKT – ska visas i offerten)
+    - `Moment/Typ/Sort`
+    - `Underlag/Variant`
+    - `Enhet`
+    - `Tid` (från vald kolumn)
+  - **Inga rubriker får genereras av modellen – endast hämtas från ATL-filen.**
+  - Om flera rader matchar samma moment:
+    - Välj den som har exakt match i både `Grupp` och `Rad`.
+    - Om osäkerhet kvarstår → lämna raden tom och sätt `notes.validation = "Ambiguös ATL-rad"` i JSON.
+- **Primär nyckel för visning = Arbetsmoment.**
+- Intern mappning får använda `(Grupp, Rad)` men dessa ska inte visas i offert.
+
+---
+
+## Särfall: Kabel “i rör”
+- Om beställningen anger kabeldragning i rör:
+  - Välj ATL-post för installations-/anslutningskabel.
+  - Använd kolumn **−3** (”i rör”).
+  - Övriga underlag följer sina respektive standardregler.
+
+---
+
+## Ej tidsatta rader från andra ATL-delar
+- Om ett moment inte finns i Del 7 → hantera enligt följande:
+  1. **Visa raden** (så kunden ser att momentet ingår)
+  2. Lägg till texten: *"Ej tidsatt i Del 7 – tidsätts i annan ATL-del"*
+  3. Tid sätts till `0.00`
+- Använd detta som standard för tydlighet mot kund.
+
+---
+
+## Snabbkontroller (exempel)
+- “120 m EXQJ 3×2,5 i rör”  
+  ⇒ Kolumn −3, tid = `0,03 h/m × 120 m = 3,60 h` (Grupp 510, rad 10)
+- “6 st kapslade dosor 4–6 mm² på betongvägg”  
+  ⇒ Kolumn −1, tid = enligt betong/tegel-regel
+
+---
+
+## Datakvalitet och validering
+- Alla rader måste innehålla:
+  - `Arbetsmoment`
+  - `Tid` (numeriskt)
+  - `Enhet`
+- Om `Tid` saknas → skriv `Tid = 0,00` och flagga raden med `notes.missing_time = true`.
+- Om `Arbetsmoment` saknas → exkludera raden helt.
+- Alla tidsvärden avrundas till 2 decimaler.
+
+---
+
+## Sammanfattning
+- Välj kolumn enligt tabellen ovan.
+- “Kabel i rör” = −3 har alltid prioritet.
+- Behåll `Arbetsmoment` exakt som i ATL-filen.
+- Returnera tid numeriskt (2 decimaler).
+- Felaktiga eller tvetydiga poster markeras, inte gissas fram.

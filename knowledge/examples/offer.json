@@ -1,0 +1,39 @@
+{
+  "meta": {
+    "offer_no": "OF-2025-001",
+    "date": "2025-11-02",
+    "valid_until": "2025-12-02",
+    "project": "Kontor – uttag & takdosor",
+    "hourly_rate": 620.0,
+    "currency": "SEK"
+  },
+  "material": [
+    {"article":"2424811","name":"VÄGGUTTAG UI 432-6+RU (dubbelt)","unit":"ST","qty":4.00,"unit_price":154.00,"sum":616.00,"supplier":"Storel"},
+    {"article":"1426101","name":"APPARATDOSA ENKELGIPS","unit":"ST","qty":4.00,"unit_price":25.75,"sum":103.00,"supplier":"Storel"},
+    {"article":"1416742","name":"VP-RÖR 16MM ULTRA 320N HF 3M","unit":"M","qty":50.00,"unit_price":32.00,"sum":1600.00,"supplier":"Storel"},
+    {"article":"400023","name":"FK 1,5 SVART","unit":"M","qty":50.00,"unit_price":2.50,"sum":125.00,"supplier":"Storel"},
+    {"article":"400032","name":"FK 1,5 RÖD","unit":"M","qty":50.00,"unit_price":6.30,"sum":315.00,"supplier":"Storel"},
+    {"article":"400042","name":"FK 1,5 GRÅ","unit":"M","qty":50.00,"unit_price":6.30,"sum":315.00,"supplier":"Storel"},
+    {"article":"400092","name":"FK 1,5 GUL/GRÖN","unit":"M","qty":50.00,"unit_price":6.30,"sum":315.00,"supplier":"Storel"},
+    {"article":"","name":"FK 1,5 BLÅ","unit":"M","qty":50.00,"unit_price":6.30,"sum":315.00,"supplier":"Storel"},
+    {"article":"1739479","name":"TAKDOSA UTANPÅ VIT","unit":"ST","qty":2.00,"unit_price":206.00,"sum":412.00,"supplier":"Storel"},
+    {"article":"1437581","name":"KOPPLINGSDOSA VIT IP54 2K-12","unit":"ST","qty":1.00,"unit_price":23.20,"sum":23.20,"supplier":"Storel"},
+    {"article":"7016211","name":"ARMATURHUS LINEAR 1200 mm","unit":"ST","qty":2.00,"unit_price":468.00,"sum":936.00,"supplier":"Storel"}
+  ],
+  "labor": [
+    {"arbetsmoment":1,"desc":"Infällda rör (VP 16–20 mm)","underlag":"Gipsvägg, infällt","unit":"m","hours":3.00,"rate":620.00,"sum":1860.00},
+    {"arbetsmoment":2,"desc":"Kabeldragning i rör, ≤2,5 mm²","underlag":"i rör (regel −3)","unit":"m","hours":1.50,"rate":620.00,"sum":930.00},
+    {"arbetsmoment":3,"desc":"Montering takdosa (utanpå på betong)","underlag":"Betongtak","unit":"st","hours":0.72,"rate":620.00,"sum":446.40},
+    {"arbetsmoment":4,"desc":"Montering kopplingsdosa","underlag":"Utanpå, ovan undertak","unit":"st","hours":0.22,"rate":620.00,"sum":136.40},
+    {"arbetsmoment":5,"desc":"Apparatdosor (4 st) – montera & ansluta","underlag":"Infällt i gips","unit":"st","hours":1.08,"rate":620.00,"sum":669.60},
+    {"arbetsmoment":6,"desc":"Vägguttag (4 st) – anslutning","underlag":"Snabbkoppling","unit":"st","hours":0.52,"rate":620.00,"sum":322.40},
+    {"arbetsmoment":7,"desc":"Montering av LED-armatur (2 st)","underlag":"Pendlad","unit":"st","hours":0.70,"rate":620.00,"sum":434.00}
+  ],
+  "totals": {
+    "material": 5075.20,
+    "labor": 4798.80,
+    "subtotal": 9874.00,
+    "vat": 2468.50,
+    "total": 12342.50
+  }
+}

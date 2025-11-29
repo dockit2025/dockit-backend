@@ -1,0 +1,685 @@
+{
+  "suggested_tasks": [
+    {
+      "task_ref": "LAGGA-KABELKANAL",
+      "title_sv": "Lägga kabelkanal på vägg",
+      "description_sv": "Montering av kabelkanal på vägg för dragning av elkabel, inklusive kapning och fastsättning.",
+      "category": "ror_och_vp",
+      "estimated_hours_per_unit": 0.15,
+      "quantity_type": "per_meter",
+      "default_unit": "m",
+      "patterns": [
+        "dra kanal",
+        "lägga kabelkanal",
+        "montera kabelkanal",
+        "sätta upp kanal på vägg"
+      ],
+      "default_materials": [
+        {
+          "material_ref_hint": "KABELKANAL-VIT",
+          "qty_per_unit": 1,
+          "unit": "m",
+          "note": "Kabelkanal plast vit"
+        },
+        {
+          "material_ref_hint": "SKRUV-PLUGG-VAGG",
+          "qty_per_unit": 2,
+          "unit": "st",
+          "note": "Fästdon för kabelkanal"
+        }
+      ],
+      "room_type_hint": "hall",
+      "confidence": 0.95,
+      "notes_internal": "Standardmoment för kabelkanal, vanligt i hall och andra rum.",
+      "source_segment_id": "missingseg_20251121T202909743431Z_0001",
+      "source_segment_text": "ska fixa allt i hallen: dra kanal 3 meter"
+    },
+    {
+      "task_ref": "LAGGA-VP-ROR",
+      "title_sv": "Lägga VP-rör på vägg eller i tak",
+      "description_sv": "Montering av VP-rör för elinstallation, inklusive kapning och fastsättning på vägg eller i tak.",
+      "category": "ror_och_vp",
+      "estimated_hours_per_unit": 0.15,
+      "quantity_type": "per_meter",
+      "default_unit": "m",
+      "patterns": [
+        "lägga vp rör",
+        "dra vp rör",
+        "montera vp rör",
+        "ett vp rör"
+      ],
+      "default_materials": [
+        {
+          "material_ref_hint": "VP-ROR-16MM",
+          "qty_per_unit": 1,
+          "unit": "m",
+          "note": "VP-rör 16 mm"
+        },
+        {
+          "material_ref_hint": "SKRUV-PLUGG-VAGG",
+          "qty_per_unit": 2,
+          "unit": "st",
+          "note": "Fästdon för VP-rör"
+        }
+      ],
+      "room_type_hint": null,
+      "confidence": 0.95,
+      "notes_internal": "Standardmoment för VP-rör, täcker både synligt och dolt montage.",
+      "source_segment_id": "missingseg_20251121T202909744879Z_0002",
+      "source_segment_text": "ett vp rör 6 meter"
+    },
+    {
+      "task_ref": "INSTALLERA-VAGGUTTAG-INFALLT",
+      "title_sv": "Installera infällt vägguttag",
+      "description_sv": "Installation av nytt infällt jordat vägguttag, inklusive montering och inkoppling mot befintlig matning.",
+      "category": "brytare_och_uttag",
+      "estimated_hours_per_unit": 0.5,
+      "quantity_type": "per_unit",
+      "default_unit": "st",
+      "patterns": [
+        "sätta upp nytt vägguttag",
+        "installera vägguttag",
+        "montera uttag",
+        "sätta upp uttag bakom soffa",
+        "extra uttag vid dörren"
+      ],
+      "default_materials": [
+        {
+          "material_ref_hint": "VAGGUTTAG-INF-JORD",
+          "qty_per_unit": 1,
+          "unit": "st",
+          "note": "Infällt jordat vägguttag"
+        },
+        {
+          "material_ref_hint": "APPARATDOSA-INF",
+          "qty_per_unit": 1,
+          "unit": "st",
+          "note": "Apparatdosa för infällt montage"
+        }
+      ],
+      "room_type_hint": null,
+      "confidence": 0.95,
+      "notes_internal": "Standardmoment för infällt vägguttag, täcker flera varianter.",
+      "source_segment_id": "missingseg_20251121T204424163096Z_0003",
+      "source_segment_text": "ska sätta upp två nya uttag bakom soffan och ett extra vid dörren"
+    },
+    {
+      "task_ref": "INSTALLERA-VAGGUTTAG-INFALLT",
+      "title_sv": "Installera infällt vägguttag",
+      "description_sv": "Installation av nytt infällt jordat vägguttag, inklusive montering och inkoppling mot befintlig matning.",
+      "category": "brytare_och_uttag",
+      "estimated_hours_per_unit": 0.5,
+      "quantity_type": "per_unit",
+      "default_unit": "st",
+      "patterns": [
+        "montera uttag",
+        "installera vägguttag",
+        "sätta upp nytt vägguttag"
+      ],
+      "default_materials": [
+        {
+          "material_ref_hint": "VAGGUTTAG-INF-JORD",
+          "qty_per_unit": 1,
+          "unit": "st",
+          "note": "Infällt jordat vägguttag"
+        },
+        {
+          "material_ref_hint": "APPARATDOSA-INF",
+          "qty_per_unit": 1,
+          "unit": "st",
+          "note": "Apparatdosa för infällt montage"
+        }
+      ],
+      "room_type_hint": null,
+      "confidence": 0.95,
+      "notes_internal": "Standardmoment för infällt vägguttag.",
+      "source_segment_id": "missingseg_20251123T113732283137Z_0004",
+      "source_segment_text": "montera ett uttag"
+    },
+    {
+      "task_ref": "LAGGA-KABELKANAL",
+      "title_sv": "Lägga kabelkanal på vägg",
+      "description_sv": "Montering av kabelkanal på vägg för dragning av elkabel, inklusive kapning och fastsättning.",
+      "category": "ror_och_vp",
+      "estimated_hours_per_unit": 0.15,
+      "quantity_type": "per_meter",
+      "default_unit": "m",
+      "patterns": [
+        "lägga list till vägguttag med kabel",
+        "lägga kabelkanal till nytt vägguttag",
+        "montera kabelkanal till uttag"
+      ],
+      "default_materials": [
+        {
+          "material_ref_hint": "KABELKANAL-VIT",
+          "qty_per_unit": 1,
+          "unit": "m",
+          "note": "Kabelkanal plast vit"
+        },
+        {
+          "material_ref_hint": "SKRUV-PLUGG-VAGG",
+          "qty_per_unit": 2,
+          "unit": "st",
+          "note": "Fästdon för kabelkanal"
+        }
+      ],
+      "room_type_hint": null,
+      "confidence": 0.9,
+      "notes_internal": "Standardmoment för kabelkanal till nytt uttag.",
+      "source_segment_id": "missingseg_20251123T122004095971Z_0005",
+      "source_segment_text": "lägga 5m list till ett nytt vägguttag med kabel"
+    },
+    {
+      "task_ref": "INSTALLERA-SPOTLIGHT-TAK",
+      "title_sv": "Installera infälld spotlight i tak",
+      "description_sv": "Montering och inkoppling av infälld spotlight i innertak, inklusive håltagning och anslutning till befintlig el.",
+      "category": "belysning",
+      "estimated_hours_per_unit": 0.5,
+      "quantity_type": "per_unit",
+      "default_unit": "st",
+      "patterns": [
+        "installera spotlights i vardagsrum",
+        "montera spottar i tak",
+        "sätta in spotlights"
+      ],
+      "default_materials": [
+        {
+          "material_ref_hint": "SPOTLIGHT-INF-TAK",
+          "qty_per_unit": 1,
+          "unit": "st",
+          "note": "Infälld spotlight för tak"
+        },
+        {
+          "material_ref_hint": "KOPPLINGSDOSA-TAK",
+          "qty_per_unit": 0.2,
+          "unit": "st",
+          "note": "Kopplingsdosa för anslutning"
+        }
+      ],
+      "room_type_hint": "vardagsrum",
+      "confidence": 0.9,
+      "notes_internal": "Standardmoment för infällda spotlights i tak.",
+      "source_segment_id": "missingseg_20251123T122004097474Z_0006",
+      "source_segment_text": "4 spottar ska installeras i vardagsrummet och en dimmer samt en kron"
+    },
+    {
+      "task_ref": "INSTALLERA-DIMMER",
+      "title_sv": "Installera dimmer",
+      "description_sv": "Montering och inkoppling av dimmer för styrning av belysning.",
+      "category": "belysning",
+      "estimated_hours_per_unit": 0.5,
+      "quantity_type": "per_unit",
+      "default_unit": "st",
+      "patterns": [
+        "installera dimmer",
+        "montera dimmer",
+        "sätta in dimmer"
+      ],
+      "default_materials": [
+        {
+          "material_ref_hint": "DIMMER-INF",
+          "qty_per_unit": 1,
+          "unit": "st",
+          "note": "Infälld dimmer"
+        }
+      ],
+      "room_type_hint": "vardagsrum",
+      "confidence": 0.9,
+      "notes_internal": "Standardmoment för dimmerinstallation.",
+      "source_segment_id": "missingseg_20251123T122004097474Z_0006",
+      "source_segment_text": "4 spottar ska installeras i vardagsrummet och en dimmer samt en kron"
+    },
+    {
+      "task_ref": "INSTALLERA-KRONBRYTARE",
+      "title_sv": "Installera kronbrytare",
+      "description_sv": "Montering och inkoppling av kronbrytare för styrning av två ljuskällor.",
+      "category": "belysning",
+      "estimated_hours_per_unit": 0.5,
+      "quantity_type": "per_unit",
+      "default_unit": "st",
+      "patterns": [
+        "installera kronbrytare",
+        "montera kronbrytare",
+        "sätta in kron"
+      ],
+      "default_materials": [
+        {
+          "material_ref_hint": "KRONBRYTARE-INF",
+          "qty_per_unit": 1,
+          "unit": "st",
+          "note": "Infälld kronbrytare"
+        }
+      ],
+      "room_type_hint": "vardagsrum",
+      "confidence": 0.9,
+      "notes_internal": "Standardmoment för kronbrytare.",
+      "source_segment_id": "missingseg_20251123T122004097474Z_0006",
+      "source_segment_text": "4 spottar ska installeras i vardagsrummet och en dimmer samt en kron"
+    },
+    {
+      "task_ref": "LAGGA-KABELKANAL",
+      "title_sv": "Lägga kabelkanal på vägg",
+      "description_sv": "Montering av kabelkanal på vägg för dragning av elkabel, inklusive kapning och fastsättning.",
+      "category": "ror_och_vp",
+      "estimated_hours_per_unit": 0.15,
+      "quantity_type": "per_meter",
+      "default_unit": "m",
+      "patterns": [
+        "lägga list till vägguttag med kabel",
+        "lägga kabelkanal till nytt vägguttag",
+        "montera kabelkanal till uttag"
+      ],
+      "default_materials": [
+        {
+          "material_ref_hint": "KABELKANAL-VIT",
+          "qty_per_unit": 1,
+          "unit": "m",
+          "note": "Kabelkanal plast vit"
+        },
+        {
+          "material_ref_hint": "SKRUV-PLUGG-VAGG",
+          "qty_per_unit": 2,
+          "unit": "st",
+          "note": "Fästdon för kabelkanal"
+        }
+      ],
+      "room_type_hint": null,
+      "confidence": 0.9,
+      "notes_internal": "Standardmoment för kabelkanal till nytt uttag.",
+      "source_segment_id": "missingseg_20251123T123148373497Z_0007",
+      "source_segment_text": "lägga 5m list till ett nytt vägguttag med kabel"
+    },
+    {
+      "task_ref": "INSTALLERA-SPOTLIGHT-TAK",
+      "title_sv": "Installera infälld spotlight i tak",
+      "description_sv": "Montering och inkoppling av infälld spotlight i innertak, inklusive håltagning och anslutning till befintlig el.",
+      "category": "belysning",
+      "estimated_hours_per_unit": 0.5,
+      "quantity_type": "per_unit",
+      "default_unit": "st",
+      "patterns": [
+        "installera spotlights i vardagsrum",
+        "montera spottar i tak",
+        "sätta in spotlights"
+      ],
+      "default_materials": [
+        {
+          "material_ref_hint": "SPOTLIGHT-INF-TAK",
+          "qty_per_unit": 1,
+          "unit": "st",
+          "note": "Infälld spotlight för tak"
+        },
+        {
+          "material_ref_hint": "KOPPLINGSDOSA-TAK",
+          "qty_per_unit": 0.2,
+          "unit": "st",
+          "note": "Kopplingsdosa för anslutning"
+        }
+      ],
+      "room_type_hint": "vardagsrum",
+      "confidence": 0.9,
+      "notes_internal": "Standardmoment för infällda spotlights i tak.",
+      "source_segment_id": "missingseg_20251123T123148375907Z_0008",
+      "source_segment_text": "4 spottar ska installeras i vardagsrummet och en dimmer samt en kron"
+    },
+    {
+      "task_ref": "LAGGA-KABELKANAL",
+      "title_sv": "Lägga kabelkanal på vägg",
+      "description_sv": "Montering av kabelkanal på vägg för dragning av elkabel, inklusive kapning och fastsättning.",
+      "category": "ror_och_vp",
+      "estimated_hours_per_unit": 0.15,
+      "quantity_type": "per_meter",
+      "default_unit": "m",
+      "patterns": [
+        "lägga list till vägguttag med kabel",
+        "lägga kabelkanal till nytt vägguttag",
+        "montera kabelkanal till uttag"
+      ],
+      "default_materials": [
+        {
+          "material_ref_hint": "KABELKANAL-VIT",
+          "qty_per_unit": 1,
+          "unit": "m",
+          "note": "Kabelkanal plast vit"
+        },
+        {
+          "material_ref_hint": "SKRUV-PLUGG-VAGG",
+          "qty_per_unit": 2,
+          "unit": "st",
+          "note": "Fästdon för kabelkanal"
+        }
+      ],
+      "room_type_hint": null,
+      "confidence": 0.9,
+      "notes_internal": "Standardmoment för kabelkanal till nytt uttag.",
+      "source_segment_id": "missingseg_20251123T123326987869Z_0009",
+      "source_segment_text": "lägga 5m list till ett nytt vägguttag med kabel"
+    },
+    {
+      "task_ref": "INSTALLERA-SPOTLIGHT-TAK",
+      "title_sv": "Installera infälld spotlight i tak",
+      "description_sv": "Montering och inkoppling av infälld spotlight i innertak, inklusive håltagning och anslutning till befintlig el.",
+      "category": "belysning",
+      "estimated_hours_per_unit": 0.5,
+      "quantity_type": "per_unit",
+      "default_unit": "st",
+      "patterns": [
+        "installera spotlights i vardagsrum",
+        "montera spottar i tak",
+        "sätta in spotlights"
+      ],
+      "default_materials": [
+        {
+          "material_ref_hint": "SPOTLIGHT-INF-TAK",
+          "qty_per_unit": 1,
+          "unit": "st",
+          "note": "Infälld spotlight för tak"
+        },
+        {
+          "material_ref_hint": "KOPPLINGSDOSA-TAK",
+          "qty_per_unit": 0.2,
+          "unit": "st",
+          "note": "Kopplingsdosa för anslutning"
+        }
+      ],
+      "room_type_hint": "vardagsrum",
+      "confidence": 0.9,
+      "notes_internal": "Standardmoment för infällda spotlights i tak.",
+      "source_segment_id": "missingseg_20251123T123326989889Z_0010",
+      "source_segment_text": "4 spottar ska installeras i vardagsrummet och en dimmer samt en kron"
+    },
+    {
+      "task_ref": "LAGGA-KABELKANAL",
+      "title_sv": "Lägga kabelkanal på vägg",
+      "description_sv": "Montering av kabelkanal på vägg för dragning av elkabel, inklusive kapning och fastsättning.",
+      "category": "ror_och_vp",
+      "estimated_hours_per_unit": 0.15,
+      "quantity_type": "per_meter",
+      "default_unit": "m",
+      "patterns": [
+        "lägga list till vägguttag med kabel",
+        "lägga kabelkanal till nytt vägguttag",
+        "montera kabelkanal till uttag"
+      ],
+      "default_materials": [
+        {
+          "material_ref_hint": "KABELKANAL-VIT",
+          "qty_per_unit": 1,
+          "unit": "m",
+          "note": "Kabelkanal plast vit"
+        },
+        {
+          "material_ref_hint": "SKRUV-PLUGG-VAGG",
+          "qty_per_unit": 2,
+          "unit": "st",
+          "note": "Fästdon för kabelkanal"
+        }
+      ],
+      "room_type_hint": null,
+      "confidence": 0.9,
+      "notes_internal": "Standardmoment för kabelkanal till nytt uttag.",
+      "source_segment_id": "missingseg_20251123T142906026328Z_0011",
+      "source_segment_text": "lägga 5m list till ett nytt vägguttag med kabel"
+    },
+    {
+      "task_ref": "INSTALLERA-SPOTLIGHT-TAK",
+      "title_sv": "Installera infälld spotlight i tak",
+      "description_sv": "Montering och inkoppling av infälld spotlight i innertak, inklusive håltagning och anslutning till befintlig el.",
+      "category": "belysning",
+      "estimated_hours_per_unit": 0.5,
+      "quantity_type": "per_unit",
+      "default_unit": "st",
+      "patterns": [
+        "installera spotlights i vardagsrum",
+        "montera spottar i tak",
+        "sätta in spotlights"
+      ],
+      "default_materials": [
+        {
+          "material_ref_hint": "SPOTLIGHT-INF-TAK",
+          "qty_per_unit": 1,
+          "unit": "st",
+          "note": "Infälld spotlight för tak"
+        },
+        {
+          "material_ref_hint": "KOPPLINGSDOSA-TAK",
+          "qty_per_unit": 0.2,
+          "unit": "st",
+          "note": "Kopplingsdosa för anslutning"
+        }
+      ],
+      "room_type_hint": "vardagsrum",
+      "confidence": 0.9,
+      "notes_internal": "Standardmoment för infällda spotlights i tak.",
+      "source_segment_id": "missingseg_20251123T142906028334Z_0012",
+      "source_segment_text": "4 spottar ska installeras i vardagsrummet och en dimmer samt en kron"
+    },
+    {
+      "task_ref": "DRA-VP-ROR-INFALLT",
+      "title_sv": "Dra VP-rör infällt i vägg eller tak",
+      "description_sv": "Dragning och infällt montage av VP-rör i vägg eller tak för elinstallation, inklusive fastsättning och kapning.",
+      "category": "ror_och_vp",
+      "estimated_hours_per_unit": 0.2,
+      "quantity_type": "per_meter",
+      "default_unit": "m",
+      "patterns": [
+        "dra vp rör infällt",
+        "dra vp rör till vägguttag",
+        "dra infällt vp rör"
+      ],
+      "default_materials": [
+        {
+          "material_ref_hint": "VP-ROR-16MM",
+          "qty_per_unit": 1,
+          "unit": "m",
+          "note": "VP-rör 16 mm"
+        }
+      ],
+      "room_type_hint": null,
+      "confidence": 0.95,
+      "notes_internal": "Standardmoment för infälld dragning av VP-rör.",
+      "source_segment_id": "missingseg_20251123T171545320428Z_0013",
+      "source_segment_text": "Dra 15 meter vp-rör infällt till tre nya vägguttag"
+    },
+    {
+      "task_ref": "INSTALLERA-NORMCENTRAL",
+      "title_sv": "Installera normcentral med jordfelsbrytare",
+      "description_sv": "Montering av ny normcentral inklusive installation av jordfelsbrytare och grundläggande inkoppling.",
+      "category": "ovrigt",
+      "estimated_hours_per_unit": 3.0,
+      "quantity_type": "per_unit",
+      "default_unit": "st",
+      "patterns": [
+        "montera ny normcentral",
+        "installera normcentral med jordfelsbrytare",
+        "byta elcentral"
+      ],
+      "default_materials": [
+        {
+          "material_ref_hint": "NORMCENTRAL-TOM",
+          "qty_per_unit": 1,
+          "unit": "st",
+          "note": "Normcentral tom"
+        },
+        {
+          "material_ref_hint": "JORDFELSBRYTARE",
+          "qty_per_unit": 2,
+          "unit": "st",
+          "note": "Jordfelsbrytare"
+        }
+      ],
+      "room_type_hint": "hall",
+      "confidence": 0.9,
+      "notes_internal": "Standardmoment för installation av normcentral.",
+      "source_segment_id": "missingseg_20251123T172708290566Z_0014",
+      "source_segment_text": "Montera ny normcentral i hallen med två nya jordfelsbrytare"
+    },
+    {
+      "task_ref": "FLYTTA-GRUPPER-NORMCENTRAL",
+      "title_sv": "Flytta över befintliga grupper i normcentral",
+      "description_sv": "Flytt och återanslutning av befintliga grupper vid byte av normcentral.",
+      "category": "ovrigt",
+      "estimated_hours_per_unit": 0.5,
+      "quantity_type": "per_unit",
+      "default_unit": "st",
+      "patterns": [
+        "flytta över befintliga grupper",
+        "återansluta grupper i elcentral",
+        "koppla om grupper vid centralbyte"
+      ],
+      "default_materials": [],
+      "room_type_hint": null,
+      "confidence": 0.85,
+      "notes_internal": "Moment vid byte av normcentral.",
+      "source_segment_id": "missingseg_20251123T172708290566Z_0015",
+      "source_segment_text": "flytta över befintliga grupper"
+    },
+    {
+      "task_ref": "DRA-MATNING-UTOMHUSBELYSNING",
+      "title_sv": "Dra matning till utomhusbelysning med skymningsrelä",
+      "description_sv": "Dragning av elkabel och installation av matning till utomhusbelysning, inklusive inkoppling via skymningsrelä.",
+      "category": "belysning",
+      "estimated_hours_per_unit": 1.0,
+      "quantity_type": "per_unit",
+      "default_unit": "st",
+      "patterns": [
+        "dra matning till led-pollare i trädgård",
+        "koppla belysning via skymningsrelä",
+        "installera utomhusbelysning med skymningsrelä"
+      ],
+      "default_materials": [
+        {
+          "material_ref_hint": "KABEL-EXQ-UTOMHUS",
+          "qty_per_unit": 10,
+          "unit": "m",
+          "note": "Kabel för utomhusbruk"
+        },
+        {
+          "material_ref_hint": "SKYMNINGSRELA",
+          "qty_per_unit": 1,
+          "unit": "st",
+          "note": "Skymningsrelä"
+        }
+      ],
+      "room_type_hint": "utomhus",
+      "confidence": 0.9,
+      "notes_internal": "Standardmoment för utomhusmatning till belysning med skymningsrelä.",
+      "source_segment_id": "missingseg_20251123T172708293071Z_0016",
+      "source_segment_text": "Dra fram matning till fyra LED-pollare i trädgården och koppla dem via skymningsrelä"
+    },
+    {
+      "task_ref": "INSTALLERA-MEDIACENTRAL",
+      "title_sv": "Installera mediacentral",
+      "description_sv": "Montering och inkoppling av mediacentral för nätverk och media i bostad.",
+      "category": "natverk_och_media",
+      "estimated_hours_per_unit": 1.0,
+      "quantity_type": "per_unit",
+      "default_unit": "st",
+      "patterns": [
+        "installera mediacentral",
+        "montera mediacentral i klädkammare",
+        "sätta upp mediacentral"
+      ],
+      "default_materials": [
+        {
+          "material_ref_hint": "MEDIACENTRAL",
+          "qty_per_unit": 1,
+          "unit": "st",
+          "note": "Mediacentral för nätverk"
+        }
+      ],
+      "room_type_hint": "sovrum",
+      "confidence": 0.85,
+      "notes_internal": "Standardmoment för mediacentral, rumstyp satt till sovrum/klädkammare.",
+      "source_segment_id": "missingseg_20251123T172708297120Z_0017",
+      "source_segment_text": "Installera mediacentral i klädkammaren"
+    },
+    {
+      "task_ref": "DRA-NATVERKSKABEL",
+      "title_sv": "Dra nätverkskabel till datauttag",
+      "description_sv": "Dragning och montering av nätverkskabel (t.ex. Cat6) till datauttag i rum, inklusive fastsättning och anslutning.",
+      "category": "natverk_och_media",
+      "estimated_hours_per_unit": 0.1,
+      "quantity_type": "per_meter",
+      "default_unit": "m",
+      "patterns": [
+        "dra nätverkskabel till datauttag",
+        "dra nätverkskabel till vardagsrum och sovrum",
+        "installera nätverksuttag"
+      ],
+      "default_materials": [
+        {
+          "material_ref_hint": "KABEL-NATVERK-CAT6",
+          "qty_per_unit": 1,
+          "unit": "m",
+          "note": "Nätverkskabel Cat6"
+        },
+        {
+          "material_ref_hint": "DATAUTTAG",
+          "qty_per_unit": 0.05,
+          "unit": "st",
+          "note": "Datauttag per meter"
+        }
+      ],
+      "room_type_hint": null,
+      "confidence": 0.9,
+      "notes_internal": "Standardmoment för nätverkskabeldragning.",
+      "source_segment_id": "missingseg_20251123T172708297120Z_0018",
+      "source_segment_text": "dra cirka 50 meter nätverkskabel till tre nya datauttag i vardagsrum och sovrum"
+    },
+    {
+      "task_ref": "INSTALLERA-KOPPLINGSDOSA-TAK",
+      "title_sv": "Installera kopplingsdosa i tak",
+      "description_sv": "Montering av kopplingsdosa i tak för framtida belysning eller elinstallation.",
+      "category": "belysning",
+      "estimated_hours_per_unit": 0.3,
+      "quantity_type": "per_unit",
+      "default_unit": "st",
+      "patterns": [
+        "sätta upp kopplingsdosa i tak",
+        "installera kopplingsdosa för belysning",
+        "montera kopplingsdosa i taket"
+      ],
+      "default_materials": [
+        {
+          "material_ref_hint": "KOPPLINGSDOSA-TAK",
+          "qty_per_unit": 1,
+          "unit": "st",
+          "note": "Kopplingsdosa för tak"
+        }
+      ],
+      "room_type_hint": null,
+      "confidence": 0.9,
+      "notes_internal": "Standardmoment för kopplingsdosa i tak.",
+      "source_segment_id": "missingseg_20251123T172708299293Z_0019",
+      "source_segment_text": "Sätta upp sex nya kopplingsdosor i taket för framtida belysning"
+    },
+    {
+      "task_ref": "INSTALLERA-APPARATDOSA-INFALLT",
+      "title_sv": "Installera apparatdosa infällt i vägg",
+      "description_sv": "Montering av infälld apparatdosa i vägg för eluttag eller brytare.",
+      "category": "brytare_och_uttag",
+      "estimated_hours_per_unit": 0.3,
+      "quantity_type": "per_unit",
+      "default_unit": "st",
+      "patterns": [
+        "installera apparatdosa i vägg",
+        "montera apparatdosa infällt",
+        "sätta in apparatdosa"
+      ],
+      "default_materials": [
+        {
+          "material_ref_hint": "APPARATDOSA-INF",
+          "qty_per_unit": 1,
+          "unit": "st",
+          "note": "Infälld apparatdosa"
+        }
+      ],
+      "room_type_hint": null,
+      "confidence": 0.9,
+      "notes_internal": "Standardmoment för infälld apparatdosa.",
+      "source_segment_id": "missingseg_20251124T125112497664Z_0020",
+      "source_segment_text": "installera en apparatdosa i väggen"
+    }
+  ]
+}

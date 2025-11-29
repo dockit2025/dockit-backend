@@ -1,0 +1,201 @@
+Bra idé att få en tydlig checklista nu så vi ser hela spelplanen.
+
+Jag delar upp det i 3 nivåer:
+
+1. Det vi redan har på plats
+2. Det som är “nästa naturliga steg”
+3. Saker för version 1.5 / “smart AI-lager” när grunden sitter
+
+---
+
+### 1. Det vi redan har (kan bockas av mentalt)
+
+* [x] Fri text → `interpret_free_text` → tasks + materials
+* [x] `quote_service.make_draft` bygger:
+
+  * work-rader (med tid, timpris, ROT-flagga)
+  * material-rader (med qty)
+* [x] ROT-logik via `RotConfig` + `apply_rot_to_lines` i `make_draft`
+* [x] Grossistpris:
+
+  * `Storel-GN.csv` normaliserad till `price_catalog.json`
+  * `pricing.get_price(customer_id, article_ref)` hämtar pris
+* [x] Materialpris i offert:
+
+  * `quote_service.make_draft` kallar `get_price` för varje materialrad
+  * `subtotal_sek`, `total_sek` beräknas korrekt
+* [x] Favoritartiklar per kund:
+
+  * `favorites.register_favorite_article(...)`
+  * `knowledge\customers\favorites.json`
+* [x] Favoritlogik i prissättningen:
+
+  * `get_price` tar hänsyn till kundens favorit först
+* [x] API-endpoints:
+
+  * `POST /quotes/draft`
+  * `POST /quotes` (skapa och spara offert)
+  * `POST /quotes/favorite-material`
+  * `GET  /quotes/favorite-materials`
+  * `GET  /quotes/material-suggestions`
+* [x] Material-förslag:
+
+  * `material_suggestions.get_material_suggestions(customer_id, material_ref)`
+  * prioriterar: favorite → mapping → direct
+
+Det här är “motorn”. Den fungerar.
+
+---
+
+### 2. Kvar att göra – grunden för en stabil version 1.0
+
+#### A. Prislistor och data
+
+* [ ] Byta till ny, uppdaterad prislista från grossisten när du får den
+* [ ] (Om du får topp-300-lista) skapa t.ex:
+
+  * `knowledge\catalogs\core_articles.json` – markerar viktigaste artiklarna
+* [ ] Få in en enkel rutin för:
+
+  * hur ni uppdaterar prislistor (2019 → ny → framtida uppdateringar)
+  * dokumentera: “så här byter vi prislista utan att paja systemet”
+
+#### B. Material-mapping och kvalitet
+
+* [ ] Bestäm strategi för `material_ref_map.json` när nya prislistan finns:
+
+  * vilka material_ref är “viktiga” (dimmer, apparatram, standarduttag, kabeltyper osv.)
+  * vilka artikelnummer de ska mappas till i den nya listan
+* [ ] När ny prislista är på plats:
+
+  * uppdatera `material_ref_map.json` med verkliga artikelnummer
+  * sanity-testa några typiska jobb (dimmer, uttag, kabeldragning) och se att priserna känns rimliga
+
+#### C. Kundspecifika prislistor (hooken finns, men inte logiken)
+
+Vi har kroken i `get_price(customer_id, article_ref)`, men inte själva overlay-logiken än.
+
+* [ ] Designa struktur, t.ex:
+
+  * `knowledge\customers\<kund_id>\price_list.json`
+* [ ] Implementera i `pricing.py`:
+
+  1. om kundpris finns → använd det
+  2. annars → grossistpris från `price_catalog.json`
+  3. annars → 0 och logga att pris saknas
+* [ ] Skapa en enkel hjälpfunktion eller script för att:
+
+  * importera en kundspecifik prislista (csv → json)
+  * uppdatera / ersätta en kunds prislista
+
+#### D. Logging av “saknas” så systemet kan förbättras
+
+* [ ] När:
+
+  * `get_price` inte hittar pris
+  * `material_ref` saknar mapping
+    …logga detta i t.ex.
+  * `knowledge\logs\missing_prices.jsonl`
+  * `knowledge\logs\missing_material_refs.jsonl`
+* [ ] En enkel rutin (script eller manuell process) för:
+
+  * att läsa loggarna
+  * uppdatera `material_ref_map.json` / prislista efter hand
+
+---
+
+### 3. Nästa nivå – kundpreferenser, varumärken, AI-hjälp (version 1.5+)
+
+Det här är saker som verkligen kommer göra systemet “smart” och personligt, men som inte måste vara klara innan ni kan använda systemet internt.
+
+#### A. Brand-preferenser per kund (Schneider vs Elko, Exans vs NKT osv.)
+
+* [ ] Definiera format för kundinställningar, t.ex.:
+
+  ```json
+  // knowledge/customers/preferences.json
+  {
+    "test@example.com": {
+      "preferred_brands": ["Schneider", "Exxact", "Exans"],
+      "blocked_brands": ["Elko"],
+      "fallback_to_other_brands": true
+    }
+  }
+  ```
+
+* [ ] Skapa `src\services\customer_preferences.py`:
+
+  * läsa/skriva dessa preferenser
+
+* [ ] Skapa metadata för de viktigaste artiklarna, t.ex.:
+
+  ```json
+  // knowledge/catalogs/article_meta.json
+  {
+    "1234567": { "brand": "Schneider", "category": "dimmer" },
+    "7654321": { "brand": "Elko",      "category": "dimmer" }
+  }
+  ```
+
+* [ ] Uppdatera `material_suggestions.get_material_suggestions` att:
+
+  * sortera förslag efter kundens brand-preferenser
+  * filtrera bort “blocked” brand
+
+#### B. Bättre sök i artikelkatalogen för mapping (när ny lista finns)
+
+Vi har redan grunden med `article_search.search_articles(query, limit)`.
+
+* [ ] Använd den för att:
+
+  * föreslå artikelnummer för en viss material_ref (t.ex. “Dimmer, universal, infälld”)
+  * låta en människa klicka “den här ska vi använda”
+  * skriva in valet i `material_ref_map.json`
+* [ ] (Senare) göra ett litet admin-UI eller CLI för detta
+
+#### C. Frontend-integration (det användaren faktiskt ser)
+
+Backend är redo, men:
+
+* [ ] UI för att skapa offert:
+
+  * fylla i kundnamn, e-post, timpris, ROT på/av, fri text
+* [ ] Visa raderna:
+
+  * work/material, qty, pris, total
+* [ ] Materialval:
+
+  * hämta från `/quotes/material-suggestions`
+  * dropdown med förslag (favorite/mapping/direct)
+  * ändra val → uppdatera pris på raden
+  * ändra val → POST `/quotes/favorite-material`
+* [ ] Visa ROT-effekt (om apply_rot = true):
+
+  * tydligt ROT-avdrag,
+  * total efter ROT
+
+#### D. Självlärande-lagret (logik och AI-koppling)
+
+När ni är igång med riktiga jobb:
+
+* [ ] Samla:
+
+  * vilka material elektrikern ofta byter till
+  * vilka tasks som saknas i mappingarna
+* [ ] Låta GPT generera:
+
+  * förslag på nya tasks för återkommande meningar i fri text
+  * förslag på nya material_ref → artikelnummer
+* [ ] Adminflöde där du:
+
+  * granskar/ändrar
+  * klickar “godkänn”
+  * så skrivs de in i `mappings/` och `material_ref_map.json`
+
+---
+
+Om du vill, kan vi i nästa steg:
+
+* ta den här listan
+* markera 3–5 punkter som är **kritiska** för att kunna använda systemet på riktigt mot riktiga kunder,
+* och sedan beta av dem en i taget, på samma sätt som vi gjort hittills (en kodruta per steg).

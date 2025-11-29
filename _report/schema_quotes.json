@@ -1,0 +1,43 @@
+=== Schema /quotes ===
+{
+  "properties": {
+    "customer_name": {
+      "type": "string",
+      "title": "Customer Name"
+    },
+    "customer_email": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Customer Email"
+    },
+    "job_summary": {
+      "type": "string",
+      "title": "Job Summary"
+    },
+    "lines": {
+      "items": {
+        "$ref": "#/components/schemas/QuoteLineIn"
+      },
+      "type": "array",
+      "title": "Lines"
+    },
+    "apply_rot": {
+      "type": "boolean",
+      "title": "Apply Rot",
+      "default": true
+    }
+  },
+  "type": "object",
+  "required": [
+    "customer_name",
+    "job_summary",
+    "lines"
+  ],
+  "title": "QuoteDraftIn"
+}
