@@ -20,7 +20,11 @@ app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "https://lovable.dev",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -40,3 +44,4 @@ def list_quotes_proxy(skip: int = 0, limit: int = 50, session: Session = Depends
 @app.get("/quotes/__list", tags=["quotes"], summary="Lista alla offerter (proxy failsafe)")
 def list_quotes_proxy2(skip: int = 0, limit: int = 50, session: Session = Depends(get_session)):
     return _list_quotes_impl(skip=skip, limit=limit, session=session)
+
