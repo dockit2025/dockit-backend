@@ -1,9 +1,3 @@
 {
-  "suggested_materials": {
-    "VEGGUTTAG-1V-JORD": "5423001",
-    "STROMBRYTARE-1P": "6112200",
-    "APPDOS-INF": "7345005",
-    "EKLK-3G1.5": "4520103"
-  },
-  "notes": "Föreslagna artikelnummer baserat på standardkomponenter för respektive materialtyp."
+  "suggested_mappings": []
 }

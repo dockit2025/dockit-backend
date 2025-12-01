@@ -46,6 +46,32 @@ def _parse_quantity_and_unit(chunk: str) -> Dict[str, Any]:
     return {"qty": qty, "unit": unit}
 
 
+def _guess_vp_ror_ref(text_norm: str) -> str:
+    """
+    Gissar vilken VP-rör-dimension som avses baserat på texten.
+    Returnerar en material_ref (VP-ROR-16MM, VP-ROR-20, ...).
+    """
+    # Vi letar efter XXmm i texten
+    m = re.search(r"(\d+)\s*mm", text_norm)
+    if m:
+        dim = m.group(1)
+        if dim == "16":
+            return "VP-ROR-16MM"
+        if dim == "20":
+            return "VP-ROR-20"
+        if dim == "25":
+            return "VP-ROR-25"
+        if dim == "32":
+            return "VP-ROR-32"
+        if dim == "40":
+            return "VP-ROR-40"
+        if dim == "50":
+            return "VP-ROR-50"
+
+    # Om ingen specifik dimension hittas men vi vet att det är rör
+    return "VP-ROR-16MM"
+
+
 def _guess_material_ref(core_text: str) -> str:
     """
     Grov typning av material baserat på texten.
@@ -53,7 +79,7 @@ def _guess_material_ref(core_text: str) -> str:
 
     Viktigt:
       - Vi lägger oss på en trygg nivå:
-        kabel / rör / uttag / dimmer / brytare / spot / kronbrytare.
+        kabel / rör / uttag / dimmer / brytare / spot / kronbrytare / taklampa / dosor / kabelkanal.
       - Inga antaganden om arbetsmoment eller ATL.
     """
     t = _normalize_whitespace(core_text).lower()
@@ -62,17 +88,32 @@ def _guess_material_ref(core_text: str) -> str:
     if "3x1,5" in t or "3x1.5" in t or "3g1,5" in t or "3g1.5" in t:
         return "KABEL-3G1.5"
 
-    # VP-rör 16 mm (standard i vårt material-läge)
-    if "vp" in t or "vp-rör" in t or "vp rör" in t or "vp-ror" in t:
-        # Om det står 16 mm är det väldigt tydligt
-        if "16" in t and "mm" in t:
-            return "VP-ROR-16MM"
-        # Saknas dimension → anta 16 mm som default i vårt system
-        return "VP-ROR-16MM"
+    # Kabelkanal (vit standard – vi använder en ref som mappar till din artikel)
+    if "kabelkanal" in t:
+        return "KABELKANAL-VIT"
 
-    # Generellt "rör" (utan vp) – tolka också som VP 16 mm i vårt system
-    if "rör" in t or "ror" in t:
-        return "VP-ROR-16MM"
+    # Dosor – apparat / koppling / tak
+    # Plural "apparatdosor" matchas av stammen "apparatdos"
+    if "apparatdosa" in t or "apparatdos" in t:
+        return "APPARATDOSA"
+    if "kopplingsdosa" in t:
+        return "KOPPLINGSDOSA"
+    if "takdosa" in t:
+        return "TAKDOSA"
+
+    # VP-rör / rör – använd dimensioner om de finns, annars 16 mm som default
+    if "vp" in t or "vp-rör" in t or "vp rör" in t or "vp-ror" in t or "rör" in t or "ror" in t:
+        return _guess_vp_ror_ref(t)
+
+    # Taklampa / plafond / takarmatur
+    # Plural "taklampor" matchas via "taklamp"
+    if (
+        "takarmatur" in t
+        or "taklampa" in t
+        or "taklamp" in t
+        or "plafond" in t
+    ):
+        return "TAKLAMPA"
 
     # Vägguttag (vanliga eluttag, inte nätverksuttag)
     if (
@@ -84,21 +125,21 @@ def _guess_material_ref(core_text: str) -> str:
         # I material-läget jobbar vi främst med infällda uttag
         return "VAGGUTTAG-INF"
 
+    # Kronbrytare – måste kollas före generell strömbrytare
+    if "kron" in t and "brytare" in t:
+        return "KRONBRYTARE"
+
     # Strömbrytare (generell kod – detaljer får UI/mapper lösa)
     if "strömbrytare" in t or "strombrytare" in t or "brytare" in t:
         return "STROMBRYTARE"
 
     # Spottar / spotlight
-    if "spot" in t or "spotlight" in t or "spottar" in t:
+    if "spot" in t or "spotlight" in t or "spottar" in t or "spotlights" in t:
         return "SPOTLIGHT"
 
     # Dimmer
-    if "dimmer" in t:
+    if "dimmer" in t or "dimmers" in t:
         return "DIMMER-UNIV"
-
-    # Kronbrytare
-    if "kron" in t and "brytare" in t:
-        return "KRONBRYTARE"
 
     return "UNKNOWN"
 
@@ -191,7 +232,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         input_text = " ".join(sys.argv[1:])
     else:
-        input_text = "10m 3x1,5, 8m vp-rör 16mm infällt, 3 infällda vägguttag, 1 dimmer"
+        input_text = "10m 3x1,5, 8m vp-rör 20mm, 3 vägguttag, 1 dimmer, 1 apparatdosa, 1 kopplingsdosa, 1 takdosa, 5m kabelkanal, 3 taklampor"
 
     parsed = parse_material_text(input_text)
     print(json.dumps(parsed, ensure_ascii=False, indent=2))
