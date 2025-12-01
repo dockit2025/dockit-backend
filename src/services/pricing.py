@@ -13,7 +13,8 @@ from src.services.favorites import get_favorite_article
 ROOT = Path(__file__).resolve().parents[2]
 
 PRICE_CATALOG_DIR = ROOT / "knowledge" / "catalogs"
-PRICE_CATALOG_PRIMARY = PRICE_CATALOG_DIR / "price_catalog.json"
+PRICE_CATALOG_PRIMARY = PRICE_CATALOG_DIR / "price_catalog.json"  # t.ex. Storel / GN
+PRICE_CATALOG_AHLSELL = PRICE_CATALOG_DIR / "price_catalog_ahlsell.json"
 MATERIAL_REF_MAP_PATH = ROOT / "knowledge" / "catalogs" / "material_ref_map.json"
 CUSTOMERS_DIR = ROOT / "knowledge" / "customers"
 
@@ -87,10 +88,13 @@ def _load_price_catalog() -> Dict[str, float]:
     Läser in normaliserade prislistor från katalogen knowledge/catalogs
     och returnerar { artikelnummer: gn_pris }.
 
-    - price_catalog.json används som primär bas (t.ex. Storel)
-    - Alla filer som matchar price_catalog_*.json (t.ex. price_catalog_ahlsell.json)
-      läses in och mergas in i samma dict.
-    - Kundspecifika prislistor hanteras separat i _load_customer_price_list().
+    Prioritet:
+
+      1) Ahlsell-kontraktsprislista (price_catalog_ahlsell.json) – högst prioritet.
+      2) Primär GN-prislista (price_catalog.json, t.ex. Storel) – fyller luckor.
+      3) Ev. övriga price_catalog_*.json – fyller ytterligare luckor.
+
+    Kundspecifika prislistor hanteras separat i _load_customer_price_list().
     """
     if not PRICE_CATALOG_DIR.exists():
         print(
@@ -135,26 +139,53 @@ def _load_price_catalog() -> Dict[str, float]:
 
     merged: Dict[str, float] = {}
 
-    # 1) Primära prislistan (om den finns) – får "vinna" vid ev. krockar senare.
-    if PRICE_CATALOG_PRIMARY.exists():
-        base = _load_single_catalog(PRICE_CATALOG_PRIMARY)
-        merged.update(base)
+    # 1) Ahlsell – kontraktspriser har högst prioritet
+    if PRICE_CATALOG_AHLSELL.exists():
+        ahlsell = _load_single_catalog(PRICE_CATALOG_AHLSELL)
+        merged.update(ahlsell)
+        print(
+            f"[pricing] Läste in Ahlsell-prislista {PRICE_CATALOG_AHLSELL.name} "
+            f"({len(ahlsell)} rader).",
+            file=sys.stderr,
+        )
     else:
         print(
-            f"[pricing] Hittar inte primär prislista price_catalog.json på {PRICE_CATALOG_PRIMARY}",
+            f"[pricing] Hittar inte Ahlsell-prislista på {PRICE_CATALOG_AHLSELL}",
             file=sys.stderr,
         )
 
-    # 2) Övriga prislistor som matchar price_catalog_*.json (t.ex. Ahlsell)
+    # 2) Primära GN-prislistan (Storel) – fyller bara på saknade artiklar
+    if PRICE_CATALOG_PRIMARY.exists():
+        base = _load_single_catalog(PRICE_CATALOG_PRIMARY)
+        added_from_base = 0
+        for art_nr, price in base.items():
+            if art_nr not in merged:
+                merged[art_nr] = price
+                added_from_base += 1
+
+        print(
+            f"[pricing] Läste in primär prislista {PRICE_CATALOG_PRIMARY.name} "
+            f"({len(base)} rader, {added_from_base} nya artiklar).",
+            file=sys.stderr,
+        )
+    else:
+        print(
+            f"[pricing] Hittar inte primär prislista price_catalog.json på "
+            f"{PRICE_CATALOG_PRIMARY}",
+            file=sys.stderr,
+        )
+
+    # 3) Övriga prislistor som matchar price_catalog_*.json (t.ex. andra leverantörer)
     for extra_path in PRICE_CATALOG_DIR.glob("price_catalog_*.json"):
-        # Hoppa över primärfilen om den av någon anledning matchar mönstret
-        if extra_path.resolve() == PRICE_CATALOG_PRIMARY.resolve():
+        # Hoppa över Ahlsell och primärfilen som vi redan har läst
+        if extra_path.resolve() in {
+            PRICE_CATALOG_PRIMARY.resolve(),
+            PRICE_CATALOG_AHLSELL.resolve(),
+        }:
             continue
 
         extra = _load_single_catalog(extra_path)
 
-        # Merge-strategi: om artikel redan finns i merged låter vi befintligt värde ligga kvar.
-        # Dvs primär prislista + ev. tidigare inlästa filer har företräde.
         added = 0
         for art_nr, price in extra.items():
             if art_nr not in merged:
@@ -304,7 +335,9 @@ def get_price(customer_id: Optional[str], article_ref: str) -> float:
 
       1) Kundens favoritartikel (via favorites.json) styr artikelnumret.
       2) Kundens prislista (price_list.json) styr priset om artikelnumret finns där.
-      3) Grossistens prislistor (price_catalog*.json) via gn_pris.
+      3) Grossistens prislistor:
+         - Ahlsell-kontraktspriser (price_catalog_ahlsell.json)
+         - därefter primär GN-prislista / andra leverantörer som fyller luckor.
       4) Om inget pris hittas returneras 0.0, ett fel loggas på stderr,
          och en rad skrivs till missing_prices.jsonl.
 
