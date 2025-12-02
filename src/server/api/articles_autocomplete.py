@@ -30,4 +30,4 @@ def autocomplete_articles(query: str = Query(..., min_length=2, max_length=20)):
                 "price": item.get("gn_pris") or 0
             })
 
-    return matches[:10]
+    return matches[:200]
