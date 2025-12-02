@@ -289,29 +289,141 @@ def get_quote(quote_id: int, session: Session = Depends(get_session)):
     return _serialize_quote(q, session)
 
 
+def _load_material_ref_map():
+    from pathlib import Path
+    import json
+
+    path = Path("knowledge/catalogs/material_ref_map.json")
+    if not path.exists():
+        return {}
+
+    try:
+        with path.open("r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def _load_price_catalog():
+    from pathlib import Path
+    import json
+
+    path = Path("knowledge/catalogs/price_catalog.json")
+    if not path.exists():
+        return []
+
+    try:
+        with path.open("r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return []
+
+
+def _resolve_article_info(material_ref, customer_id):
+    """
+    Slår upp artikelnummer + namn + pris för en given material_ref.
+    Favoriter per kund (om de finns) går först, sedan material_ref_map.
+    """
+    from src.services.favorites import get_favorite_article
+
+    material_ref = (material_ref or "").strip()
+    if not material_ref:
+        return None
+
+    # 1) Försök med favorit per kund
+    article_number = None
+    if customer_id:
+        fav = get_favorite_article(customer_id, material_ref)
+        if fav:
+            article_number = str(fav).strip()
+
+    # 2) Fallback till global material_ref_map
+    if not article_number:
+        ref_map = _load_material_ref_map()
+        raw = ref_map.get(material_ref) or ref_map.get(material_ref.upper())
+        if raw:
+            article_number = str(raw).strip()
+
+    if not article_number:
+        return None
+
+    # 3) Slå upp i prislistan
+    catalog = _load_price_catalog()
+    for row in catalog:
+        art = str(row.get("artikelnummer") or "").strip()
+        if art == article_number:
+            return {
+                "article_number": article_number,
+                "article_name": row.get("benamning") or row.get("name") or "",
+                "unit": row.get("enhet") or "st",
+                "unit_price": row.get("gn_pris") or 0,
+            }
+
+    # Om vi inte hittar raden i katalogen men har artikelnummer, returnera ändå det
+    return {
+        "article_number": article_number,
+        "article_name": "",
+        "unit": "st",
+        "unit_price": 0,
+    }
+
+
 class MaterialParseIn(BaseModel):
     """
     Payload till /quotes/material-parse.
-    Innehåller bara rå materialtext som ska tolkas till material_items.
+    Innehåller rå materialtext + ev. customer_email
+    för att vi ska kunna använda favoriter per kund.
     """
     text: str
+    customer_email: str | None = None
 
 
 @router.post(
     "/material-parse",
     summary="Tolkar materialtext till material_items",
 )
-def quote_material_parse(
-    payload: MaterialParseIn,
-):
+def quote_material_parse(payload: MaterialParseIn):
     """
     Tar emot rå materialtext, t.ex.
       "10m 3x1,5, 15m 20mm rör, 3 vägguttag, 2 strömbrytare"
-    och returnerar resultatet från material_list_parser.parse_material_text.
+
+    Steg:
+      1) material_list_parser.parse_material_text → { free_text, items[...] }
+      2) För varje item: försök slå upp artikelnummer, namn, pris via:
+         - favorit per kund (customer_email)
+         - material_ref_map.json
+         - price_catalog.json
+      3) Returnera enriched struktur till frontend.
     """
     parsed = _parse_material_text(payload.text)
-    return parsed
+    items = parsed.get("items") or []
 
+    enriched_items = []
+    for item in items:
+        mat_ref = item.get("material_ref")
+        qty = item.get("qty")
+        unit = item.get("unit")
+        raw = item.get("raw")
+        parsed_core = item.get("parsed_core")
 
+        article_info = _resolve_article_info(
+            material_ref=mat_ref,
+            customer_id=payload.customer_email,
+        )
 
+        enriched_items.append({
+            "raw": raw,
+            "parsed_core": parsed_core,
+            "qty": qty,
+            "unit": unit,
+            "material_ref": mat_ref,
+            "article_number": article_info["article_number"] if article_info else None,
+            "article_name": article_info["article_name"] if article_info else None,
+            "unit_price": article_info["unit_price"] if article_info else 0,
+            "unit_from_catalog": article_info["unit"] if article_info else unit,
+        })
 
+    return {
+        "free_text": payload.text,
+        "items": enriched_items,
+    }
