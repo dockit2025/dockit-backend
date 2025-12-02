@@ -34,8 +34,10 @@ app.add_middleware(
 )
 
 # Routers
+from src.server.api.articles_autocomplete import router as autocomplete_router
 app.include_router(health.router)
 app.include_router(system.router)
+app.include_router(autocomplete_router)
 app.include_router(quotes.router)
 app.include_router(articles.router)
 
