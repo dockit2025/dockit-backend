@@ -7,6 +7,7 @@ from src.server.db.session import init_db, get_session
 from src.server.api import health
 from src.server.api import system
 from src.server.api import quotes
+from src.server.api import articles
 from src.server.api.quotes import _list_quotes_impl  # vår säkra list-funktion
 
 @asynccontextmanager
@@ -36,6 +37,7 @@ app.add_middleware(
 app.include_router(health.router)
 app.include_router(system.router)
 app.include_router(quotes.router)
+app.include_router(articles.router)
 
 # Hård proxy: tvinga fram GET /quotes och /quotes/__list
 @app.get("/quotes", tags=["quotes"], summary="Lista alla offerter (proxy)")
