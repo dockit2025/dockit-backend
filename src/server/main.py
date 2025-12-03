@@ -4,11 +4,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
 from src.server.db.session import init_db, get_session
-from src.server.api import health
-from src.server.api import system
-from src.server.api import quotes
-from src.server.api import articles
-from src.server.api.quotes import _list_quotes_impl  # vår säkra list-funktion
+from src.server.api import health, system, quotes, articles
+from src.server.api.quote_document import router as quote_document_router
+from src.server.api.quotes import _list_quotes_impl
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -21,7 +19,7 @@ app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-        allow_origins=[
+    allow_origins=[
         "http://localhost:5173",
         "http://127.0.0.1:5173",
         "https://lovable.dev",
@@ -33,24 +31,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Routers
-from src.server.api.articles_autocomplete import router as autocomplete_router
 app.include_router(health.router)
 app.include_router(system.router)
-app.include_router(autocomplete_router)
-app.include_router(quotes.router)
+app.include_router(quotes.router)     # kräver API-key
 app.include_router(articles.router)
+app.include_router(quote_document_router)   # OFFENTLIG – kräver ingen API key
 
-# Hård proxy: tvinga fram GET /quotes och /quotes/__list
-@app.get("/quotes", tags=["quotes"], summary="Lista alla offerter (proxy)")
+@app.get("/quotes", tags=["quotes"])
 @app.get("/quotes/", include_in_schema=False)
 def list_quotes_proxy(skip: int = 0, limit: int = 50, session: Session = Depends(get_session)):
     return _list_quotes_impl(skip=skip, limit=limit, session=session)
 
-@app.get("/quotes/__list", tags=["quotes"], summary="Lista alla offerter (proxy failsafe)")
+@app.get("/quotes/__list", tags=["quotes"])
 def list_quotes_proxy2(skip: int = 0, limit: int = 50, session: Session = Depends(get_session)):
     return _list_quotes_impl(skip=skip, limit=limit, session=session)
-
-
-
-

@@ -1,9 +1,9 @@
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Header
-from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from sqlalchemy import select
+from pydantic import BaseModel
 
 from src.services.quote_service import make_draft, create_quote, material_draft
 from src.services.favorites import register_favorite_article, list_favorites_for_customer
@@ -11,29 +11,33 @@ from src.services.material_suggestions import get_material_suggestions
 
 from src.server.db.session import get_session
 from src.server.models import Quote, QuoteLine, Customer
-from src.server.schemas.quote import QuoteDraftIn, MaterialDraftIn  # vi använder in-modellen
+from src.server.schemas.quote import QuoteDraftIn, MaterialDraftIn
 from material_list_parser import parse_material_text as _parse_material_text
+
+
+# ==============================
+# API KEY
+# ==============================
 
 API_KEY_HEADER_NAME = "X-DOCKIT-API-KEY"
 API_KEY_VALUE = "dockit-material-beta-123"
 
 
 def verify_api_key(x_dockit_api_key: str = Header(None)) -> None:
-    """
-    Enkel API-nyckelkontroll för betatester.
-
-    Alla anrop mot /quotes-ändpunkter måste skicka:
-      X-DOCKIT-API-KEY: dockit-material-beta-123
-    """
     if x_dockit_api_key != API_KEY_VALUE:
         raise HTTPException(status_code=401, detail="Invalid or missing API key")
 
 
-router = APIRouter(prefix="/quotes", tags=["quotes"], dependencies=[Depends(verify_api_key)])
+router = APIRouter(
+    prefix="/quotes",
+    tags=["quotes"],
+    dependencies=[Depends(verify_api_key)],
+)
 
 
-# ---------- Hjälpare ----------
-
+# ==============================
+# HELPERS
+# ==============================
 
 def _serialize_quote(q: Quote, session: Session) -> dict:
     cust_name: Optional[str] = None
@@ -74,14 +78,31 @@ def _list_quotes_impl(skip: int, limit: int, session: Session) -> List[dict]:
             select(Quote).offset(skip).limit(limit)
         ).scalars().all()
     )
-    out: List[dict] = []
-    for q in rows:
-        out.append(_serialize_quote(q, session))
-    return out
+    return [_serialize_quote(q, session) for q in rows]
 
 
-# ---------- LISTA (måste ligga före parameterrutten) ----------
+def _get_company_settings() -> dict:
+    return {
+        "company_name": "Dockit El AB",
+        "address": "Exempelgatan 1",
+        "address_line1": "Exempelgatan 1",
+        "postcode": "414 00",
+        "zip_code": "414 00",
+        "city": "Göteborg",
+        "country": "Sverige",
+        "phone": "070-000 00 00",
+        "email": "info@dockit.se",
+        "bankgiro": "123-4567",
+        "iban": "",
+        "org_number": "5590-0000",
+        "f_tax_text": "Ja",
+        "logo_url": "",
+    }
 
+
+# ==============================
+# LISTA
+# ==============================
 
 @router.get("", summary="Lista alla offerter")
 @router.get("/", include_in_schema=False)
@@ -93,56 +114,29 @@ def list_quotes(
     return _list_quotes_impl(skip=skip, limit=limit, session=session)
 
 
-@router.get("/__list", include_in_schema=False)
-def list_quotes_failsafe(
-    skip: int = Query(0, ge=0),
-    limit: int = Query(50, ge=1, le=200),
-    session: Session = Depends(get_session),
-):
-    return _list_quotes_impl(skip=skip, limit=limit, session=session)
+# ==============================
+# SKAPA & DRAFT
+# ==============================
 
-
-# ---------- SKAPA (POST) ----------
-
-
-@router.post("/draft", summary="Beräkna en offert (utkast, ej spara)")
+@router.post("/draft", summary="Beräkna offert (utkast)")
 def draft_quote(payload: QuoteDraftIn, session: Session = Depends(get_session)):
-    """
-    Använder services.make_draft för att räkna fram totaller/ROT på ett utkast.
-    Returnerar samma struktur som frontend använder i sin preview.
-    """
     return make_draft(payload=payload, session=session)
 
 
-@router.post("", summary="Spara en offert")
+@router.post("", summary="Spara offert")
 def create_quote_endpoint(payload: QuoteDraftIn, session: Session = Depends(get_session)):
-    """
-    Skapar en offert och dess rader i databasen via services.create_quote.
-    Returnerar den sparade offerten i samma struktur som GET /quotes/{id}.
-    """
     result = create_quote(payload=payload, session=session)
-    q = (result if hasattr(result, "id") else session.get(Quote, result))
+    q = result if hasattr(result, "id") else session.get(Quote, result)
     if not q:
         raise HTTPException(status_code=500, detail="Offerten kunde inte hämtas efter skapande")
     return _serialize_quote(q, session)
 
 
-# ---------- FAVORITARTIKLAR (POST) ----------
-
+# ==============================
+# FAVORITER
+# ==============================
 
 class FavoriteMaterialIn(BaseModel):
-    """
-    Payload för att registrera en favoritartikel för en kund + material_ref.
-
-    Exempel på JSON:
-    {
-      "customer_id": "123",              # valfritt
-      "customer_email": "kund@ex.se",    # gärna denna
-      "customer_name": "Kund AB",        # fallback
-      "material_ref": "DIMMER-UNIV",
-      "article_number": "0000120"
-    }
-    """
     customer_id: Optional[str] = None
     customer_email: Optional[str] = None
     customer_name: Optional[str] = None
@@ -150,25 +144,15 @@ class FavoriteMaterialIn(BaseModel):
     article_number: str
 
 
-@router.post("/favorite-material", summary="Registrera favoritartikel för kund/material-ref")
+@router.post("/favorite-material")
 def set_favorite_material(payload: FavoriteMaterialIn):
-    """
-    Registrerar/uppdaterar en favoritartikel för en viss kund + material_ref.
-
-    Frontend kan anropa detta när elektrikern manuellt byter artikel i offerten,
-    t.ex. väljer en annan dimmer än standard.
-    """
     cust_key = (
         payload.customer_id
         or payload.customer_email
         or payload.customer_name
     )
-
     if not cust_key:
-        raise HTTPException(
-            status_code=400,
-            detail="customer_id, customer_email eller customer_name måste anges",
-        )
+        raise HTTPException(status_code=400, detail="customer-id or email required")
 
     register_favorite_article(
         customer_id=cust_key,
@@ -176,86 +160,41 @@ def set_favorite_material(payload: FavoriteMaterialIn):
         article_number=payload.article_number,
     )
 
-    return {
-        "status": "ok",
-        "customer_id": cust_key,
-        "material_ref": payload.material_ref,
-        "article_number": payload.article_number,
-    }
+    return {"status": "ok"}
 
 
-# ---------- FAVORITARTIKLAR (GET) ----------
-
-
-@router.get(
-    "/favorite-materials",
-    summary="Lista favoritartiklar för en kund",
-)
+@router.get("/favorite-materials")
 def get_favorite_materials(
     customer_id: Optional[str] = Query(default=None),
     customer_email: Optional[str] = Query(default=None),
     customer_name: Optional[str] = Query(default=None),
 ):
-    """
-    Returnerar alla favoritartiklar för en kund.
-
-    Du kan identifiera kund på tre sätt:
-      - customer_id
-      - customer_email
-      - customer_name
-
-    Exempel:
-      GET /quotes/favorite-materials?customer_email=test@example.com
-    """
     cust_key = customer_id or customer_email or customer_name
     if not cust_key:
-        raise HTTPException(
-            status_code=400,
-            detail="customer_id, customer_email eller customer_name måste anges som query-parameter",
-        )
-
-    favorites = list_favorites_for_customer(cust_key)
+        raise HTTPException(status_code=400, detail="customer-id or email required")
 
     return {
         "customer_id": cust_key,
-        "favorites": favorites,
+        "favorites": list_favorites_for_customer(cust_key),
     }
 
 
-# ---------- MATERIAL-SUGGESTIONS (GET) ----------
+# ==============================
+# MATERIAL SUGGESTIONS
+# ==============================
 
-
-@router.get(
-    "/material-suggestions",
-    summary="Få materialsförslag för kund + material_ref",
-)
+@router.get("/material-suggestions")
 def material_suggestions(
-    material_ref: str = Query(..., description="Materialreferens, t.ex. DIMMER-UNIV"),
-    customer_id: Optional[str] = Query(default=None),
-    customer_email: Optional[str] = Query(default=None),
-    customer_name: Optional[str] = Query(default=None),
+    material_ref: str,
+    customer_id: Optional[str] = None,
+    customer_email: Optional[str] = None,
+    customer_name: Optional[str] = None,
 ):
-    """
-    Returnerar en prioriterad lista med artikelförslag för en given kund + material_ref.
-
-    Prioritet i svar:
-      1) Kundens favorit (om finns)
-      2) Global mapping i material_ref_map.json
-      3) Direkt-användning av material_ref som artikelnummer (om prissatt)
-
-    Exempel:
-      GET /quotes/material-suggestions?customer_email=test@example.com&material_ref=DIMMER-UNIV
-    """
-    if not material_ref:
-        raise HTTPException(status_code=400, detail="material_ref måste anges")
-
     cust_key = customer_id or customer_email or customer_name
-
     suggestions = get_material_suggestions(
         customer_id=cust_key,
         material_ref=material_ref,
     )
-
     return {
         "customer_id": cust_key,
         "material_ref": material_ref,
@@ -263,167 +202,111 @@ def material_suggestions(
     }
 
 
-# ---------- HÄMTA EN (läggs sist) ----------
+# ==============================
+# MATERIAL DRAFT
+# ==============================
 
-
-@router.post(
-    "/material-draft",
-    summary="Beräkna offert i material-läge (utkast, ej spara)",
-)
-def quote_material_draft(
-    payload: MaterialDraftIn,
-    session: Session = Depends(get_session),
-):
-    """
-    Material-läge: tar emot redan tolkade materialrader (material_items)
-    och bygger ett offertutkast baserat på material + work_profiles.
-    """
+@router.post("/material-draft")
+def quote_material_draft(payload: MaterialDraftIn, session: Session = Depends(get_session)):
     return material_draft(payload=payload, session=session)
 
 
-@router.get("/{quote_id}", summary="Hämta sparad offert med rader")
+# ==============================
+# MATERIAL PARSE
+# ==============================
+
+class MaterialParseIn(BaseModel):
+    text: str
+    customer_email: Optional[str] = None
+
+
+@router.post("/material-parse")
+def quote_material_parse(payload: MaterialParseIn):
+    parsed = _parse_material_text(payload.text)
+    items = parsed.get("items") or []
+
+    enriched = []
+    for item in items:
+        ref = item.get("material_ref")
+        raw = item.get("raw")
+        parsed_core = item.get("parsed_core")
+        qty = item.get("qty")
+        unit = item.get("unit")
+
+        # article lookup reused from pricing service
+        from src.services.favorites import get_favorite_article
+        from pathlib import Path
+        import json
+
+        def _load_material_ref_map():
+            path = Path("knowledge/catalogs/material_ref_map.json")
+            if not path.exists():
+                return {}
+            try:
+                return json.loads(path.read_text(encoding="utf-8"))
+            except Exception:
+                return {}
+
+        def _load_price_catalog():
+            path = Path("knowledge/catalogs/price_catalog.json")
+            if not path.exists():
+                return []
+            try:
+                return json.loads(path.read_text(encoding="utf-8"))
+            except Exception:
+                return []
+
+        # resolve article
+        article_number = None
+        if payload.customer_email:
+            fav = get_favorite_article(payload.customer_email, ref)
+            if fav:
+                article_number = fav
+
+        if not article_number:
+            refmap = _load_material_ref_map()
+            rawmap = refmap.get(ref) or refmap.get(str(ref).upper())
+            if rawmap:
+                article_number = rawmap
+
+        article_name = ""
+        unit_from_catalog = unit
+        unit_price = 0
+
+        if article_number:
+            catalog = _load_price_catalog()
+            for row in catalog:
+                if str(row.get("artikelnummer")).strip() == str(article_number).strip():
+                    article_name = row.get("benamning") or ""
+                    unit_from_catalog = row.get("enhet") or "st"
+                    unit_price = row.get("gn_pris") or 0
+                    break
+
+        enriched.append({
+            "raw": raw,
+            "parsed_core": parsed_core,
+            "qty": qty,
+            "unit": unit,
+            "material_ref": ref,
+            "article_number": article_number,
+            "article_name": article_name,
+            "unit_price": unit_price,
+            "unit_from_catalog": unit_from_catalog,
+        })
+
+    return {
+        "free_text": payload.text,
+        "items": enriched,
+    }
+
+
+# ==============================
+# GET SINGLE QUOTE
+# ==============================
+
+@router.get("/{quote_id}")
 def get_quote(quote_id: int, session: Session = Depends(get_session)):
     q = session.get(Quote, quote_id)
     if not q:
         raise HTTPException(status_code=404, detail="Offerten hittades inte")
     return _serialize_quote(q, session)
-
-
-def _load_material_ref_map():
-    from pathlib import Path
-    import json
-
-    path = Path("knowledge/catalogs/material_ref_map.json")
-    if not path.exists():
-        return {}
-
-    try:
-        with path.open("r", encoding="utf-8") as f:
-            return json.load(f)
-    except Exception:
-        return {}
-
-
-def _load_price_catalog():
-    from pathlib import Path
-    import json
-
-    path = Path("knowledge/catalogs/price_catalog.json")
-    if not path.exists():
-        return []
-
-    try:
-        with path.open("r", encoding="utf-8") as f:
-            return json.load(f)
-    except Exception:
-        return []
-
-
-def _resolve_article_info(material_ref, customer_id):
-    """
-    Slår upp artikelnummer + namn + pris för en given material_ref.
-    Favoriter per kund (om de finns) går först, sedan material_ref_map.
-    """
-    from src.services.favorites import get_favorite_article
-
-    material_ref = (material_ref or "").strip()
-    if not material_ref:
-        return None
-
-    # 1) Försök med favorit per kund
-    article_number = None
-    if customer_id:
-        fav = get_favorite_article(customer_id, material_ref)
-        if fav:
-            article_number = str(fav).strip()
-
-    # 2) Fallback till global material_ref_map
-    if not article_number:
-        ref_map = _load_material_ref_map()
-        raw = ref_map.get(material_ref) or ref_map.get(material_ref.upper())
-        if raw:
-            article_number = str(raw).strip()
-
-    if not article_number:
-        return None
-
-    # 3) Slå upp i prislistan
-    catalog = _load_price_catalog()
-    for row in catalog:
-        art = str(row.get("artikelnummer") or "").strip()
-        if art == article_number:
-            return {
-                "article_number": article_number,
-                "article_name": row.get("benamning") or row.get("name") or "",
-                "unit": row.get("enhet") or "st",
-                "unit_price": row.get("gn_pris") or 0,
-            }
-
-    # Om vi inte hittar raden i katalogen men har artikelnummer, returnera ändå det
-    return {
-        "article_number": article_number,
-        "article_name": "",
-        "unit": "st",
-        "unit_price": 0,
-    }
-
-
-class MaterialParseIn(BaseModel):
-    """
-    Payload till /quotes/material-parse.
-    Innehåller rå materialtext + ev. customer_email
-    för att vi ska kunna använda favoriter per kund.
-    """
-    text: str
-    customer_email: str | None = None
-
-
-@router.post(
-    "/material-parse",
-    summary="Tolkar materialtext till material_items",
-)
-def quote_material_parse(payload: MaterialParseIn):
-    """
-    Tar emot rå materialtext, t.ex.
-      "10m 3x1,5, 15m 20mm rör, 3 vägguttag, 2 strömbrytare"
-
-    Steg:
-      1) material_list_parser.parse_material_text → { free_text, items[...] }
-      2) För varje item: försök slå upp artikelnummer, namn, pris via:
-         - favorit per kund (customer_email)
-         - material_ref_map.json
-         - price_catalog.json
-      3) Returnera enriched struktur till frontend.
-    """
-    parsed = _parse_material_text(payload.text)
-    items = parsed.get("items") or []
-
-    enriched_items = []
-    for item in items:
-        mat_ref = item.get("material_ref")
-        qty = item.get("qty")
-        unit = item.get("unit")
-        raw = item.get("raw")
-        parsed_core = item.get("parsed_core")
-
-        article_info = _resolve_article_info(
-            material_ref=mat_ref,
-            customer_id=payload.customer_email,
-        )
-
-        enriched_items.append({
-            "raw": raw,
-            "parsed_core": parsed_core,
-            "qty": qty,
-            "unit": unit,
-            "material_ref": mat_ref,
-            "article_number": article_info["article_number"] if article_info else None,
-            "article_name": article_info["article_name"] if article_info else None,
-            "unit_price": article_info["unit_price"] if article_info else 0,
-            "unit_from_catalog": article_info["unit"] if article_info else unit,
-        })
-
-    return {
-        "free_text": payload.text,
-        "items": enriched_items,
-    }
