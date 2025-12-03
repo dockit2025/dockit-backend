@@ -96,7 +96,7 @@ def _get_company_settings() -> dict:
         "iban": "",
         "org_number": "5590-0000",
         "f_tax_text": "Ja",
-        "logo_url": "",
+        "logo_url": "/static/dockit-logo.png",
     }
 
 
