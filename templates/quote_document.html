@@ -12,30 +12,33 @@
       margin: 0;
       padding: 0;
       font-family: Arial, Helvetica, sans-serif;
-      font-size: 12px;
+      font-size: 11px;
       color: #000;
     }
 
     .page {
-      width: 800px;
+      width: 780px;           /* ungefär A4-bredd i px */
       margin: 0 auto;
-      padding: 40px 40px 30px 40px;
+      padding: 20px 40px 25px 40px;
     }
+
+    /* HEADER ---------------------------------------------------- */
 
     .header {
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
+      margin-bottom: 12px;
     }
 
     .logo {
-      max-width: 520px;
-      max-height: 240px;
+      max-width: 260px;
+      max-height: 120px;
     }
 
     .title {
-      text-align: center;
       flex: 1;
+      text-align: center;
       font-size: 20px;
       font-weight: bold;
       margin-top: 10px;
@@ -49,6 +52,7 @@
 
     .meta-box table {
       width: 100%;
+      border-collapse: collapse;
     }
 
     .meta-box td {
@@ -68,136 +72,140 @@
     }
 
     .spacer-large {
-      height: 40px;
+      height: 28px;
     }
 
+    /* AVSÄNDAREADRESS ------------------------------------------ */
+
     .company-address {
-      text-align:left;
-      font-size:11px;
-      margin-bottom:40px;
+      text-align: left;
+      font-size: 11px;
+      margin-bottom: 18px;
+      line-height: 1.3;
     }
+
+    /* KUND + REFERENSBLOCK -------------------------------------- */
 
     .customer-info {
       display: flex;
       justify-content: space-between;
       font-size: 11px;
+      margin-bottom: 26px;
     }
 
     .customer-block {
-      max-width: 45%;
+      flex: 1;
     }
 
     .customer-block h4 {
-      margin: 0 0 4px 0;
+      margin: 0 0 2px 0;
       font-size: 11px;
       font-weight: bold;
     }
 
     .customer-block p {
-      margin: 0;
-      line-height: 1.3;
+      margin: 0 0 6px 0;
     }
 
-    .table-section {
-      margin-top: 40px;
-    }
+    /* ARTIKELTABELL --------------------------------------------- */
 
-    table.items {
+    .items-table {
       width: 100%;
       border-collapse: collapse;
+      margin-top: 8px;
       font-size: 11px;
     }
 
-    table.items thead tr {
+    .items-table thead th {
       border-bottom: 1px solid #000;
-    }
-
-    table.items th {
-      text-align: left;
-      padding: 4px 3px;
+      padding: 4px 4px;
       font-weight: bold;
+      text-align: left;
     }
 
-    table.items td {
-      padding: 4px 3px;
+    .items-table thead th.col-levant,
+    .items-table thead th.col-apris,
+    .items-table thead th.col-summa {
+      text-align: right;
+    }
+
+    .items-table tbody td {
+      padding: 3px 4px;
+      border-bottom: 0.5px solid #ddd;
       vertical-align: top;
     }
 
-    .col-artnr {
-      width: 8%;
-    }
-
-    .col-benamning {
-      width: 52%;
-    }
-
-    .col-levant {
-      width: 10%;
-      text-align: right;
-    }
-
-    .col-apris {
-      width: 15%;
-      text-align: right;
-    }
-
-    .col-summa {
-      width: 15%;
-      text-align: right;
-    }
-
-    .summary-section {
-      margin-top: 40px;
-      display: flex;
-      justify-content: flex-end;
-      font-size: 11px;
-    }
-
-    .summary-table {
-      border-collapse: collapse;
-      min-width: 260px;
-    }
-
-    .summary-table td {
-      padding: 3px 4px;
-    }
-
-    .summary-label {
-      text-align: left;
-    }
-
-    .summary-value {
+    .items-table tbody td.col-levant,
+    .items-table tbody td.col-apris,
+    .items-table tbody td.col-summa {
       text-align: right;
       white-space: nowrap;
     }
 
-    .summary-total-row {
-      border-top: 1px solid #000;
+    .items-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* SUMMARUTA ------------------------------------------------- */
+
+    .summary-box {
+      margin-top: 8px;
+      width: 260px;
+      margin-left: auto;
+      font-size: 11px;
+    }
+
+    .summary-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .summary-label {
+      text-align: left;
+      padding: 2px 0;
+    }
+
+    .summary-value {
+      text-align: right;
+      padding: 2px 0;
+      white-space: nowrap;
+    }
+
+    .summary-total-row .summary-label,
+    .summary-total-row .summary-value {
       font-weight: bold;
     }
 
-    .note-text {
-      margin-top: 20px;
-      font-size: 10px;
+    .summary-total-row:first-of-type .summary-label,
+    .summary-total-row:first-of-type .summary-value {
+      border-top: 1px solid #000;
+      padding-top: 4px;
+      margin-top: 2px;
     }
+
+    /* NOT-RAD --------------------------------------------------- */
+
+    .note-text {
+      margin-top: 22px;
+      font-size: 11px;
+    }
+
+    /* FOOTER ---------------------------------------------------- */
 
     .footer {
       margin-top: 40px;
       border-top: 1px solid #000;
-      padding-top: 8px;
-      font-size: 9px;
+      padding-top: 6px;
+      font-size: 10px;
+    }
+
+    .footer-columns {
       display: flex;
       justify-content: space-between;
-      flex-wrap: wrap;
     }
 
-    .footer-block {
-      margin-right: 30px;
-      margin-top: 4px;
-    }
-
-    .footer-block p {
-      margin: 0;
+    .footer-column {
+      width: 33%;
       line-height: 1.3;
     }
   </style>
@@ -208,7 +216,6 @@
     <!-- HEADER -->
     <div class="header">
       <div>
-        <!-- Byt ut src till din logotyp-URL eller base64 om/när vi vill -->
         <img class="logo" src="[[company_logo_url]]" alt="[[company_name]]" />
       </div>
 
@@ -249,42 +256,44 @@
       <div class="customer-block">
         <h4>Kundnr</h4>
         <p>[[customer_number]]</p>
-        <h4 style="margin-top:8px;">Ert VAT-nummer</h4>
+
+        <h4>Ert VAT-nummer</h4>
         <p>[[customer_vat_number]]</p>
       </div>
 
       <div class="customer-block">
         <h4>Vår referens</h4>
         <p>[[our_reference]]</p>
-        <h4 style="margin-top:8px;">Betalningsvillkor</h4>
+
+        <h4>Betalningsvillkor</h4>
         <p>[[payment_terms]]</p>
-        <h4 style="margin-top:8px;">Förfallodatum</h4>
+
+        <h4>Förfallodatum</h4>
         <p>[[due_date]]</p>
-        <h4 style="margin-top:8px;">Dröjsmålsränta</h4>
+
+        <h4>Dröjsmålsränta</h4>
         <p>[[late_interest]]</p>
       </div>
     </div>
 
     <!-- ITEMS TABLE -->
-    <div class="table-section">
-      <table class="items">
-        <thead>
-          <tr>
-            <th class="col-artnr">Artnr</th>
-            <th class="col-benamning">Benämning</th>
-            <th class="col-levant">Lev ant</th>
-            <th class="col-apris">À-pris</th>
-            <th class="col-summa">Summa</th>
-          </tr>
-        </thead>
-        <tbody>
-          [[rows_html]]
-        </tbody>
-      </table>
-    </div>
+    <table class="items-table">
+      <thead>
+        <tr>
+          <th class="col-artnr">Artnr</th>
+          <th class="col-benamning">Benämning</th>
+          <th class="col-levant">Lev ant</th>
+          <th class="col-apris">À-pris</th>
+          <th class="col-summa">Summa</th>
+        </tr>
+      </thead>
+      <tbody>
+        [[rows_html]]
+      </tbody>
+    </table>
 
     <!-- SUMMARY -->
-    <div class="summary-section">
+    <div class="summary-box">
       <table class="summary-table">
         <tr>
           <td class="summary-label">Exkl. moms</td>
@@ -312,35 +321,35 @@
 
     <!-- FOOTER -->
     <div class="footer">
-      <div class="footer-block">
-        <p><strong>Adress</strong></p>
-        <p>[[company_name]]</p>
-        <p>[[company_address_line1]]</p>
-        <p>[[company_postcode]] [[company_city]]</p>
-        <p>[[company_country]]</p>
-      </div>
+      <div class="footer-columns">
+        <div class="footer-column">
+          <strong>Adress</strong><br />
+          [[company_name]]<br />
+          [[company_address_line1]]<br />
+          [[company_postcode]] [[company_city]]<br />
+          [[company_country]]
+        </div>
 
-      <div class="footer-block">
-        <p><strong>Telefon</strong></p>
-        <p>[[company_phone]]</p>
-        <p><strong>E-post</strong></p>
-        <p>[[company_email]]</p>
-      </div>
+        <div class="footer-column">
+          <strong>Telefon</strong><br />
+          [[company_phone]]<br />
+          <br />
+          <strong>E-post</strong><br />
+          [[company_email]]
+        </div>
 
-      <div class="footer-block">
-        <p><strong>Bankgiro</strong></p>
-        <p>[[company_bankgiro]]</p>
-        <p><strong>IBAN</strong></p>
-        <p>[[company_iban]]</p>
-      </div>
-
-      <div class="footer-block">
-        <p><strong>Organisationsnr</strong></p>
-        <p>[[company_org_number]]</p>
-        <p><strong>Säte</strong></p>
-        <p>[[company_city]]</p>
-        <p><strong>Godkänd för F-skatt</strong></p>
-        <p>[[company_f_tax_text]]</p>
+        <div class="footer-column">
+          <strong>Bankgiro</strong><br />
+          [[company_bankgiro]]<br />
+          <strong>IBAN</strong><br />
+          [[company_iban]]<br />
+          <strong>Organisationsnr</strong><br />
+          [[company_org_number]]<br />
+          <strong>Säte</strong><br />
+          [[company_city]]<br />
+          <strong>Godkänd för F-skatt</strong><br />
+          [[company_f_tax_text]]
+        </div>
       </div>
     </div>
 
