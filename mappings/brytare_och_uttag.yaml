@@ -83,7 +83,12 @@ tasks:
   - ersätta strömbrytare
   - gammal strömbrytare
   - uppgradera strömbrytare
-  time_source: manual
+  time_source: atl
+  atl_refs:
+    - moment: "272"
+      variant: 0
+    - moment: "272"
+      variant: 0
   atl_refs: []
   manual_time_minutes_per_unit: 20
   pricing_source: manual
@@ -157,7 +162,10 @@ tasks:
   label: Installera infällt vägguttag
   category: brytare_och_uttag
   manual_time_minutes_per_unit: 30
-  time_source: gpt
+  time_source: atl
+  atl_refs:
+    - moment: "272"
+      variant: 0
   description: Installation av nytt infällt jordat vägguttag, inklusive montering
     och inkoppling mot befintlig matning.
   quantity_type: per_unit
