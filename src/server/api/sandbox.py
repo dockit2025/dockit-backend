@@ -2,10 +2,14 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
+from sqlalchemy.orm import Session
 
 from src.server.api.quotes import verify_api_key
+from src.server.db.session import get_session
+from src.server.schemas.quote import QuoteDraftIn
+from src.services.quote_service import make_draft
 from src.services.ai_client import AIClient
 from src.services.ai_specs import load_task_generation_spec
 from src.services import task_suggestions as ts
@@ -29,12 +33,75 @@ class AcceptTaskRequest(BaseModel):
     source: Optional[str] = "sandbox_ui"
 
 
+class SandboxInterpretRequest(BaseModel):
+    """
+    Request till /sandbox/interpret från Sandbox-fliken i frontend.
+
+    Vi stödjer både:
+      - job_summary
+      - text
+    så att frontend kan skicka vilket som.
+    """
+    job_summary: Optional[str] = None
+    text: Optional[str] = None
+    customer_email: Optional[str] = None
+    customer_name: Optional[str] = None
+    apply_rot: bool = False  # Sandbox: som standard ingen ROT här
+
+
 router = APIRouter(
     prefix="/sandbox",
     tags=["sandbox"],
     dependencies=[Depends(verify_api_key)],
 )
 
+
+# =========================================================
+#  TOLKA JOBB (Sandbox)
+# =========================================================
+
+@router.post("/interpret")
+def sandbox_interpret(
+    payload: SandboxInterpretRequest,
+    session: Session = Depends(get_session),
+) -> Dict[str, Any]:
+    """
+    Tolkning av fri text i Sandlådan.
+
+    Flöde:
+      - Plocka ut job_summary (eller text)
+      - Bygg ett QuoteDraftIn med tomma lines
+      - Anropa make_draft → samma logik som i /quotes/draft
+      - Returnera resultatet direkt till UI
+
+    På så sätt får Sandbox exakt samma:
+      - tasks + tolkad arbetstid (ATL/manual)
+      - work/material-rader
+      - materialpriser via pricing.get_price
+      - interpretation-fältet med detaljer
+    """
+    summary = payload.job_summary or payload.text
+    if not summary or not summary.strip():
+        raise HTTPException(status_code=400, detail="job_summary eller text krävs")
+
+    draft_payload = QuoteDraftIn(
+        customer_name=payload.customer_name or "Sandbox-kund",
+        customer_email=payload.customer_email,
+        job_summary=summary.strip(),
+        lines=[],
+        apply_rot=payload.apply_rot,
+    )
+
+    result = make_draft(payload=draft_payload, session=session)
+
+    # Lägg till en liten markör så vi vet att svaret kommer från Sandlådan
+    result["sandbox"] = True
+    return result
+
+
+# =========================================================
+#  GPT-FÖRSLAG (missing_task_segments → GPT)
+# =========================================================
 
 @router.post("/gpt-suggest-tasks")
 def gpt_suggest_tasks(payload: GPTTaskSuggestRequest) -> Dict[str, Any]:

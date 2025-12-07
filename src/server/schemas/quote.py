@@ -10,7 +10,7 @@ class QuoteLineIn(BaseModel):
     ref: Optional[str] = None
 
 class QuoteDraftIn(BaseModel):
-    customer_name: str
+    customer_name: Optional[str] = None
     customer_email: Optional[str] = None
     job_summary: str
     lines: List[QuoteLineIn]
@@ -46,7 +46,7 @@ class MaterialDraftIn(BaseModel):
     Payload till /quotes/material-draft.
     Hantverkaren anger bara materialrader – inget job_summary.
     """
-    customer_name: str
+    customer_name: Optional[str] = None
     customer_email: Optional[str] = None
 
     apply_rot: bool = True               # ROT bara på arbete (som vanligt)
