@@ -444,3 +444,5 @@ if __name__ == "__main__":
     top = get_top_missing_material_refs(50)
     prompt = build_material_mapping_prompt(top)
     print(prompt)
+
+
