@@ -12,7 +12,6 @@ from src.server.schemas.quote import QuoteDraftIn
 from src.services.quote_service import make_draft
 from src.services.ai_client import AIClient
 from src.services.ai_specs import load_task_generation_spec
-from src.services.ai_specs_text_cleaner import load_text_cleaner_spec
 from src.services import task_suggestions as ts
 from src.services import ai_suggestions  # NYTT – ATL-hjälp
 from src.services.atl_lookup import get_atl_time_minutes
@@ -58,15 +57,6 @@ class SandboxInterpretRequest(BaseModel):
     apply_rot: bool = False  # Sandbox: som standard ingen ROT här
 
 
-class TextCleanerRequest(BaseModel):
-    """
-    Request till /sandbox/clean-text.
-
-    Tar emot en fri jobbeskrivning som en enda sträng.
-    """
-    job_text: str
-
-
 router = APIRouter(
     prefix="/sandbox",
     tags=["sandbox"],
@@ -90,13 +80,8 @@ def sandbox_interpret(
       - Plocka ut job_summary (eller text)
       - Bygg ett QuoteDraftIn med tomma lines
       - Anropa make_draft → samma logik som i /quotes/draft
+      - Rensa missing_segments från uppenbart brus (hej/tack)
       - Returnera resultatet direkt till UI
-
-    På så sätt får Sandbox exakt samma:
-      - tasks + tolkad arbetstid (ATL/manual)
-      - work/material-rader
-      - materialpriser via pricing.get_price
-      - interpretation-fältet med detaljer
     """
     summary = payload.job_summary or payload.text
     if not summary or not summary.strip():
@@ -112,44 +97,41 @@ def sandbox_interpret(
 
     result = make_draft(payload=draft_payload, session=session)
 
+    # Rensa missing_segments från uppenbart brus (hälsningar, tackfraser)
+    try:
+        interpretation = result.get("interpretation") or {}
+        raw_missing = interpretation.get("missing_segments") or []
+
+        if isinstance(raw_missing, list):
+            filtered_missing: List[str] = []
+
+            for s in raw_missing:
+                text = str(s or "").strip()
+                if not text:
+                    continue
+
+                lower = text.lower()
+                words = lower.split()
+
+                # Filtrera bort korta hälsningar, t.ex. "hej", "hej kunden"
+                if words and words[0] in {"hej", "hejsan", "tjena"} and len(words) <= 5:
+                    continue
+
+                # Filtrera bort korta tackfraser, t.ex. "tack på förhand"
+                if "tack" in words and len(words) <= 6:
+                    continue
+
+                filtered_missing.append(text)
+
+            interpretation["missing_segments"] = filtered_missing
+            result["interpretation"] = interpretation
+    except Exception:
+        # Vi vill inte att Sandlådan kraschar bara för att rensningen strular
+        pass
+
     # Lägg till en liten markör så vi vet att svaret kommer från Sandlådan
     result["sandbox"] = True
     return result
-
-
-# =========================================================
-#  TEXT CLEANER – rensa fri jobbeskrivning till segment
-# =========================================================
-
-@router.post("/clean-text")
-def sandbox_clean_text(payload: TextCleanerRequest) -> Dict[str, Any]:
-    """
-    Rensar en fri jobbeskrivning och plockar ut rena arbetsmoment-segment.
-
-    Flöde:
-      - Tar emot job_text som en sträng
-      - Använder ai_spec_text_cleaner.md via load_text_cleaner_spec
-      - Anropar AIClient.generate_text_segments
-      - Returnerar clean_segments direkt till frontend
-
-    Detta är ett säkert försteg:
-      - Inga arbetsmoment skapas
-      - Inga tider sätts
-      - Endast textsegmenten rensas/filtreras
-    """
-    job_text = (payload.job_text or "").strip()
-    if not job_text:
-        raise HTTPException(status_code=400, detail="job_text krävs")
-
-    spec = load_text_cleaner_spec()
-    client = AIClient()
-    gpt_output: Dict[str, Any] = client.generate_text_segments(spec=spec, job_text=job_text)
-
-    clean_segments = gpt_output.get("clean_segments") or []
-    if not isinstance(clean_segments, list):
-        clean_segments = []
-
-    return {"clean_segments": clean_segments}
 
 
 # =========================================================
