@@ -11,7 +11,8 @@ from src.server.db.session import get_session
 from src.server.schemas.quote import QuoteDraftIn
 from src.services.quote_service import make_draft
 from src.services.ai_client import AIClient
-from src.services.ai_specs import load_task_generation_spec, load_text_cleaner_spec
+from src.services.ai_specs import load_task_generation_spec
+from src.services.ai_specs_text_cleaner import load_text_cleaner_spec
 from src.services import task_suggestions as ts
 from src.services import ai_suggestions  # NYTT – ATL-hjälp
 from src.services.atl_lookup import get_atl_time_minutes
@@ -57,12 +58,11 @@ class SandboxInterpretRequest(BaseModel):
     apply_rot: bool = False  # Sandbox: som standard ingen ROT här
 
 
-class TextCleanRequest(BaseModel):
+class TextCleanerRequest(BaseModel):
     """
     Request till /sandbox/clean-text.
 
-    Tar emot en fri jobbeskrivning och returnerar
-    rena arbetsmoment-segment i clean_segments.
+    Tar emot en fri jobbeskrivning som en enda sträng.
     """
     job_text: str
 
@@ -118,42 +118,38 @@ def sandbox_interpret(
 
 
 # =========================================================
-#  TEXTRNSNING MED GPT (försteg innan GPT-taskförslag)
+#  TEXT CLEANER – rensa fri jobbeskrivning till segment
 # =========================================================
 
 @router.post("/clean-text")
-def clean_text(payload: TextCleanRequest) -> Dict[str, Any]:
+def sandbox_clean_text(payload: TextCleanerRequest) -> Dict[str, Any]:
     """
-    Enkel textrensare för fri jobbeskrivning.
+    Rensar en fri jobbeskrivning och plockar ut rena arbetsmoment-segment.
 
-    - Tar emot job_text
-    - Använder GPT-specen ai_spec_text_cleaner.md
-    - Returnerar en lista clean_segments (list[str]) med
-      bara konkreta arbetsmoment, rensat från hälsningar osv.
+    Flöde:
+      - Tar emot job_text som en sträng
+      - Använder ai_spec_text_cleaner.md via load_text_cleaner_spec
+      - Anropar AIClient.generate_text_segments
+      - Returnerar clean_segments direkt till frontend
+
+    Detta är ett säkert försteg:
+      - Inga arbetsmoment skapas
+      - Inga tider sätts
+      - Endast textsegmenten rensas/filtreras
     """
-    raw_text = (payload.job_text or "").strip()
-    if not raw_text:
+    job_text = (payload.job_text or "").strip()
+    if not job_text:
         raise HTTPException(status_code=400, detail="job_text krävs")
 
     spec = load_text_cleaner_spec()
     client = AIClient()
+    gpt_output: Dict[str, Any] = client.generate_text_segments(spec=spec, job_text=job_text)
 
-    gpt_input: Dict[str, Any] = {
-        "job_text": raw_text,
-    }
-
-    gpt_output: Dict[str, Any] = client.generate_tasks(spec=spec, gpt_input=gpt_input)
     clean_segments = gpt_output.get("clean_segments") or []
+    if not isinstance(clean_segments, list):
+        clean_segments = []
 
-    out_segments: List[str] = []
-    if isinstance(clean_segments, list):
-        for seg in clean_segments:
-            if isinstance(seg, str):
-                s = seg.strip()
-                if s:
-                    out_segments.append(s)
-
-    return {"clean_segments": out_segments}
+    return {"clean_segments": clean_segments}
 
 
 # =========================================================
@@ -240,7 +236,6 @@ def gpt_suggest_tasks(payload: GPTTaskSuggestRequest) -> Dict[str, Any]:
     raw_suggested = gpt_output.get("suggested_tasks") or []
     if not isinstance(raw_suggested, list):
         raw_suggested = []
-
 
     # -----------------------------------------------------
     # 3) Filtrera bort tasks som redan finns i mappings
