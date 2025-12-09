@@ -11,7 +11,7 @@ from src.server.db.session import get_session
 from src.server.schemas.quote import QuoteDraftIn
 from src.services.quote_service import make_draft
 from src.services.ai_client import AIClient
-from src.services.ai_specs import load_task_generation_spec
+from src.services.ai_specs import load_task_generation_spec, load_text_cleaner_spec
 from src.services import task_suggestions as ts
 from src.services import ai_suggestions  # NYTT – ATL-hjälp
 from src.services.atl_lookup import get_atl_time_minutes
@@ -55,6 +55,16 @@ class SandboxInterpretRequest(BaseModel):
     customer_email: Optional[str] = None
     customer_name: Optional[str] = None
     apply_rot: bool = False  # Sandbox: som standard ingen ROT här
+
+
+class TextCleanRequest(BaseModel):
+    """
+    Request till /sandbox/clean-text.
+
+    Tar emot en fri jobbeskrivning och returnerar
+    rena arbetsmoment-segment i clean_segments.
+    """
+    job_text: str
 
 
 router = APIRouter(
@@ -105,6 +115,45 @@ def sandbox_interpret(
     # Lägg till en liten markör så vi vet att svaret kommer från Sandlådan
     result["sandbox"] = True
     return result
+
+
+# =========================================================
+#  TEXTRNSNING MED GPT (försteg innan GPT-taskförslag)
+# =========================================================
+
+@router.post("/clean-text")
+def clean_text(payload: TextCleanRequest) -> Dict[str, Any]:
+    """
+    Enkel textrensare för fri jobbeskrivning.
+
+    - Tar emot job_text
+    - Använder GPT-specen ai_spec_text_cleaner.md
+    - Returnerar en lista clean_segments (list[str]) med
+      bara konkreta arbetsmoment, rensat från hälsningar osv.
+    """
+    raw_text = (payload.job_text or "").strip()
+    if not raw_text:
+        raise HTTPException(status_code=400, detail="job_text krävs")
+
+    spec = load_text_cleaner_spec()
+    client = AIClient()
+
+    gpt_input: Dict[str, Any] = {
+        "job_text": raw_text,
+    }
+
+    gpt_output: Dict[str, Any] = client.generate_tasks(spec=spec, gpt_input=gpt_input)
+    clean_segments = gpt_output.get("clean_segments") or []
+
+    out_segments: List[str] = []
+    if isinstance(clean_segments, list):
+        for seg in clean_segments:
+            if isinstance(seg, str):
+                s = seg.strip()
+                if s:
+                    out_segments.append(s)
+
+    return {"clean_segments": out_segments}
 
 
 # =========================================================
@@ -191,6 +240,7 @@ def gpt_suggest_tasks(payload: GPTTaskSuggestRequest) -> Dict[str, Any]:
     raw_suggested = gpt_output.get("suggested_tasks") or []
     if not isinstance(raw_suggested, list):
         raw_suggested = []
+
 
     # -----------------------------------------------------
     # 3) Filtrera bort tasks som redan finns i mappings
@@ -294,5 +344,3 @@ def accept_task(payload: AcceptTaskRequest) -> Dict[str, Any]:
     ts.apply_suggested_tasks(gpt_output)
 
     return {"status": "ok", "source": event_payload["source"]}
-
-

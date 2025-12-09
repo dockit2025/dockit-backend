@@ -9,6 +9,7 @@ ROOT = Path(__file__).resolve().parents[2]
 # Paths till våra GPT-specar
 TASK_SPEC_PATH = ROOT / "documentation" / "ai_spec_task_generation.md"
 MATERIAL_SPEC_PATH = ROOT / "documentation" / "ai_spec_material_generation.md"
+TEXT_CLEANER_SPEC_PATH = ROOT / "documentation" / "ai_spec_text_cleaner.md"
 
 
 def load_task_generation_spec() -> str:
@@ -33,3 +34,15 @@ def load_material_generation_spec() -> str:
         )
 
     return MATERIAL_SPEC_PATH.read_text(encoding="utf-8")
+
+
+def load_text_cleaner_spec() -> str:
+    """
+    Läser in GPT-specen för textrensaren (fri jobbeskrivning -> clean_segments).
+    """
+    if not TEXT_CLEANER_SPEC_PATH.exists():
+        raise FileNotFoundError(
+            f"Hittar inte filen för text-cleaner-spec: {TEXT_CLEANER_SPEC_PATH}"
+        )
+
+    return TEXT_CLEANER_SPEC_PATH.read_text(encoding="utf-8")
