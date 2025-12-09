@@ -205,7 +205,7 @@ def apply_material_suggestions(suggestions: Dict[str, str]) -> None:
 
 
 # ------------------------------------------------------------
-#  ATL-INTEGRATION FÖR GPT/SANDBOX (NY FUNKTIONALITET)
+#  ATL-INTEGRATION FÖR GPT/SANDBOX
 # ------------------------------------------------------------
 
 ATL_PATH = ROOT / "knowledge" / "ATL" / "Del7_ATL_Total.csv"
@@ -237,7 +237,9 @@ def load_atl_rows() -> List[ATLRow]:
     """
     Läser Del7_ATL_Total.csv och returnerar en lista ATLRow.
 
-    Hanterar svenska kommatecken i tidskolumnerna (0,03 -> 0.03).
+    - Läser med UTF-8-SIG (hanterar BOM).
+    - Använder semikolon som delimiter (enligt din fil).
+    - Konverterar kommatecken i tidskolumnerna (0,03 -> 0.03).
 
     Om filen saknas returneras en tom lista (ingen hård crash).
     """
@@ -251,11 +253,9 @@ def load_atl_rows() -> List[ATLRow]:
         _ATL_CACHE = []
         return _ATL_CACHE
 
-    # Många ATL-exporter är semikolon- eller tabbseparerade.
-    # Vi försöker först med tabb. Vid problem kan vi byta till delimiter=";".
-    with ATL_PATH.open("r", encoding="utf-8") as f:
-        # Justera delimiter här om din fil är semikolonseparerad.
-        reader = csv.DictReader(f, delimiter="\t")
+    with ATL_PATH.open("r", encoding="utf-8-sig") as f:
+        # Din fil är semikolonseparerad
+        reader = csv.DictReader(f, delimiter=";")
         for raw in reader:
             if not raw:
                 continue
@@ -263,6 +263,7 @@ def load_atl_rows() -> List[ATLRow]:
             try:
                 arbetsmoment = int(raw.get("Arbetsmoment") or 0)
             except ValueError:
+                # hoppa över rader som inte har giltigt arbetsmoment
                 continue
 
             times: Dict[str, float] = {}
@@ -444,5 +445,3 @@ if __name__ == "__main__":
     top = get_top_missing_material_refs(50)
     prompt = build_material_mapping_prompt(top)
     print(prompt)
-
-
