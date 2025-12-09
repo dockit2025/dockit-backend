@@ -205,10 +205,41 @@ def apply_material_suggestions(suggestions: Dict[str, str]) -> None:
 
 
 # ------------------------------------------------------------
-#  ATL-INTEGRATION FÖR GPT/SANDBOX
+#  ATL-INTEGRATION FÖR GPT/SANDBOX (NY FUNKTIONALITET)
 # ------------------------------------------------------------
 
-ATL_PATH = ROOT / "knowledge" / "ATL" / "Del7_ATL_Total.csv"
+# Bas-katalog för knowledge
+KNOWLEDGE_DIR = ROOT / "knowledge"
+
+
+def _resolve_atl_path() -> Path:
+    """
+    Försöker hitta ATL-katalogen oavsett versaler/gemener (ATL/atl).
+
+    Viktigt eftersom du utvecklar på Windows (case-insensitive) men Render kör Linux
+    (case-sensitive). Då kan katalogen heta "atl" i repo men koden leta efter "ATL".
+    """
+    # 1) Leta efter en undermapp i knowledge/ där namnet (case-insensitivt) är "atl"
+    try:
+        if KNOWLEDGE_DIR.exists():
+            for p in KNOWLEDGE_DIR.iterdir():
+                if p.is_dir() and p.name.lower() == "atl":
+                    return p / "Del7_ATL_Total.csv"
+    except Exception:
+        # Skulle något gå fel här faller vi tillbaka på standardstigar nedan
+        pass
+
+    # 2) Fallback: testa några vanliga varianter
+    for name in ("ATL", "atl", "Atl"):
+        candidate = KNOWLEDGE_DIR / name / "Del7_ATL_Total.csv"
+        if candidate.exists():
+            return candidate
+
+    # 3) Sista utvägen – standardväg (kommer logga varning senare om filen inte finns)
+    return KNOWLEDGE_DIR / "ATL" / "Del7_ATL_Total.csv"
+
+
+ATL_PATH = _resolve_atl_path()
 
 
 @dataclass
@@ -237,9 +268,7 @@ def load_atl_rows() -> List[ATLRow]:
     """
     Läser Del7_ATL_Total.csv och returnerar en lista ATLRow.
 
-    - Läser med UTF-8-SIG (hanterar BOM).
-    - Använder semikolon som delimiter (enligt din fil).
-    - Konverterar kommatecken i tidskolumnerna (0,03 -> 0.03).
+    Hanterar svenska kommatecken i tidskolumnerna (0,03 -> 0.03).
 
     Om filen saknas returneras en tom lista (ingen hård crash).
     """
@@ -253,9 +282,10 @@ def load_atl_rows() -> List[ATLRow]:
         _ATL_CACHE = []
         return _ATL_CACHE
 
+    # Många ATL-exporter är semikolon- eller tabbseparerade.
+    # I ditt fall är den tabbseparerad, därför delimiter="\t".
     with ATL_PATH.open("r", encoding="utf-8-sig") as f:
-        # Din fil är semikolonseparerad
-        reader = csv.DictReader(f, delimiter=";")
+        reader = csv.DictReader(f, delimiter="\t")
         for raw in reader:
             if not raw:
                 continue
@@ -263,7 +293,6 @@ def load_atl_rows() -> List[ATLRow]:
             try:
                 arbetsmoment = int(raw.get("Arbetsmoment") or 0)
             except ValueError:
-                # hoppa över rader som inte har giltigt arbetsmoment
                 continue
 
             times: Dict[str, float] = {}
