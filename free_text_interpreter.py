@@ -547,6 +547,7 @@ def interpret_free_text(free_text: str) -> Dict[str, Any]:
     free_text_stripped = (free_text or "").strip()
 
     matched_tasks: List[Dict[str, Any]] = []
+    missing_segments: List[str] = []
 
     segments = _split_into_segments(free_text_stripped)
 
@@ -579,6 +580,7 @@ def interpret_free_text(free_text: str) -> Dict[str, Any]:
 
         if not segment_matched:
             _log_unmatched_segment(segment)
+            missing_segments.append(segment)
 
     matched_tasks = _dedupe_tasks(matched_tasks)
 
@@ -604,6 +606,7 @@ def interpret_free_text(free_text: str) -> Dict[str, Any]:
         "tasks": matched_tasks,
         "totals": totals,
         "meta": meta,
+        "missing_segments": missing_segments,
     }
 
     return result
@@ -622,3 +625,4 @@ if __name__ == "__main__":
 
     data = interpret_free_text(free_text_input)
     print(json.dumps(data, ensure_ascii=False, indent=2))
+

@@ -1,13 +1,19 @@
 from __future__ import annotations
 
+import csv
 import json
+import re
+from dataclasses import dataclass
 from collections import Counter
 from pathlib import Path
-from typing import Dict, List, Tuple
-
+from typing import Any, Dict, List, Optional, Tuple
 
 # Projektrot, t.ex. D:\dockit-ai
 ROOT = Path(__file__).resolve().parents[2]
+
+# ------------------------------------------------------------
+#  LOGGAR & MATERIAL-MAPPING (BEFINTLIG FUNKTIONALITET)
+# ------------------------------------------------------------
 
 LOG_DIR = ROOT / "knowledge" / "logs"
 MATERIAL_LOG_PATH = LOG_DIR / "missing_material_mappings.jsonl"
@@ -198,8 +204,241 @@ def apply_material_suggestions(suggestions: Dict[str, str]) -> None:
     )
 
 
+# ------------------------------------------------------------
+#  ATL-INTEGRATION FÖR GPT/SANDBOX (NY FUNKTIONALITET)
+# ------------------------------------------------------------
+
+ATL_PATH = ROOT / "knowledge" / "ATL" / "Del7_ATL_Total.csv"
+
+
+@dataclass
+class ATLRow:
+    arbetsmoment: int          # kolumn "Arbetsmoment"
+    grupp: str                 # "Grupp"
+    rad: str                   # "Rad"
+    moment_text: str           # "Moment/Typ/Sort"
+    underlag_text: str         # "Underlag/Variant"
+    enhet: str                 # "Enhet"
+    times: Dict[str, float]    # t.ex. {"0": 0.03, "-1": 0.06, ...}
+
+    @property
+    def id_str(self) -> str:
+        """
+        Unikt id som kan användas mot GPT och i YAML.
+        Just nu använder vi arbetsmoment-numret som sträng.
+        """
+        return str(self.arbetsmoment)
+
+
+_ATL_CACHE: Optional[List[ATLRow]] = None
+
+
+def load_atl_rows() -> List[ATLRow]:
+    """
+    Läser Del7_ATL_Total.csv och returnerar en lista ATLRow.
+
+    Hanterar svenska kommatecken i tidskolumnerna (0,03 -> 0.03).
+
+    Om filen saknas returneras en tom lista (ingen hård crash).
+    """
+    global _ATL_CACHE
+    if _ATL_CACHE is not None:
+        return _ATL_CACHE
+
+    rows: List[ATLRow] = []
+    if not ATL_PATH.exists():
+        print(f"[ai_suggestions] Varning: ATL-fil saknas: {ATL_PATH}")
+        _ATL_CACHE = []
+        return _ATL_CACHE
+
+    # Många ATL-exporter är semikolon- eller tabbseparerade.
+    # Vi försöker först med tabb. Vid problem kan vi byta till delimiter=";".
+    with ATL_PATH.open("r", encoding="utf-8") as f:
+        # Justera delimiter här om din fil är semikolonseparerad.
+        reader = csv.DictReader(f, delimiter="\t")
+        for raw in reader:
+            if not raw:
+                continue
+
+            try:
+                arbetsmoment = int(raw.get("Arbetsmoment") or 0)
+            except ValueError:
+                continue
+
+            times: Dict[str, float] = {}
+            for key, value in raw.items():
+                if key in (
+                    "Arbetsmoment",
+                    "Grupp",
+                    "Rad",
+                    "Moment/Typ/Sort",
+                    "Underlag/Variant",
+                    "Enhet",
+                ) or not value:
+                    continue
+
+                key_str = str(key).strip()
+                val_str = str(value).strip().replace(",", ".")
+                try:
+                    t = float(val_str)
+                except ValueError:
+                    continue
+                times[key_str] = t
+
+            row = ATLRow(
+                arbetsmoment=arbetsmoment,
+                grupp=str(raw.get("Grupp") or "").strip(),
+                rad=str(raw.get("Rad") or "").strip(),
+                moment_text=str(raw.get("Moment/Typ/Sort") or "").strip(),
+                underlag_text=str(raw.get("Underlag/Variant") or "").strip(),
+                enhet=str(raw.get("Enhet") or "").strip(),
+                times=times,
+            )
+            rows.append(row)
+
+    _ATL_CACHE = rows
+    print(f"[ai_suggestions] Läste {len(rows)} ATL-rader från {ATL_PATH}")
+    return rows
+
+
+def _tokenize(text: str) -> List[str]:
+    text = text.lower()
+    # enkel tokenisering – bokstäver/siffror inkl åäö
+    return re.findall(r"[a-z0-9åäö]+", text)
+
+
+def _similarity_score(segment: str, row: ATLRow) -> float:
+    """
+    Enkel heuristik för likhet mellan ett textsegment och en ATL-rad.
+
+    Vi använder token-overlap (Jaccard) + liten bonus för fler gemensamma ord.
+    Det här är bara ett filter för vilka rader GPT ska få – själva "intelligensen"
+    kommer i nästa steg hos GPT.
+    """
+    seg_tokens = set(_tokenize(segment))
+    if not seg_tokens:
+        return 0.0
+
+    text = f"{row.moment_text} {row.underlag_text} {row.enhet}"
+    row_tokens = set(_tokenize(text))
+    if not row_tokens:
+        return 0.0
+
+    overlap = seg_tokens & row_tokens
+    if not overlap:
+        return 0.0
+
+    # Jaccard + bonus
+    jaccard = len(overlap) / len(seg_tokens | row_tokens)
+    bonus = 0.02 * len(overlap)
+    return jaccard + bonus
+
+
+def find_atl_candidates_for_segment(
+    segment_text: str,
+    max_rows: int = 20,
+    min_score: float = 0.05,
+) -> List[ATLRow]:
+    """
+    Returnerar de ATL-rader som språkligt liknar segmentet mest.
+
+    max_rows: hur många rader vi max skickar till GPT per segment.
+    min_score: filter så att helt irrelevanta rader faller bort.
+    """
+    atl_rows = load_atl_rows()
+    if not atl_rows:
+        return []
+
+    scored: List[Tuple[float, ATLRow]] = []
+    for row in atl_rows:
+        score = _similarity_score(segment_text, row)
+        if score >= min_score:
+            scored.append((score, row))
+
+    # sortera bästa först
+    scored.sort(key=lambda x: x[0], reverse=True)
+    top = scored[:max_rows]
+    return [r for _, r in top]
+
+
+def build_gpt_input_with_atl_for_segments(
+    segments: List[Dict[str, Any]],
+    max_rows_per_segment: int = 20,
+) -> Dict[str, Any]:
+    """
+    Bygger gpt_input-struktur att skickas till AIClient.generate_tasks,
+    där varje segment får en lista över atl_candidates.
+
+    Struktur:
+
+    {
+      "segments": [...],
+      "atl_candidates": [
+        {
+          "segment_id": "...",
+          "segment_text": "...",
+          "rows": [
+            {
+              "arbetsmoment": 501,
+              "moment_id": "501",
+              "grupp": "501",
+              "rad": "10",
+              "moment_text": "...",
+              "underlag_text": "...",
+              "enhet": "m rör",
+              "times": { "0": 0.03, "-1": 0.06, ... }
+            },
+            ...
+          ]
+        },
+        ...
+      ]
+    }
+    """
+    atl_candidates: List[Dict[str, Any]] = []
+
+    for seg in segments:
+        seg_id = seg.get("segment_id") or ""
+        seg_text = seg.get("segment_text") or ""
+        if not seg_id or not seg_text:
+            continue
+
+        candidates = find_atl_candidates_for_segment(
+            segment_text=seg_text,
+            max_rows=max_rows_per_segment,
+        )
+
+        rows_payload: List[Dict[str, Any]] = []
+        for row in candidates:
+            rows_payload.append(
+                {
+                    "arbetsmoment": row.arbetsmoment,
+                    "moment_id": row.id_str,
+                    "grupp": row.grupp,
+                    "rad": row.rad,
+                    "moment_text": row.moment_text,
+                    "underlag_text": row.underlag_text,
+                    "enhet": row.enhet,
+                    "times": row.times,
+                }
+            )
+
+        atl_candidates.append(
+            {
+                "segment_id": seg_id,
+                "segment_text": seg_text,
+                "rows": rows_payload,
+            }
+        )
+
+    return {
+        "segments": segments,
+        "atl_candidates": atl_candidates,
+    }
+
+
 if __name__ == "__main__":
-    # Enkel CLI-hjälp:
+    # Enkel CLI-hjälp för materialdelen:
     # 1) Läs topp saknade refs
     # 2) Skriv ut prompt till konsolen
     top = get_top_missing_material_refs(50)

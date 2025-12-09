@@ -13,16 +13,23 @@ from src.services.quote_service import make_draft
 from src.services.ai_client import AIClient
 from src.services.ai_specs import load_task_generation_spec
 from src.services import task_suggestions as ts
+from src.services import ai_suggestions  # NYTT – ATL-hjälp
 
 
 class GPTTaskSuggestRequest(BaseModel):
     """
     Request till /sandbox/gpt-suggest-tasks.
 
-    limit: hur många senaste missing_task-segment som ska tas med
-           från missing_task_segments.jsonl (default 50).
+    limit:
+      - hur många senaste missing_task-segment som ska tas med
+        från missing_task_segments.jsonl (default 50).
+
+    segments: (NYTT)
+      - Om frontend skickar in en lista med rena texter (strängar),
+        använder vi dessa direkt istället för att läsa från loggen.
     """
     limit: Optional[int] = 50
+    segments: Optional[List[str]] = None
 
 
 class AcceptTaskRequest(BaseModel):
@@ -100,7 +107,7 @@ def sandbox_interpret(
 
 
 # =========================================================
-#  GPT-FÖRSLAG (missing_task_segments → GPT)
+#  GPT-FÖRSLAG (missing_task_segments → GPT + ATL)
 # =========================================================
 
 @router.post("/gpt-suggest-tasks")
@@ -109,6 +116,13 @@ def gpt_suggest_tasks(payload: GPTTaskSuggestRequest) -> Dict[str, Any]:
     Kör samma GPT-flöde som task_suggestions_review.py --gpt,
     men som HTTP-endpoint för Sandlådan.
 
+    ATL-first-tanke:
+      - Om payload.segments finns → använd JUST dessa segments
+        (t.ex. de missing_segments som kom från det här jobbet),
+        bygg GPT-input med ATL-kandidater via ai_suggestions.
+      - Annars → läs som tidigare från missing_task_segments-loggen
+        och berika med ATL-kandidater där också.
+
     Viktigt:
       - Denna endpoint LOGGAR INTE något permanent.
       - Den returnerar bara förslag till UI.
@@ -116,17 +130,59 @@ def gpt_suggest_tasks(payload: GPTTaskSuggestRequest) -> Dict[str, Any]:
     """
     limit = payload.limit or 50
 
-    # 1) Bygg GPT-input från loggade missing_task-segment
-    gpt_input: Dict[str, Any] = ts.build_gpt_input_from_missing_segments(limit=limit)
-    segments: List[Dict[str, Any]] = gpt_input.get("segments") or []
+    # -----------------------------------------------------
+    # 1) Bestäm vilka segments vi skickar till GPT
+    # -----------------------------------------------------
+    segments: List[Dict[str, Any]] = []
+    note: Optional[str] = None
+
+    if payload.segments:
+        # Frontend har skickat in segment-texter direkt.
+        # Bygg upp segment-objekt i samma format som logg-baserade.
+        for idx, text in enumerate(payload.segments):
+            if not text or not str(text).strip():
+                continue
+            segments.append(
+                {
+                    "segment_id": f"ui_{idx + 1:04d}",
+                    "segment_text": str(text).strip(),
+                    "source_type": "sandbox_ui",
+                    "room_hint": None,
+                    "language": "sv",
+                    "existing_task_ref": None,
+                }
+            )
+
+        # Bygg GPT-input baserat på dessa segments + ATL-kandidater
+        gpt_input: Dict[str, Any] = ai_suggestions.build_gpt_input_with_atl_for_segments(
+            segments
+        )
+    else:
+        # Behåll befintligt beteende: bygg GPT-input från loggade missing_task-segment
+        base_input: Dict[str, Any] = ts.build_gpt_input_from_missing_segments(limit=limit)
+        segments = base_input.get("segments") or []
+
+        if not segments:
+            return {
+                "gpt_input": base_input,
+                "suggested_tasks": [],
+                "note": "Inga missing_task-segment hittades i loggen.",
+            }
+
+        # Berika med ATL-kandidater för dessa segments
+        atl_enriched = ai_suggestions.build_gpt_input_with_atl_for_segments(segments)
+        gpt_input = {**base_input, "atl_candidates": atl_enriched.get("atl_candidates", [])}
+
     if not segments:
         return {
             "gpt_input": gpt_input,
             "suggested_tasks": [],
-            "note": "Inga missing_task-segment hittades i loggen.",
+            "note": "Inga segments skickades in och inga missing_task-segment hittades i loggen.",
         }
 
+    # -----------------------------------------------------
     # 2) Hämta spec + anropa GPT
+    # -----------------------------------------------------
     spec = load_task_generation_spec()
     client = AIClient()
     gpt_output: Dict[str, Any] = client.generate_tasks(spec=spec, gpt_input=gpt_input)
@@ -135,7 +191,9 @@ def gpt_suggest_tasks(payload: GPTTaskSuggestRequest) -> Dict[str, Any]:
     if not isinstance(raw_suggested, list):
         raw_suggested = []
 
+    # -----------------------------------------------------
     # 3) Filtrera bort tasks som redan finns i mappings
+    # -----------------------------------------------------
     filtered: List[Dict[str, Any]] = []
 
     # Cache för redan laddade mapping-filer per path
@@ -169,10 +227,19 @@ def gpt_suggest_tasks(payload: GPTTaskSuggestRequest) -> Dict[str, Any]:
 
         filtered.append(s)
 
+    if not filtered and payload.segments:
+        note = (
+            "GPT försökte matcha segmenten mot ATL men hittade inga nya "
+            "arbetsmoment som inte redan finns i mappings."
+        )
+
+    # -----------------------------------------------------
     # 4) Returnera data till Sandlådan (ingen loggning här)
+    # -----------------------------------------------------
     return {
         "gpt_input": gpt_input,
         "suggested_tasks": filtered,
+        "note": note,
     }
 
 
@@ -181,8 +248,14 @@ def accept_task(payload: AcceptTaskRequest) -> Dict[str, Any]:
     """
     Anropas när användaren klickar 'Acceptera' på en GPT-föreslagen task i Sandlådan.
 
-    Sparar INTE direkt till YAML, utan loggar till task_suggestions.jsonl
-    som en del av "förslagslistan" för senare review/patch.
+    Just nu:
+      - Sparar INTE direkt till YAML
+      - Loggar till task_suggestions.jsonl
+        som en del av "förslagslistan" för senare review/patch.
+
+    Nästa steg i vår plan:
+      - Koppla detta vidare till task_suggestions.py så att
+        accepterade tasks kan skrivas in i mappings/*.
     """
     task = payload.task or {}
     if not isinstance(task, dict) or not (task.get("task_ref") or "").strip():
