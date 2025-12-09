@@ -192,13 +192,39 @@ def _convert_suggested_task_to_mapping_task(s: Dict[str, Any]) -> Dict[str, Any]
     category = (s.get("category") or "ovrigt").strip() or "ovrigt"
 
     # Tid: timmar -> minuter
+    time_source_raw = (s.get("time_source") or "").strip().lower()
+    minutes_from_atl = None
+    try:
+        tmp = float(s.get("time_minutes_per_unit") or 0.0)
+        if tmp > 0:
+            minutes_from_atl = tmp
+    except Exception:
+        minutes_from_atl = None
+
     hours = 0.0
     try:
         hours = float(s.get("estimated_hours_per_unit") or 0.0)
     except Exception:
         hours = 0.0
 
-    minutes = int(round(hours * 60)) if hours > 0 else 0
+    if minutes_from_atl is not None and time_source_raw == "atl":
+        minutes = int(round(minutes_from_atl))
+        time_source_value = "atl"
+    elif hours > 0:
+        minutes = int(round(hours * 60))
+        time_source_value = "gpt"
+    else:
+        minutes = 0
+        time_source_value = "gpt"
+
+    # ATL-info (om GPT föreslagit det)
+    atl_moment = (s.get("atl_moment") or "").strip() or None
+    atl_variant = s.get("atl_variant")
+    try:
+        if atl_variant is not None:
+            atl_variant = int(atl_variant)
+    except Exception:
+        atl_variant = None
 
     segment_text = (s.get("source_segment_text") or "").strip()
 
@@ -247,8 +273,10 @@ def _convert_suggested_task_to_mapping_task(s: Dict[str, Any]) -> Dict[str, Any]
         "task_id": task_ref or title_sv.replace(" ", "_").upper(),
         "label": title_sv or task_ref or "Nytt arbetsmoment",
         "category": category,
+        "atl_moment": atl_moment,
+        "atl_variant": atl_variant,
         "manual_time_minutes_per_unit": minutes,
-        "time_source": "gpt",
+        "time_source": time_source_value,
         "description": description_sv or None,
         "quantity_type": s.get("quantity_type") or "per_unit",
         "default_unit": s.get("default_unit") or "st",
@@ -311,3 +339,4 @@ if __name__ == "__main__":
     apply_suggested_tasks(gpt_output)
 
     print("OK: suggestions logged + written to mapping files.")
+

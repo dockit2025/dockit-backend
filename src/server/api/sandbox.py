@@ -14,6 +14,7 @@ from src.services.ai_client import AIClient
 from src.services.ai_specs import load_task_generation_spec
 from src.services import task_suggestions as ts
 from src.services import ai_suggestions  # NYTT – ATL-hjälp
+from src.services.atl_lookup import get_atl_time_minutes
 
 
 class GPTTaskSuggestRequest(BaseModel):
@@ -227,6 +228,26 @@ def gpt_suggest_tasks(payload: GPTTaskSuggestRequest) -> Dict[str, Any]:
 
         filtered.append(s)
 
+    # -----------------------------------------------------
+    # 3b) Sätt ATL-tider på förslagen om atl_moment/atl_variant finns
+    # -----------------------------------------------------
+    for s in filtered:
+        try:
+            atl_moment = (s.get("atl_moment") or "").strip()
+            atl_variant = s.get("atl_variant")
+            if atl_moment and atl_variant is not None:
+                variant_int = int(atl_variant)
+            else:
+                continue
+
+            minutes = get_atl_time_minutes(atl_moment, variant_int)
+            if minutes and minutes > 0:
+                s["time_source"] = "atl"
+                s["time_minutes_per_unit"] = minutes
+        except Exception:
+            # Vi ignorerar fel här så att ett enskilt fel inte stoppar hela svaret
+            continue
+
     if not filtered and payload.segments:
         note = (
             "GPT försökte matcha segmenten mot ATL men hittade inga nya "
@@ -248,24 +269,30 @@ def accept_task(payload: AcceptTaskRequest) -> Dict[str, Any]:
     """
     Anropas när användaren klickar 'Acceptera' på en GPT-föreslagen task i Sandlådan.
 
-    Just nu:
-      - Sparar INTE direkt till YAML
-      - Loggar till task_suggestions.jsonl
-        som en del av "förslagslistan" för senare review/patch.
-
-    Nästa steg i vår plan:
-      - Koppla detta vidare till task_suggestions.py så att
-        accepterade tasks kan skrivas in i mappings/*.
+    Nu:
+      - Loggar händelsen till task_suggestions.jsonl
+      - Skriver direkt in arbetsmomentet i mappings/*
+        via apply_suggested_tasks, med ATL-tider om de finns.
     """
     task = payload.task or {}
     if not isinstance(task, dict) or not (task.get("task_ref") or "").strip():
         return {"status": "ignored", "reason": "Ogiltig eller tom task"}
 
+    # Bygg GPT-lik struktur som apply_suggested_tasks förstår
+    gpt_output: Dict[str, Any] = {
+        "suggested_tasks": [task],
+    }
+
+    # 1) Logga till task_suggestions.jsonl (för historik/spårbarhet)
     event_payload: Dict[str, Any] = {
         "source": payload.source or "sandbox_ui",
         "suggested_tasks": [task],
     }
-
     ts.log_task_suggestions(event_payload)
 
+    # 2) Skriv direkt till YAML-mappings
+    ts.apply_suggested_tasks(gpt_output)
+
     return {"status": "ok", "source": event_payload["source"]}
+
+

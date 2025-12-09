@@ -312,3 +312,108 @@ Sammanfattning:
 - Undvik "mellanvarianter" och synonymer till redan etablerade standardmoment.
 
 
+------------------------------------------------------------
+TILLÄGG: ATL-KANDIDATER I INPUT (SANDBOX-LÄGE)
+------------------------------------------------------------
+
+Förutom "segments" kan input även innehålla nyckeln "atl_candidates".
+
+Struktur på input från systemet:
+
+{
+  "segments": [
+    {
+      "segment_id": "seg_001",
+      "segment_text": "Jag ska sätta upp tre utanpåliggande vägguttag på gipsvägg",
+      "source_type": "missing_task_segment",
+      "room_hint": "vardagsrum",
+      "language": "sv",
+      "existing_task_ref": null
+    },
+    ...
+  ],
+  "atl_candidates": [
+    {
+      "segment_id": "seg_001",
+      "segment_text": "Jag ska sätta upp tre utanpåliggande vägguttag på gipsvägg",
+      "rows": [
+        {
+          "arbetsmoment": 501,
+          "moment_id": "501",
+          "grupp": "501",
+          "rad": "10",
+          "moment_text": "Infällda rör (VP 16–20 mm)",
+          "underlag_text": "I vägg/tak",
+          "enhet": "m rör",
+          "times": {
+            "0": 0.5,
+            "-1": 0.75,
+            "-2": 1.0
+          }
+        },
+        ...
+      ]
+    },
+    ...
+  ]
+}
+
+För varje segment i "segments" kan det finnas en motsvarande post i "atl_candidates"
+med samma segment_id. Varje "row" beskriver ett möjligt ATL-arbetsmoment.
+
+Viktigt:
+
+- "moment_text" motsvarar kolumnen "Moment/Typ/Sort" i ATL-filen.
+- "times" är en dictionary där nycklarna (t.ex. "0", "-1") motsvarar variant-index
+  och värdet är tiden i timmar per enhet.
+
+
+------------------------------------------------------------
+TILLÄGG: ATL-FÄLT I TASK-FORMAT
+------------------------------------------------------------
+
+Förutom befintliga fält i TASK-FORMAT ska varje task-objekt även ha:
+
+- atl_moment
+  - Antingen:
+    - exakt samma text som "moment_text" från en vald ATL-rad
+      (dvs texten i kolumnen "Moment/Typ/Sort" i ATL-filen)
+  - eller:
+    - null om du inte hittar en lämplig ATL-rad
+
+- atl_variant
+  - Heltal som motsvarar en av nycklarna i "times" för vald ATL-rad, t.ex. 0, -1, -2
+  - Om du inte väljer någon variant ska detta vara null.
+
+Regler:
+
+1) Om du använder ATL-kandidater för ett segment:
+   - Välj den rad i atl_candidates.rows som bäst motsvarar arbetsmomentet.
+   - Kopiera dess "moment_text" rakt av till atl_moment.
+   - Välj en rimlig variantnyckel ur "times" (t.ex. "0" för normalvariant),
+     och sätt atl_variant till motsvarande heltal (t.ex. 0).
+
+2) Om du inte hittar någon rimlig ATL-rad:
+   - Sätt:
+     - "atl_moment": null
+     - "atl_variant": null
+
+3) estimated_hours_per_unit:
+   - Om du har valt en ATL-rad och variant kan du använda tiden från "times"
+     som grund (den är i timmar per enhet).
+   - Backend kommer senare att slå upp exakt tid i ATL-tabellen och kan
+     justera dina timmar, så detta värde behöver inte vara perfekt.
+
+4) Du får ALDRIG hitta på godtyckliga ATL-koder.
+   - Du ska endast använda moment_text och variantnycklar som faktiskt finns
+     i atl_candidates för aktuellt segment.
+   - Om inget passar bra ska du lämna atl_moment och atl_variant som null.
+
+Sammanfattning:
+
+- "atl_candidates" beskriver möjliga ATL-rader per segment.
+- Din uppgift är att, när det är rimligt, koppla varje föreslaget task till en
+  konkret ATL-rad genom att sätta:
+  - atl_moment = exakt "Moment/Typ/Sort"-texten (moment_text)
+  - atl_variant = heltalet som motsvarar nyckeln i "times" (t.ex. 0 eller -1)
+- Om du inte hittar en tydlig match ska båda vara null.
