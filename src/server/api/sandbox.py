@@ -199,7 +199,10 @@ def gpt_suggest_tasks(payload: GPTTaskSuggestRequest) -> Dict[str, Any]:
 
         # Berika med ATL-kandidater för dessa segments
         atl_enriched = ai_suggestions.build_gpt_input_with_atl_for_segments(segments)
-        gpt_input = {**base_input, "atl_candidates": atl_enriched.get("atl_candidates", [])}
+        gpt_input = {
+            **base_input,
+            "atl_candidates": atl_enriched.get("atl_candidates", []),
+        }
 
     if not segments:
         return {
@@ -370,3 +373,41 @@ def debug_atl() -> Dict[str, Any]:
         "sample_rows": rows_info,
         "error": error,
     }
+
+
+# =========================================================
+#  DEBUG-ENDPOINT FÖR MAPPINGS (PÅ RENDER/LOKALT)
+# =========================================================
+
+@router.get("/debug/mapping")
+def debug_mapping(category: str = "ovrigt") -> Dict[str, Any]:
+    """
+    Enkel debug-endpoint för att inspecta mappings-filerna.
+
+    Exempel:
+      GET /sandbox/debug/mapping?category=belysning
+      GET /sandbox/debug/mapping?category=kok
+
+    category:
+      - belysning
+      - brytare_och_uttag
+      - natverk_och_media
+      - ror_och_vp
+      - felsokning_och_service
+      - kok
+      - badrum
+      - ovrigt
+    """
+    try:
+        path = ts._category_to_mapping_path(category)
+        data = ts._load_mapping_file(path)
+        tasks = data.get("tasks") or []
+
+        return {
+            "category": category,
+            "path": str(path),
+            "tasks_count": len(tasks),
+            "tasks": tasks,
+        }
+    except Exception as e:  # noqa: BLE001
+        raise HTTPException(status_code=500, detail=str(e))
