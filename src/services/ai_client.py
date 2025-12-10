@@ -17,6 +17,7 @@ class AIClient:
     Hanterar:
       - Task suggestions
       - Material suggestions
+      - Textrensning av fri jobbeskrivning (text cleaner)
     """
 
     def _safe_json_loads(self, raw: str, *, context: str) -> Dict[str, Any]:
@@ -125,6 +126,64 @@ class AIClient:
         return self.generate_task_suggestions(gpt_spec=spec, segments=gpt_input)
 
     # -------------------------------------------------------------
+    #  TEXT CLEANER – rensa fri jobbeskrivning till rena segment
+    # -------------------------------------------------------------
+    def generate_text_segments(
+        self, *, spec: str, job_text: str
+    ) -> Dict[str, Any]:
+        """
+        Använder textrensar-specen (ai_spec_text_cleaner.md) för att:
+          - ta in en fri jobbeskrivning
+          - plocka ut rena arbetsmoment-segment
+          - filtrera bort hälsningar, småprat osv.
+
+        Förväntad output enligt spec:
+          {
+            "clean_segments": [
+              { "id": "...", "text": "..." },
+              ...
+            ]
+          }
+        """
+        payload = {"job_text": job_text}
+
+        prompt = (
+            spec
+            + "\n\nHär är jobbeskrivningen i JSON-format:\n"
+            + json.dumps(payload, ensure_ascii=False, indent=2)
+        )
+
+        response = self.client.chat.completions.create(
+            model=self.model,
+            temperature=0.0,
+            response_format={"type": "json_object"},
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "Du är en assistent som rensar svensk jobbeskrivningstext "
+                        "från elektriker och returnerar rena segment i JSON-format."
+                    ),
+                },
+                {"role": "user", "content": prompt},
+            ],
+        )
+
+        raw = response.choices[0].message.content
+
+        # Hantera både str och ev. list-format från klienten
+        if isinstance(raw, list):
+            parts = []
+            for part in raw:
+                if isinstance(part, dict) and "text" in part:
+                    parts.append(str(part["text"]))
+                else:
+                    parts.append(str(part))
+            raw = "".join(parts)
+
+        return self._safe_json_loads(raw, context="text_cleaner")
+
+    # -------------------------------------------------------------
     #  MATERIAL SUGGESTIONS
     # -------------------------------------------------------------
     def generate_material_suggestions(
@@ -132,7 +191,7 @@ class AIClient:
     ) -> Dict[str, Any]:
         """
         Tar emot:
-          - instruction: kort GPT-instruktion (t.ex. byggd av build_material_mapping_prompt)
+          - instruction: kort GPT-instruktion (t.ex. byggt av build_material_mapping_prompt)
           - missing_material_refs: dict {ref: count}
         """
         payload = {
@@ -175,6 +234,3 @@ class AIClient:
 
 if __name__ == "__main__":
     print("AIClient-test: importera AIClient i andra moduler och använd där.")
-
-
-
