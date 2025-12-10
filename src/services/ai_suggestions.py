@@ -115,11 +115,6 @@ def build_material_mapping_prompt(top_refs: List[Tuple[str, int]]) -> str:
     """
     Bygger en textprompt som kan användas mot GPT (manuellt eller via API)
     för att få förslag på artikelnummer per material_ref.
-
-    Användning:
-        top_refs = get_top_missing_material_refs(50)
-        prompt = build_material_mapping_prompt(top_refs)
-        print(prompt)
     """
     if not top_refs:
         return (
@@ -205,41 +200,10 @@ def apply_material_suggestions(suggestions: Dict[str, str]) -> None:
 
 
 # ------------------------------------------------------------
-#  ATL-INTEGRATION FÖR GPT/SANDBOX (NY FUNKTIONALITET)
+#  ATL-INTEGRATION FÖR GPT/SANDBOX
 # ------------------------------------------------------------
 
-# Bas-katalog för knowledge
-KNOWLEDGE_DIR = ROOT / "knowledge"
-
-
-def _resolve_atl_path() -> Path:
-    """
-    Försöker hitta ATL-katalogen oavsett versaler/gemener (ATL/atl).
-
-    Viktigt eftersom du utvecklar på Windows (case-insensitive) men Render kör Linux
-    (case-sensitive). Då kan katalogen heta "atl" i repo men koden leta efter "ATL".
-    """
-    # 1) Leta efter en undermapp i knowledge/ där namnet (case-insensitivt) är "atl"
-    try:
-        if KNOWLEDGE_DIR.exists():
-            for p in KNOWLEDGE_DIR.iterdir():
-                if p.is_dir() and p.name.lower() == "atl":
-                    return p / "Del7_ATL_Total.csv"
-    except Exception:
-        # Skulle något gå fel här faller vi tillbaka på standardstigar nedan
-        pass
-
-    # 2) Fallback: testa några vanliga varianter
-    for name in ("ATL", "atl", "Atl"):
-        candidate = KNOWLEDGE_DIR / name / "Del7_ATL_Total.csv"
-        if candidate.exists():
-            return candidate
-
-    # 3) Sista utvägen – standardväg (kommer logga varning senare om filen inte finns)
-    return KNOWLEDGE_DIR / "ATL" / "Del7_ATL_Total.csv"
-
-
-ATL_PATH = _resolve_atl_path()
+ATL_PATH = ROOT / "knowledge" / "atl" / "Del7_ATL_Total.csv"
 
 
 @dataclass
@@ -268,7 +232,10 @@ def load_atl_rows() -> List[ATLRow]:
     """
     Läser Del7_ATL_Total.csv och returnerar en lista ATLRow.
 
-    Hanterar svenska kommatecken i tidskolumnerna (0,03 -> 0.03).
+    - Läser med encoding utf-8-sig (hanterar BOM).
+    - Använder semikolon som delimiter (;).
+    - Hoppar över rader där Arbetsmoment saknas eller inte är ett tal.
+    - Hoppar över rader där både Moment/Typ/Sort, Underlag/Variant och Enhet är tomma.
 
     Om filen saknas returneras en tom lista (ingen hård crash).
     """
@@ -282,18 +249,30 @@ def load_atl_rows() -> List[ATLRow]:
         _ATL_CACHE = []
         return _ATL_CACHE
 
-    # Många ATL-exporter är semikolon- eller tabbseparerade.
-    # I ditt fall är den tabbseparerad, därför delimiter="\t".
     with ATL_PATH.open("r", encoding="utf-8-sig") as f:
-        reader = csv.DictReader(f, delimiter="\t")
+        reader = csv.DictReader(f, delimiter=";")
         for raw in reader:
             if not raw:
                 continue
 
+            am_str = (raw.get("Arbetsmoment") or "").strip()
+            if not am_str:
+                continue
             try:
-                arbetsmoment = int(raw.get("Arbetsmoment") or 0)
+                arbetsmoment = int(am_str)
             except ValueError:
                 continue
+
+            moment_text = (raw.get("Moment/Typ/Sort") or "").strip()
+            underlag_text = (raw.get("Underlag/Variant") or "").strip()
+            enhet = (raw.get("Enhet") or "").strip()
+
+            # Hoppa över rader som i praktiken är tomma
+            if not (moment_text or underlag_text or enhet):
+                continue
+
+            grupp = (raw.get("Grupp") or "").strip()
+            rad = (raw.get("Rad") or "").strip()
 
             times: Dict[str, float] = {}
             for key, value in raw.items():
@@ -304,7 +283,9 @@ def load_atl_rows() -> List[ATLRow]:
                     "Moment/Typ/Sort",
                     "Underlag/Variant",
                     "Enhet",
-                ) or not value:
+                ):
+                    continue
+                if not value:
                     continue
 
                 key_str = str(key).strip()
@@ -317,11 +298,11 @@ def load_atl_rows() -> List[ATLRow]:
 
             row = ATLRow(
                 arbetsmoment=arbetsmoment,
-                grupp=str(raw.get("Grupp") or "").strip(),
-                rad=str(raw.get("Rad") or "").strip(),
-                moment_text=str(raw.get("Moment/Typ/Sort") or "").strip(),
-                underlag_text=str(raw.get("Underlag/Variant") or "").strip(),
-                enhet=str(raw.get("Enhet") or "").strip(),
+                grupp=grupp,
+                rad=rad,
+                moment_text=moment_text,
+                underlag_text=underlag_text,
+                enhet=enhet,
                 times=times,
             )
             rows.append(row)
@@ -367,7 +348,7 @@ def _similarity_score(segment: str, row: ATLRow) -> float:
 def find_atl_candidates_for_segment(
     segment_text: str,
     max_rows: int = 20,
-    min_score: float = 0.05,
+    min_score: float = 0.0,
 ) -> List[ATLRow]:
     """
     Returnerar de ATL-rader som språkligt liknar segmentet mest.
