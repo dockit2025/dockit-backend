@@ -294,33 +294,64 @@ def gpt_suggest_tasks(payload: GPTTaskSuggestRequest) -> Dict[str, Any]:
     }
 
 
+# =========================================================
+#  ACCEPTERA TASK (med möjlighet att rätta ATL + kategori)
+# =========================================================
+
 @router.post("/accept-task")
 def accept_task(payload: AcceptTaskRequest) -> Dict[str, Any]:
     """
     Anropas när användaren klickar 'Acceptera' på en GPT-föreslagen task i Sandlådan.
 
     Nu:
+      - Tar emot en ev. REDIGERAD task från UI (kategori, ATL-moment, variant, tider)
+      - Om ATL-info finns → räknar om tiden från ATL
       - Loggar händelsen till task_suggestions.jsonl
-      - Skriver direkt in arbetsmomentet i mappings/*
-        via apply_suggested_tasks, med ATL-tider om de finns.
+      - Skriver arbetsmomentet i mappings/* via apply_suggested_tasks.
     """
     task = payload.task or {}
     if not isinstance(task, dict) or not (task.get("task_ref") or "").strip():
         return {"status": "ignored", "reason": "Ogiltig eller tom task"}
 
-    # Bygg GPT-lik struktur som apply_suggested_tasks förstår
+    # -----------------------------------------------------
+    # 1) Om användaren har justerat ATL-moment/variant i UI:
+    #    räkna om tid från ATL-boken innan vi sparar.
+    # -----------------------------------------------------
+    try:
+        atl_moment_raw = task.get("atl_moment")
+        atl_variant_raw = task.get("atl_variant")
+
+        atl_moment = (atl_moment_raw or "").strip() if isinstance(atl_moment_raw, str) else ""
+        if atl_moment and atl_variant_raw is not None:
+            try:
+                variant_int = int(atl_variant_raw)
+                minutes = get_atl_time_minutes(atl_moment, variant_int)
+                if minutes and minutes > 0:
+                    # Sätt om time_source + tid per enhet baserat på ATL
+                    task["time_source"] = "atl"
+                    task["time_minutes_per_unit"] = minutes
+            except Exception:
+                # Om ATL-lookup failar vill vi inte krascha accept,
+                # utan bara låta GPT-tid stå kvar.
+                pass
+    except Exception:
+        pass
+
+    # -----------------------------------------------------
+    # 2) Bygg GPT-lik struktur som apply_suggested_tasks förstår
+    # -----------------------------------------------------
     gpt_output: Dict[str, Any] = {
         "suggested_tasks": [task],
     }
 
-    # 1) Logga till task_suggestions.jsonl (för historik/spårbarhet)
+    # 3) Logga till task_suggestions.jsonl (för historik/spårbarhet)
     event_payload: Dict[str, Any] = {
         "source": payload.source or "sandbox_ui",
         "suggested_tasks": [task],
     }
     ts.log_task_suggestions(event_payload)
 
-    # 2) Skriv direkt till YAML-mappings
+    # 4) Skriv direkt till YAML-mappings
     ts.apply_suggested_tasks(gpt_output)
 
     return {"status": "ok", "source": event_payload["source"]}
