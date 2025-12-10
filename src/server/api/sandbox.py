@@ -11,7 +11,10 @@ from src.server.db.session import get_session
 from src.server.schemas.quote import QuoteDraftIn
 from src.services.quote_service import make_draft
 from src.services.ai_client import AIClient
-from src.services.ai_specs import load_task_generation_spec
+from src.services.ai_specs import (
+    load_task_generation_spec,
+    load_text_cleaner_spec,
+)
 from src.services import task_suggestions as ts
 from src.services import ai_suggestions  # ATL-hjälp
 from src.services.atl_lookup import get_atl_time_minutes
@@ -55,6 +58,16 @@ class SandboxInterpretRequest(BaseModel):
     customer_email: Optional[str] = None
     customer_name: Optional[str] = None
     apply_rot: bool = False  # Sandbox: som standard ingen ROT här
+
+
+class TextCleanerRequest(BaseModel):
+    """
+    Request till /sandbox/clean-text.
+
+    Tar in en fri job_text och returnerar clean_segments enligt
+    textrensar-specen.
+    """
+    job_text: str
 
 
 router = APIRouter(
@@ -132,6 +145,52 @@ def sandbox_interpret(
     # Lägg till en liten markör så vi vet att svaret kommer från Sandlådan
     result["sandbox"] = True
     return result
+
+
+# =========================================================
+#  TEXTRENSARE – /sandbox/clean-text
+# =========================================================
+
+@router.post("/clean-text")
+def sandbox_clean_text(payload: TextCleanerRequest) -> Dict[str, Any]:
+    """
+    Använder textrensar-specen för att ta in fri job_text och
+    returnera rena arbetsmoment-segment.
+
+    Output:
+      {
+        "clean_segments": [ "segment 1", "segment 2", ... ]
+      }
+    """
+    job_text = (payload.job_text or "").strip()
+    if not job_text:
+        raise HTTPException(status_code=400, detail="job_text krävs")
+
+    try:
+        spec = load_text_cleaner_spec()
+        client = AIClient()
+        result = client.generate_text_segments(spec=spec, job_text=job_text)
+
+        clean_segments = result.get("clean_segments") or []
+        if not isinstance(clean_segments, list):
+            clean_segments = []
+
+        # Normalisera till lista av strängar
+        out: List[str] = []
+        for item in clean_segments:
+            if isinstance(item, dict) and "text" in item:
+                text = str(item["text"] or "").strip()
+            else:
+                text = str(item or "").strip()
+            if text:
+                out.append(text)
+
+        return {"clean_segments": out}
+    except FileNotFoundError as e:
+        # Om spec-filen saknas: tydligt felmeddelande
+        raise HTTPException(status_code=500, detail=f"Text-cleaner-spec saknas: {e}")
+    except Exception as e:  # noqa: BLE001
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 # =========================================================
@@ -313,10 +372,7 @@ def accept_task(payload: AcceptTaskRequest) -> Dict[str, Any]:
     if not isinstance(task, dict) or not (task.get("task_ref") or "").strip():
         return {"status": "ignored", "reason": "Ogiltig eller tom task"}
 
-    # -----------------------------------------------------
-    # 1) Om användaren har justerat ATL-moment/variant i UI:
-    #    räkna om tid från ATL-boken innan vi sparar.
-    # -----------------------------------------------------
+    # 1) Om användaren har justerat ATL-moment/variant i UI: räkna om tiden från ATL-boken.
     try:
         atl_moment_raw = task.get("atl_moment")
         atl_variant_raw = task.get("atl_variant")
@@ -327,31 +383,24 @@ def accept_task(payload: AcceptTaskRequest) -> Dict[str, Any]:
                 variant_int = int(atl_variant_raw)
                 minutes = get_atl_time_minutes(atl_moment, variant_int)
                 if minutes and minutes > 0:
-                    # Sätt om time_source + tid per enhet baserat på ATL
                     task["time_source"] = "atl"
                     task["time_minutes_per_unit"] = minutes
             except Exception:
-                # Om ATL-lookup failar vill vi inte krascha accept,
-                # utan bara låta GPT-tid stå kvar.
                 pass
     except Exception:
         pass
 
-    # -----------------------------------------------------
-    # 2) Bygg GPT-lik struktur som apply_suggested_tasks förstår
-    # -----------------------------------------------------
-    gpt_output: Dict[str, Any] = {
-        "suggested_tasks": [task],
-    }
+    # Bygg GPT-lik struktur som apply_suggested_tasks förstår
+    gpt_output: Dict[str, Any] = {"suggested_tasks": [task]}
 
-    # 3) Logga till task_suggestions.jsonl (för historik/spårbarhet)
+    # Logga till task_suggestions.jsonl
     event_payload: Dict[str, Any] = {
         "source": payload.source or "sandbox_ui",
         "suggested_tasks": [task],
     }
     ts.log_task_suggestions(event_payload)
 
-    # 4) Skriv direkt till YAML-mappings
+    # Skriv till YAML-mappings
     ts.apply_suggested_tasks(gpt_output)
 
     return {"status": "ok", "source": event_payload["source"]}
@@ -366,12 +415,6 @@ def debug_atl() -> Dict[str, Any]:
     """
     Enkel debug-endpoint för att verifiera ATL-laddning
     på Render (och lokalt).
-
-    Returnerar:
-      - vilken path som används
-      - om filen finns
-      - antal rader
-      - några exempelrader
     """
     path = ai_suggestions.ATL_PATH
     file_exists = path.exists()
@@ -407,27 +450,13 @@ def debug_atl() -> Dict[str, Any]:
 
 
 # =========================================================
-#  DEBUG-ENDPOINT FÖR MAPPINGS (PÅ RENDER/LOKALT)
+#  DEBUG-ENDPOINT FÖR MAPPINGS
 # =========================================================
 
 @router.get("/debug/mapping")
 def debug_mapping(category: str = "ovrigt") -> Dict[str, Any]:
     """
     Enkel debug-endpoint för att inspecta mappings-filerna.
-
-    Exempel:
-      GET /sandbox/debug/mapping?category=belysning
-      GET /sandbox/debug/mapping?category=kok
-
-    category:
-      - belysning
-      - brytare_och_uttag
-      - natverk_och_media
-      - ror_och_vp
-      - felsokning_och_service
-      - kok
-      - badrum
-      - ovrigt
     """
     try:
         path = ts._category_to_mapping_path(category)
