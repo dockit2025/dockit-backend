@@ -13,7 +13,7 @@ from src.services.quote_service import make_draft
 from src.services.ai_client import AIClient
 from src.services.ai_specs import load_task_generation_spec
 from src.services import task_suggestions as ts
-from src.services import ai_suggestions  # NYTT – ATL-hjälp
+from src.services import ai_suggestions  # ATL-hjälp
 from src.services.atl_lookup import get_atl_time_minutes
 
 
@@ -25,7 +25,7 @@ class GPTTaskSuggestRequest(BaseModel):
       - hur många senaste missing_task-segment som ska tas med
         från missing_task_segments.jsonl (default 50).
 
-    segments: (NYTT)
+    segments:
       - Om frontend skickar in en lista med rena texter (strängar),
         använder vi dessa direkt istället för att läsa från loggen.
     """
@@ -321,3 +321,52 @@ def accept_task(payload: AcceptTaskRequest) -> Dict[str, Any]:
     ts.apply_suggested_tasks(gpt_output)
 
     return {"status": "ok", "source": event_payload["source"]}
+
+
+# =========================================================
+#  DEBUG-ENDPOINT FÖR ATL PÅ RENDER
+# =========================================================
+
+@router.get("/debug/atl")
+def debug_atl() -> Dict[str, Any]:
+    """
+    Enkel debug-endpoint för att verifiera ATL-laddning
+    på Render (och lokalt).
+
+    Returnerar:
+      - vilken path som används
+      - om filen finns
+      - antal rader
+      - några exempelrader
+    """
+    path = ai_suggestions.ATL_PATH
+    file_exists = path.exists()
+
+    rows_info: List[Dict[str, Any]] = []
+    row_count: int = 0
+    error: Optional[str] = None
+
+    try:
+        rows = ai_suggestions.load_atl_rows()
+        row_count = len(rows)
+        for r in rows[:5]:
+            rows_info.append(
+                {
+                    "arbetsmoment": r.arbetsmoment,
+                    "grupp": r.grupp,
+                    "rad": r.rad,
+                    "moment_text": r.moment_text,
+                    "underlag_text": r.underlag_text,
+                    "enhet": r.enhet,
+                }
+            )
+    except Exception as e:  # noqa: BLE001
+        error = str(e)
+
+    return {
+        "atl_path": str(path),
+        "file_exists": file_exists,
+        "row_count": row_count,
+        "sample_rows": rows_info,
+        "error": error,
+    }
