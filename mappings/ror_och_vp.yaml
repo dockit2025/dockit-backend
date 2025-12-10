@@ -294,3 +294,31 @@ tasks:
   materials: []
   notes: "Schablonmoment för infälld apparatdosa. Kan ATL-kopplas senare."
 
+
+- task_id: DRA-VP-ROR-INFALLT
+  label: Dra infällt VP-rör
+  category: ror_och_vp
+  patterns:
+  - dra vp-rör infällt
+  - dra infällt vp-rör
+  - installera vp-rör i vägg
+  - dra vp-rör i vardagsrum
+  time_source: atl
+  atl_refs:
+  - moment: Rörförläggning i färdig bilad spår (VP 16–50)
+    variant: 0
+  manual_time_minutes_per_unit: 0
+  pricing_source: manual
+  description: Dragning och montering av infällt VP-rör i vägg eller tak, inklusive fastsättning och anpassning för elinstallationer.
+  quantity_type: per_meter
+  default_unit: m
+  room_type_hint: vardagsrum
+  gpt_confidence: 0.95
+  materials:
+  - ref: VP-ROR-16MM
+    description: VP-rör 16 mm för infällt montage
+    quantity_per_unit: 1.0
+  - ref: FESTKLAMMER-VP
+    description: Fästklammer för VP-rör
+    quantity_per_unit: 1.0
+  notes: 'ATL-baserad tid ca 3,6 min/m från "Rörförläggning i färdig bilad spår (VP 16–50)".'
