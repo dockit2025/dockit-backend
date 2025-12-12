@@ -16,6 +16,7 @@ class AIClient:
     Central GPT-klient för Dockit.
     Hanterar:
       - Task suggestions
+      - Task matching (FAS 2)
       - Material suggestions
       - Textrensning av fri jobbeskrivning (text cleaner)
     """
@@ -126,6 +127,49 @@ class AIClient:
         return self.generate_task_suggestions(gpt_spec=spec, segments=gpt_input)
 
     # -------------------------------------------------------------
+    #  TASK MATCHING – segments -> befintliga tasks (FAS 2)
+    # -------------------------------------------------------------
+    def generate_task_matches(self, *, spec: str, gpt_input: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Matchar segments -> befintliga tasks (via kandidatlista per segment).
+        """
+        prompt = (
+            spec
+            + "\n\nHär är JSON-inmatningen:\n"
+            + json.dumps(gpt_input, ensure_ascii=False, indent=2)
+        )
+
+        response = self.client.chat.completions.create(
+            model=self.model,
+            temperature=0.0,
+            response_format={"type": "json_object"},
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "Du matchar arbetssegment mot befintliga tasks. "
+                        "Du får aldrig hitta på nya task_id."
+                    ),
+                },
+                {"role": "user", "content": prompt},
+            ],
+        )
+
+        raw = response.choices[0].message.content
+
+        # Hantera både str och ev. list-format från klienten
+        if isinstance(raw, list):
+            parts = []
+            for part in raw:
+                if isinstance(part, dict) and "text" in part:
+                    parts.append(str(part["text"]))
+                else:
+                    parts.append(str(part))
+            raw = "".join(parts)
+
+        return self._safe_json_loads(raw, context="task_matching")
+
+    # -------------------------------------------------------------
     #  TEXT CLEANER – rensa fri jobbeskrivning till rena segment
     # -------------------------------------------------------------
     def generate_text_segments(
@@ -229,7 +273,7 @@ class AIClient:
                     parts.append(str(part))
             raw = "".join(parts)
 
-        return self._safe_json_loads(raw, context="tasks")
+        return self._safe_json_loads(raw, context="material")
 
 
 if __name__ == "__main__":

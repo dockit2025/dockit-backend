@@ -36,6 +36,19 @@ class GPTTaskSuggestRequest(BaseModel):
     segments: Optional[List[str]] = None
 
 
+class GPTMatchTasksRequest(BaseModel):
+    """
+    Request till /sandbox/gpt-match-tasks (FAS 2).
+
+    Antingen:
+      - job_text: fri text som segmenteras via gpt_extract_segments
+      - segments: lista med rena segment-texter från UI
+    """
+    job_text: Optional[str] = None
+    segments: Optional[List[str]] = None
+    categories_hint: Optional[List[str]] = None
+
+
 class AcceptTaskRequest(BaseModel):
     """
     En enskild task som användaren valt 'Acceptera' på i Sandlådan.
@@ -269,6 +282,78 @@ def gpt_extract_segments(payload: TextCleanerRequest) -> Dict[str, Any]:
 
 
 # =========================================================
+#  GPT-MATCH TASKS – /sandbox/gpt-match-tasks (FAS 2)
+# =========================================================
+
+@router.post("/gpt-match-tasks")
+def gpt_match_tasks(payload: GPTMatchTasksRequest) -> Dict[str, Any]:
+    """
+    FAS 2: Matcha segments -> befintliga tasks (YAML) via GPT.
+    """
+    segments: List[Dict[str, Any]] = []
+
+    if payload.segments:
+        for i, s in enumerate(payload.segments, start=1):
+            text = str(s or "").strip()
+            if not text:
+                continue
+            segments.append({"segment_id": f"ui_{i:03d}", "segment_text": text})
+    elif payload.job_text and str(payload.job_text).strip():
+        seg_resp = gpt_extract_segments(TextCleanerRequest(job_text=str(payload.job_text).strip()))
+        segments = seg_resp.get("segments") or []
+    else:
+        raise HTTPException(status_code=400, detail="Antingen job_text eller segments krävs.")
+
+    if not segments:
+        return {"matches": [], "unmatched_segments": [], "note": "Inga segments att matcha."}
+
+    from src.services.task_library import load_all_tasks_from_mappings
+    all_tasks = load_all_tasks_from_mappings()
+
+    from src.services.task_candidates import build_candidates_by_segment
+    candidates_by_segment = build_candidates_by_segment(segments, all_tasks)
+
+    from src.services.ai_task_matching import match_segments_to_tasks
+    result = match_segments_to_tasks(
+        segments=segments,
+        candidates_by_segment=candidates_by_segment,
+    )
+
+    # --- Safety normalization ---
+    matches = result.get("matches")
+    if not isinstance(matches, list):
+        matches = []
+
+    # 1) Se till att matched_task_id (om satt) finns bland kandidaterna för segmentet
+    for m in matches:
+        if not isinstance(m, dict):
+            continue
+        sid = (m.get("segment_id") or "").strip()
+        mid = (m.get("matched_task_id") or "").strip()
+        if not sid:
+            continue
+        cand_ids = {str(t.get("task_id") or "").strip() for t in (candidates_by_segment.get(sid) or [])}
+        if mid and cand_ids and (mid not in cand_ids):
+            # ogiltigt val -> tvinga unmatched
+            m["matched_task_id"] = None
+            m["needs_new_task"] = True
+            m["confidence"] = min(float(m.get("confidence") or 0.0), 0.49)
+            m["reason"] = (m.get("reason") or "") + " (Safety: matched_task_id fanns inte i kandidatlistan.)"
+
+    # 2) Bygg unmatched_segments deterministiskt från matches
+    unmatched: List[Dict[str, Any]] = []
+    for m in matches:
+        if not isinstance(m, dict):
+            continue
+        if m.get("needs_new_task") is True or not (m.get("matched_task_id") or ""):
+            sid = m.get("segment_id")
+            stx = m.get("segment_text")
+            if sid and stx:
+                unmatched.append({"segment_id": sid, "segment_text": stx})
+
+    result["matches"] = matches
+    result["unmatched_segments"] = unmatched
+    return result# =========================================================
 #  GPT-FÖRSLAG (missing_task_segments → GPT + ATL)
 # =========================================================
 
@@ -550,3 +635,4 @@ def debug_mapping(category: str = "ovrigt") -> Dict[str, Any]:
         }
     except Exception as e:  # noqa: BLE001
         raise HTTPException(status_code=500, detail=str(e))
+
