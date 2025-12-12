@@ -44,10 +44,6 @@ def _is_tillagg(row: ai_suggestions.ATLRow) -> bool:
 
 
 def _boost_score(seg_text: str, task_id: str, row: ai_suggestions.ATLRow) -> float:
-    """
-    Extra boost ovanpå ai_suggestions._similarity_score via text-signaler.
-    Detta är bara för att ranka kandidater bättre innan GPT väljer.
-    """
     s = 0.0
     seg = (seg_text or "").lower()
     tid = (task_id or "").lower()
@@ -64,7 +60,6 @@ def _boost_score(seg_text: str, task_id: str, row: ai_suggestions.ATLRow) -> flo
     if wants_vagg and ("vägg" in txt or "vagg" in txt):
         s += 0.10
 
-    # Straffa "tillägg" när vi verkar leta huvudmoment
     if _is_tillagg(row) and (wants_vp or wants_infallt or wants_vagg):
         s -= 0.25
 
@@ -72,12 +67,6 @@ def _boost_score(seg_text: str, task_id: str, row: ai_suggestions.ATLRow) -> flo
 
 
 def _pick_candidates(search_text: str, seg_text: str, task_id: str, max_rows: int) -> List[ai_suggestions.ATLRow]:
-    """
-    Plocka kandidater och ranka med similarity + boost.
-
-    search_text används för att hitta bättre kandidater (segment + label + task_id).
-    seg_text + task_id används fortsatt för boost-heuristiker.
-    """
     base = ai_suggestions.find_atl_candidates_for_segment(
         segment_text=search_text,
         max_rows=max_rows * 3,
@@ -100,11 +89,26 @@ def _pick_candidates(search_text: str, seg_text: str, task_id: str, max_rows: in
     return ranked[:max_rows]
 
 
+def _manual_minutes_for_task(task_id: str) -> Optional[float]:
+    t = _get_task_by_id(task_id)
+    if not isinstance(t, dict):
+        return None
+    mt = t.get("manual_time_minutes_per_unit")
+    try:
+        mt_val = float(mt) if mt is not None else None
+    except Exception:
+        mt_val = None
+    if mt_val is not None and mt_val > 0:
+        return mt_val
+    return None
+
+
 def _apply_manual_fallback(results: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Om GPT inte hittar ATL (needs_estimate=true) men task har manual_time_minutes_per_unit:
-      - använd den tiden
-      - markera som manual_fallback (yellow)
+    Fallback-regel:
+    1) Om GPT säger needs_estimate=true och manual tid finns -> manual_fallback (yellow)
+    2) Om GPT väljer ATL men confidence_level är gul/röd och manual tid finns -> OVERRIDE till manual_fallback (yellow)
+       (Detta förhindrar "fel ATL" när vi hellre vill ha rimlig schablon.)
     """
     out = dict(results or {})
     res_list = out.get("results")
@@ -116,31 +120,43 @@ def _apply_manual_fallback(results: Dict[str, Any]) -> Dict[str, Any]:
         if not isinstance(r, dict):
             continue
 
-        needs_est = r.get("needs_estimate") is True
         task_id = str(r.get("task_id") or "").strip()
+        if not task_id:
+            new_list.append(r)
+            continue
 
-        if needs_est and task_id:
-            t = _get_task_by_id(task_id)
-            if isinstance(t, dict):
-                mt = t.get("manual_time_minutes_per_unit")
-                try:
-                    mt_val = float(mt) if mt is not None else None
-                except Exception:
-                    mt_val = None
+        manual_minutes = _manual_minutes_for_task(task_id)
 
-                if mt_val is not None and mt_val > 0:
-                    r = dict(r)
-                    r["time_source"] = "manual_fallback"
-                    r["time_minutes_per_unit"] = mt_val
-                    r["needs_estimate"] = False
-                    r["confidence"] = max(float(r.get("confidence") or 0.0), 0.6)
-                    r["confidence_level"] = "yellow"
-                    r["explanation"] = (
-                        (r.get("explanation") or "").strip()
-                        + " (Fallback: använde manual_time_minutes_per_unit från mappings.)"
-                    ).strip()
+        needs_est = r.get("needs_estimate") is True
+        confidence_level = str(r.get("confidence_level") or "").strip().lower()
+        time_source = str(r.get("time_source") or "").strip().lower()
 
-        new_list.append(r)
+        should_override_weak_atl = (
+            manual_minutes is not None
+            and time_source == "atl"
+            and confidence_level in {"yellow", "red"}
+        )
+
+        if (needs_est and manual_minutes is not None) or should_override_weak_atl:
+            rr = dict(r)
+            rr["time_source"] = "manual_fallback"
+            rr["time_minutes_per_unit"] = float(manual_minutes)
+            rr["needs_estimate"] = False
+            rr["confidence"] = max(float(rr.get("confidence") or 0.0), 0.6)
+            rr["confidence_level"] = "yellow"
+
+            # Ta bort chosen om vi override:ar ett svagt ATL-val (så UI inte visar fel ATL)
+            if should_override_weak_atl and "chosen" in rr:
+                rr.pop("chosen", None)
+
+            suffix = " (Fallback: använde manual_time_minutes_per_unit från mappings.)"
+            if should_override_weak_atl:
+                suffix = " (Override: svag ATL-träff ersatt med manual_time_minutes_per_unit från mappings.)"
+
+            rr["explanation"] = ((rr.get("explanation") or "").strip() + suffix).strip()
+            new_list.append(rr)
+        else:
+            new_list.append(r)
 
     out["results"] = new_list
     return out
