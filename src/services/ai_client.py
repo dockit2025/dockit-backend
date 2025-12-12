@@ -228,6 +228,49 @@ class AIClient:
         return self._safe_json_loads(raw, context="text_cleaner")
 
     # -------------------------------------------------------------
+    #  ATL SELECTION – välj ATL moment + variant (Sandbox)
+    # -------------------------------------------------------------
+    def generate_atl_selection(self, *, spec: str, gpt_input: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Väljer ATL moment + variant baserat på kandidatlista per item.
+        Returnerar JSON enligt ai_spec_atl_selection.md
+        """
+        prompt = (
+            spec
+            + "\n\nHär är JSON-inmatningen:\n"
+            + json.dumps(gpt_input, ensure_ascii=False, indent=2)
+        )
+
+        response = self.client.chat.completions.create(
+            model=self.model,
+            temperature=0.0,
+            response_format={"type": "json_object"},
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "Du väljer rätt ATL-rad (moment + variant) från en kandidatlista. "
+                        "Du får aldrig hitta på ett arbetsmoment som inte finns i kandidaterna."
+                    ),
+                },
+                {"role": "user", "content": prompt},
+            ],
+        )
+
+        raw = response.choices[0].message.content
+
+        if isinstance(raw, list):
+            parts = []
+            for part in raw:
+                if isinstance(part, dict) and "text" in part:
+                    parts.append(str(part["text"]))
+                else:
+                    parts.append(str(part))
+            raw = "".join(parts)
+
+        return self._safe_json_loads(raw, context="atl_selection")
+
+    # -------------------------------------------------------------
     #  MATERIAL SUGGESTIONS
     # -------------------------------------------------------------
     def generate_material_suggestions(
@@ -278,3 +321,4 @@ class AIClient:
 
 if __name__ == "__main__":
     print("AIClient-test: importera AIClient i andra moduler och använd där.")
+

@@ -49,6 +49,20 @@ class GPTMatchTasksRequest(BaseModel):
     categories_hint: Optional[List[str]] = None
 
 
+class GPTMatchAtlRequest(BaseModel):
+    """
+    Request till /sandbox/gpt-match-atl (ATL-Sandbox).
+
+    items: lista av matchade tasks från FAS 2, där varje item innehåller:
+      - segment_id
+      - segment_text
+      - task_id
+      - label (valfri)
+      - quantity
+    """
+    items: List[Dict[str, Any]]
+
+
 class AcceptTaskRequest(BaseModel):
     """
     En enskild task som användaren valt 'Acceptera' på i Sandlådan.
@@ -222,14 +236,6 @@ def gpt_extract_segments(payload: TextCleanerRequest) -> Dict[str, Any]:
     """
     Tar in en fri job_text och använder samma textrensare som /sandbox/clean-text,
     men returnerar explicita segment med id + text.
-
-    Exempel på output:
-      {
-        "segments": [
-          { "segment_id": "seg_001", "segment_text": "dra 12 meter vp-rör infällt ..." },
-          { "segment_id": "seg_002", "segment_text": "dra fram 8 meter nätverkskabel ..." }
-        ]
-      }
     """
     job_text = (payload.job_text or "").strip()
     if not job_text:
@@ -353,7 +359,63 @@ def gpt_match_tasks(payload: GPTMatchTasksRequest) -> Dict[str, Any]:
 
     result["matches"] = matches
     result["unmatched_segments"] = unmatched
-    return result# =========================================================
+    return result
+
+
+# =========================================================
+#  GPT-MATCH ATL – /sandbox/gpt-match-atl (ATL-Sandbox)
+# =========================================================
+
+@router.post("/gpt-match-atl")
+def gpt_match_atl(payload: GPTMatchAtlRequest) -> Dict[str, Any]:
+    """
+    ATL-Sandbox:
+      - Tar in matchade items (segment_text + task_id + quantity)
+      - Hämtar ATL-kandidater
+      - Låter GPT välja moment+variant eller göra estimate
+      - Returnerar results med confidence + explanation
+    """
+    items = payload.items or []
+    if not isinstance(items, list) or not items:
+        raise HTTPException(status_code=400, detail="items krävs och måste vara en lista")
+
+    # Bygg quantity-map så vi kan räkna totals på outputen
+    qty_by_segment: Dict[str, float] = {}
+    for it in items:
+        if not isinstance(it, dict):
+            continue
+        sid = str(it.get("segment_id") or "").strip()
+        if not sid:
+            continue
+        try:
+            q = float(it.get("quantity", 1) or 1)
+        except Exception:
+            q = 1.0
+        if q <= 0:
+            q = 1.0
+        qty_by_segment[sid] = q
+
+    from src.services.ai_atl_selection import select_atl_for_items
+    result = select_atl_for_items(items=items, max_rows_per_item=12)
+
+    # Lägg till time_minutes_total per result
+    results = result.get("results")
+    if isinstance(results, list):
+        for r in results:
+            if not isinstance(r, dict):
+                continue
+            sid = str(r.get("segment_id") or "").strip()
+            qty = qty_by_segment.get(sid, 1.0)
+            try:
+                per_unit = float(r.get("time_minutes_per_unit") or 0.0)
+            except Exception:
+                per_unit = 0.0
+            r["quantity"] = qty
+            r["time_minutes_total"] = round(per_unit * qty, 2)
+
+    return result
+
+# =========================================================
 #  GPT-FÖRSLAG (missing_task_segments → GPT + ATL)
 # =========================================================
 
@@ -362,18 +424,6 @@ def gpt_suggest_tasks(payload: GPTTaskSuggestRequest) -> Dict[str, Any]:
     """
     Kör samma GPT-flöde som task_suggestions_review.py --gpt,
     men som HTTP-endpoint för Sandlådan.
-
-    ATL-first-tanke:
-      - Om payload.segments finns → använd JUST dessa segments
-        (t.ex. de missing_segments som kom från det här jobbet),
-        bygg GPT-input med ATL-kandidater via ai_suggestions.
-      - Annars → läs som tidigare från missing_task_segments-loggen
-        och berika med ATL-kandidater där också.
-
-    Viktigt:
-      - Denna endpoint LOGGAR INTE något permanent.
-      - Den returnerar bara förslag till UI.
-      - När användaren klickar "Acceptera" ska /sandbox/accept-task användas.
     """
     limit = payload.limit or 50
 
@@ -384,8 +434,6 @@ def gpt_suggest_tasks(payload: GPTTaskSuggestRequest) -> Dict[str, Any]:
     note: Optional[str] = None
 
     if payload.segments:
-        # Frontend har skickat in segment-texter direkt.
-        # Bygg upp segment-objekt i samma format som logg-baserade.
         for idx, text in enumerate(payload.segments):
             if not text or not str(text).strip():
                 continue
@@ -400,12 +448,10 @@ def gpt_suggest_tasks(payload: GPTTaskSuggestRequest) -> Dict[str, Any]:
                 }
             )
 
-        # Bygg GPT-input baserat på dessa segments + ATL-kandidater
         gpt_input: Dict[str, Any] = ai_suggestions.build_gpt_input_with_atl_for_segments(
             segments
         )
     else:
-        # Behåll befintligt beteende: bygg GPT-input från loggade missing_task-segment
         base_input: Dict[str, Any] = ts.build_gpt_input_from_missing_segments(limit=limit)
         segments = base_input.get("segments") or []
 
@@ -416,7 +462,6 @@ def gpt_suggest_tasks(payload: GPTTaskSuggestRequest) -> Dict[str, Any]:
                 "note": "Inga missing_task-segment hittades i loggen.",
             }
 
-        # Berika med ATL-kandidater för dessa segments
         atl_enriched = ai_suggestions.build_gpt_input_with_atl_for_segments(segments)
         gpt_input = {
             **base_input,
@@ -445,8 +490,6 @@ def gpt_suggest_tasks(payload: GPTTaskSuggestRequest) -> Dict[str, Any]:
     # 3) Filtrera bort tasks som redan finns i mappings
     # -----------------------------------------------------
     filtered: List[Dict[str, Any]] = []
-
-    # Cache för redan laddade mapping-filer per path
     existing_tasks_cache: Dict[str, List[Dict[str, Any]]] = {}
 
     for s in raw_suggested:
@@ -459,11 +502,9 @@ def gpt_suggest_tasks(payload: GPTTaskSuggestRequest) -> Dict[str, Any]:
         if not task_ref:
             continue
 
-        # Hoppa över dubbletter inom samma GPT-svar
         if any((t.get("task_ref") or "").strip() == task_ref for t in filtered):
             continue
 
-        # Hitta rätt mapping-fil för kategorin
         path = ts._category_to_mapping_path(category)
         key = str(path)
 
@@ -471,7 +512,6 @@ def gpt_suggest_tasks(payload: GPTTaskSuggestRequest) -> Dict[str, Any]:
             data = ts._load_mapping_file(path)
             existing_tasks_cache[key] = data.get("tasks") or []
 
-        # Hoppa över om task_id redan finns i befintlig YAML
         if ts._task_exists(existing_tasks_cache[key], task_ref):
             continue
 
@@ -494,7 +534,6 @@ def gpt_suggest_tasks(payload: GPTTaskSuggestRequest) -> Dict[str, Any]:
                 s["time_source"] = "atl"
                 s["time_minutes_per_unit"] = minutes
         except Exception:
-            # Vi ignorerar fel här så att ett enskilt fel inte stoppar hela svaret
             continue
 
     if not filtered and payload.segments:
@@ -503,9 +542,6 @@ def gpt_suggest_tasks(payload: GPTTaskSuggestRequest) -> Dict[str, Any]:
             "arbetsmoment som inte redan finns i mappings."
         )
 
-    # -----------------------------------------------------
-    # 4) Returnera data till Sandlådan (ingen loggning här)
-    # -----------------------------------------------------
     return {
         "gpt_input": gpt_input,
         "suggested_tasks": filtered,
@@ -519,20 +555,10 @@ def gpt_suggest_tasks(payload: GPTTaskSuggestRequest) -> Dict[str, Any]:
 
 @router.post("/accept-task")
 def accept_task(payload: AcceptTaskRequest) -> Dict[str, Any]:
-    """
-    Anropas när användaren klickar 'Acceptera' på en GPT-föreslagen task i Sandlådan.
-
-    Nu:
-      - Tar emot en ev. REDIGERAD task från UI (kategori, ATL-moment, variant, tider)
-      - Om ATL-info finns → räknar om tiden från ATL
-      - Loggar händelsen till task_suggestions.jsonl
-      - Skriver arbetsmomentet i mappings/* via apply_suggested_tasks.
-    """
     task = payload.task or {}
     if not isinstance(task, dict) or not (task.get("task_ref") or "").strip():
         return {"status": "ignored", "reason": "Ogiltig eller tom task"}
 
-    # 1) Om användaren har justerat ATL-moment/variant i UI: räkna om tiden från ATL-boken.
     try:
         atl_moment_raw = task.get("atl_moment")
         atl_variant_raw = task.get("atl_variant")
@@ -550,17 +576,13 @@ def accept_task(payload: AcceptTaskRequest) -> Dict[str, Any]:
     except Exception:
         pass
 
-    # Bygg GPT-lik struktur som apply_suggested_tasks förstår
     gpt_output: Dict[str, Any] = {"suggested_tasks": [task]}
 
-    # Logga till task_suggestions.jsonl
     event_payload: Dict[str, Any] = {
         "source": payload.source or "sandbox_ui",
         "suggested_tasks": [task],
     }
     ts.log_task_suggestions(event_payload)
-
-    # Skriv till YAML-mappings
     ts.apply_suggested_tasks(gpt_output)
 
     return {"status": "ok", "source": event_payload["source"]}
@@ -572,10 +594,6 @@ def accept_task(payload: AcceptTaskRequest) -> Dict[str, Any]:
 
 @router.get("/debug/atl")
 def debug_atl() -> Dict[str, Any]:
-    """
-    Enkel debug-endpoint för att verifiera ATL-laddning
-    på Render (och lokalt).
-    """
     path = ai_suggestions.ATL_PATH
     file_exists = path.exists()
 
@@ -615,13 +633,6 @@ def debug_atl() -> Dict[str, Any]:
 
 @router.get("/debug/mapping")
 def debug_mapping(category: str = "ovrigt") -> Dict[str, Any]:
-    """
-    Enkel debug-endpoint för att inspecta mappings-filerna.
-
-    Exempel:
-      GET /sandbox/debug/mapping?category=belysning
-      GET /sandbox/debug/mapping?category=kok
-    """
     try:
         path = ts._category_to_mapping_path(category)
         data = ts._load_mapping_file(path)
@@ -635,4 +646,5 @@ def debug_mapping(category: str = "ovrigt") -> Dict[str, Any]:
         }
     except Exception as e:  # noqa: BLE001
         raise HTTPException(status_code=500, detail=str(e))
+
 
