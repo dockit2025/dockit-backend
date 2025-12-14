@@ -228,6 +228,53 @@ class AIClient:
         return self._safe_json_loads(raw, context="text_cleaner")
 
     # -------------------------------------------------------------
+    #  WORKPLAN (FAS 0) – arbetsplan + rena segment (Sandbox)
+    # -------------------------------------------------------------
+    def generate_workplan(self, *, spec: str, gpt_input: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        FAS 0 (Sandbox-only):
+          - Tar fri text (job_text) och ev. kontext
+          - Returnerar work_plan + segments + antaganden + needs_clarification
+        JSON enligt ai_spec_workplan.md
+        """
+        prompt = (
+            spec
+            + "\n\nHär är JSON-inmatningen:\n"
+            + json.dumps(gpt_input, ensure_ascii=False, indent=2)
+        )
+
+        response = self.client.chat.completions.create(
+            model=self.model,
+            temperature=0.0,
+            response_format={"type": "json_object"},
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "Du skapar en arbetsplan och rena segment för elektrikerjobb. "
+                        "Du får inte välja task_id, ATL eller tid. "
+                        "Svara endast med JSON enligt specifikationen."
+                    ),
+                },
+                {"role": "user", "content": prompt},
+            ],
+        )
+
+        raw = response.choices[0].message.content
+
+        if isinstance(raw, list):
+            parts = []
+            for part in raw:
+                if isinstance(part, dict) and "text" in part:
+                    parts.append(str(part["text"]))
+                else:
+                    parts.append(str(part))
+            raw = "".join(parts)
+
+        return self._safe_json_loads(raw, context="workplan")
+
+
+    # -------------------------------------------------------------
     #  ATL SELECTION – välj ATL moment + variant (Sandbox)
     # -------------------------------------------------------------
     def generate_atl_selection(self, *, spec: str, gpt_input: Dict[str, Any]) -> Dict[str, Any]:
@@ -321,4 +368,5 @@ class AIClient:
 
 if __name__ == "__main__":
     print("AIClient-test: importera AIClient i andra moduler och använd där.")
+
 

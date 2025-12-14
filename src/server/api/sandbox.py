@@ -41,7 +41,7 @@ class GPTMatchTasksRequest(BaseModel):
     Request till /sandbox/gpt-match-tasks (FAS 2).
 
     Antingen:
-      - job_text: fri text som segmenteras via gpt_extract_segments
+      - job_text: fri text som preprocessas via FAS 0 workplan (gpt-workplan)
       - segments: lista med rena segment-texter från UI
     """
     job_text: Optional[str] = None
@@ -95,6 +95,18 @@ class TextCleanerRequest(BaseModel):
     textrensar-specen.
     """
     job_text: str
+
+
+class GPTWorkplanRequest(BaseModel):
+    """
+    Request till /sandbox/gpt-workplan (FAS 0).
+
+    job_text:
+      - Fri text från användaren (tal, felskrivningar, mängder).
+    """
+    job_text: str
+    language: Optional[str] = "sv"
+    context: Optional[Dict[str, Any]] = None
 
 
 router = APIRouter(
@@ -288,6 +300,36 @@ def gpt_extract_segments(payload: TextCleanerRequest) -> Dict[str, Any]:
 
 
 # =========================================================
+#  GPT-WORKPLAN – /sandbox/gpt-workplan (FAS 0)
+# =========================================================
+
+@router.post("/gpt-workplan")
+def gpt_workplan(payload: GPTWorkplanRequest) -> Dict[str, Any]:
+    """
+    FAS 0 (Sandbox-only):
+      - Fri text -> arbetsplan + rena segment
+      - Returnerar även antaganden och frågor
+    """
+    job_text = (payload.job_text or "").strip()
+    if not job_text:
+        raise HTTPException(status_code=400, detail="job_text krävs")
+
+    from src.services.ai_workplan import generate_workplan
+
+    try:
+        result = generate_workplan(
+            job_text=job_text,
+            language=payload.language or "sv",
+            context=payload.context,
+        )
+        return result
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e:  # noqa: BLE001
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# =========================================================
 #  GPT-MATCH TASKS – /sandbox/gpt-match-tasks (FAS 2)
 # =========================================================
 
@@ -295,18 +337,42 @@ def gpt_extract_segments(payload: TextCleanerRequest) -> Dict[str, Any]:
 def gpt_match_tasks(payload: GPTMatchTasksRequest) -> Dict[str, Any]:
     """
     FAS 2: Matcha segments -> befintliga tasks (YAML) via GPT.
+
+    Input:
+      - segments: (UI) lista med segment-texter (används direkt)
+      - job_text: (fri text) preprocessas via FAS 0 workplan och workplan.segments används
     """
     segments: List[Dict[str, Any]] = []
 
     if payload.segments:
+        # UI skickar redan rena segments
         for i, s in enumerate(payload.segments, start=1):
             text = str(s or "").strip()
             if not text:
                 continue
             segments.append({"segment_id": f"ui_{i:03d}", "segment_text": text})
+
     elif payload.job_text and str(payload.job_text).strip():
-        seg_resp = gpt_extract_segments(TextCleanerRequest(job_text=str(payload.job_text).strip()))
-        segments = seg_resp.get("segments") or []
+        # FAS 0: Workplan → använd dess segments
+        from src.services.ai_workplan import generate_workplan
+
+        wp = generate_workplan(job_text=str(payload.job_text).strip(), language="sv", context=None)
+        wp_segments = wp.get("segments") or []
+        if not isinstance(wp_segments, list):
+            wp_segments = []
+
+        for idx, item in enumerate(wp_segments, start=1):
+            if isinstance(item, dict):
+                sid = str(item.get("segment_id") or "").strip() or f"wp_{idx:03d}"
+                stx = str(item.get("segment_text") or "").strip()
+            else:
+                sid = f"wp_{idx:03d}"
+                stx = str(item or "").strip()
+
+            if not stx:
+                continue
+            segments.append({"segment_id": sid, "segment_text": stx})
+
     else:
         raise HTTPException(status_code=400, detail="Antingen job_text eller segments krävs.")
 
@@ -646,5 +712,3 @@ def debug_mapping(category: str = "ovrigt") -> Dict[str, Any]:
         }
     except Exception as e:  # noqa: BLE001
         raise HTTPException(status_code=500, detail=str(e))
-
-

@@ -12,6 +12,7 @@ MATERIAL_SPEC_PATH = ROOT / "documentation" / "ai_spec_material_generation.md"
 TEXT_CLEANER_SPEC_PATH = ROOT / "documentation" / "ai_spec_text_cleaner.md"
 TASK_MATCHING_SPEC_PATH = ROOT / "documentation" / "ai_spec_task_matching.md"
 ATL_SELECTION_SPEC_PATH = ROOT / "documentation" / "ai_spec_atl_selection.md"
+WORKPLAN_SPEC_PATH = ROOT / "documentation" / "ai_spec_workplan.md"
 
 
 def load_task_generation_spec() -> str:
@@ -71,4 +72,19 @@ def load_atl_selection_spec() -> str:
             f"Hittar inte filen för ATL-selection-spec: {ATL_SELECTION_SPEC_PATH}"
         )
 
+
+
+def load_workplan_spec() -> str:
+    """
+    Läser in GPT-specen för FAS 0 – Workplan (fri text -> arbetsplan + rena segment).
+    """
+    if not WORKPLAN_SPEC_PATH.exists():
+        raise FileNotFoundError(
+            f"Hittar inte filen för workplan-spec: {WORKPLAN_SPEC_PATH}"
+        )
+
+    return WORKPLAN_SPEC_PATH.read_text(encoding="utf-8")
+
+
     return ATL_SELECTION_SPEC_PATH.read_text(encoding="utf-8")
+
