@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-
 # Projektrot (ex: D:\dockit-ai)
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -13,6 +12,7 @@ TEXT_CLEANER_SPEC_PATH = ROOT / "documentation" / "ai_spec_text_cleaner.md"
 TASK_MATCHING_SPEC_PATH = ROOT / "documentation" / "ai_spec_task_matching.md"
 ATL_SELECTION_SPEC_PATH = ROOT / "documentation" / "ai_spec_atl_selection.md"
 WORKPLAN_SPEC_PATH = ROOT / "documentation" / "ai_spec_workplan.md"
+ATL_RANK_SPEC_PATH = ROOT / "documentation" / "ai_spec_atl_rank.md"
 
 
 def load_task_generation_spec() -> str:
@@ -72,6 +72,7 @@ def load_atl_selection_spec() -> str:
             f"Hittar inte filen för ATL-selection-spec: {ATL_SELECTION_SPEC_PATH}"
         )
 
+    return ATL_SELECTION_SPEC_PATH.read_text(encoding="utf-8")
 
 
 def load_workplan_spec() -> str:
@@ -86,5 +87,13 @@ def load_workplan_spec() -> str:
     return WORKPLAN_SPEC_PATH.read_text(encoding="utf-8")
 
 
-    return ATL_SELECTION_SPEC_PATH.read_text(encoding="utf-8")
+def load_atl_rank_spec() -> str:
+    """
+    Läser in GPT-specen för ATL-rank (admin-only: välj moment+variant från kandidater).
+    """
+    if not ATL_RANK_SPEC_PATH.exists():
+        raise FileNotFoundError(
+            f"Hittar inte filen för atl-rank-spec: {ATL_RANK_SPEC_PATH}"
+        )
 
+    return ATL_RANK_SPEC_PATH.read_text(encoding="utf-8")

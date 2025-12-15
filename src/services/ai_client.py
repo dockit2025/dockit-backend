@@ -275,6 +275,51 @@ class AIClient:
 
 
     # -------------------------------------------------------------
+    #  ATL RANK (Admin) – välj moment + variant från kandidatlista
+    # -------------------------------------------------------------
+    def generate_atl_rank(self, *, spec: str, gpt_input: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Admin-only: Välj bästa ATL-rad (moment_id + variant) för en task/segment,
+        men endast från given kandidatlista.
+        JSON enligt ai_spec_atl_rank.md
+        """
+        prompt = (
+            spec
+            + "\n\nHär är JSON-inmatningen:\n"
+            + json.dumps(gpt_input, ensure_ascii=False, indent=2)
+        )
+
+        response = self.client.chat.completions.create(
+            model=self.model,
+            temperature=0.0,
+            response_format={"type": "json_object"},
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "Du väljer en ATL-referens (moment_id + variant) från en kandidatlista. "
+                        "Du får aldrig hitta på moment_id eller variant utanför kandidaterna. "
+                        "Svara endast med JSON enligt specifikationen."
+                    ),
+                },
+                {"role": "user", "content": prompt},
+            ],
+        )
+
+        raw = response.choices[0].message.content
+
+        if isinstance(raw, list):
+            parts = []
+            for part in raw:
+                if isinstance(part, dict) and "text" in part:
+                    parts.append(str(part["text"]))
+                else:
+                    parts.append(str(part))
+            raw = "".join(parts)
+
+        return self._safe_json_loads(raw, context="atl_rank")
+
+    # -------------------------------------------------------------
     #  ATL SELECTION – välj ATL moment + variant (Sandbox)
     # -------------------------------------------------------------
     def generate_atl_selection(self, *, spec: str, gpt_input: Dict[str, Any]) -> Dict[str, Any]:
@@ -368,5 +413,6 @@ class AIClient:
 
 if __name__ == "__main__":
     print("AIClient-test: importera AIClient i andra moduler och använd där.")
+
 
 

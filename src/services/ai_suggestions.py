@@ -320,30 +320,43 @@ def _tokenize(text: str) -> List[str]:
 
 def _similarity_score(segment: str, row: ATLRow) -> float:
     """
-    Enkel heuristik för likhet mellan ett textsegment och en ATL-rad.
+    Heuristisk likhet mellan segment och ATL-rad.
 
-    Vi använder token-overlap (Jaccard) + liten bonus för fler gemensamma ord.
-    Det här är bara ett filter för vilka rader GPT ska få – själva "intelligensen"
-    kommer i nästa steg hos GPT.
+    Viktning:
+      - moment_text (högst vikt)
+      - underlag_text (lägre vikt)
+      - enhet (låg vikt)
+
+    Syfte: relevanta "moment" ska rankas före t.ex. tillägg som bara råkar nämna samma ord i underlag.
     """
     seg_tokens = set(_tokenize(segment))
     if not seg_tokens:
         return 0.0
 
-    text = f"{row.moment_text} {row.underlag_text} {row.enhet}"
-    row_tokens = set(_tokenize(text))
-    if not row_tokens:
+    moment_tokens = set(_tokenize(row.moment_text or ""))
+    underlag_tokens = set(_tokenize(row.underlag_text or ""))
+    enhet_tokens = set(_tokenize(row.enhet or ""))
+
+    if not (moment_tokens or underlag_tokens or enhet_tokens):
         return 0.0
 
-    overlap = seg_tokens & row_tokens
-    if not overlap:
+    overlap_moment = seg_tokens & moment_tokens
+    overlap_underlag = seg_tokens & underlag_tokens
+    overlap_enhet = seg_tokens & enhet_tokens
+
+    # Inget overlap alls -> 0
+    if not (overlap_moment or overlap_underlag or overlap_enhet):
         return 0.0
 
-    # Jaccard + bonus
-    jaccard = len(overlap) / len(seg_tokens | row_tokens)
-    bonus = 0.02 * len(overlap)
-    return jaccard + bonus
+    # Viktad overlap + liten bonus för fler gemensamma ord
+    # moment väger tyngst, underlag lite, enhet minst
+    score = 0.0
+    score += 1.0 * (len(overlap_moment) / max(1, len(seg_tokens | moment_tokens)))
+    score += 0.4 * (len(overlap_underlag) / max(1, len(seg_tokens | underlag_tokens)))
+    score += 0.2 * (len(overlap_enhet) / max(1, len(seg_tokens | enhet_tokens)))
 
+    bonus = 0.02 * (len(overlap_moment) + 0.5 * len(overlap_underlag))
+    return score + bonus
 
 def find_atl_candidates_for_segment(
     segment_text: str,
@@ -455,3 +468,4 @@ if __name__ == "__main__":
     top = get_top_missing_material_refs(50)
     prompt = build_material_mapping_prompt(top)
     print(prompt)
+

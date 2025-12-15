@@ -391,6 +391,36 @@ def gpt_match_tasks(payload: GPTMatchTasksRequest) -> Dict[str, Any]:
         candidates_by_segment=candidates_by_segment,
     )
 
+    # -----------------------------------------------------
+    #  Enrich matches med task-metadata (för spårbarhet i Sandbox)
+    # -----------------------------------------------------
+    try:
+        task_by_id: Dict[str, Dict[str, Any]] = {
+            str(t.get("task_id") or "").strip(): t for t in all_tasks if isinstance(t, dict) and (t.get("task_id") or "")
+        }
+        matches_tmp = result.get("matches")
+        if isinstance(matches_tmp, list):
+            for m in matches_tmp:
+                if not isinstance(m, dict):
+                    continue
+                tid = str(m.get("matched_task_id") or "").strip()
+                if not tid:
+                    continue
+                t = task_by_id.get(tid)
+                if not t:
+                    continue
+                m["task_meta"] = {
+                    "label": t.get("label"),
+                    "category": t.get("category"),
+                    "time_source": t.get("time_source"),
+                    "atl_refs": t.get("atl_refs") or [],
+                    "manual_time_minutes_per_unit": t.get("manual_time_minutes_per_unit"),
+                    "mapping_file": t.get("_mapping_file"),
+                }
+    except Exception:
+        # Sandbox ska inte krascha om metadata-enrichment strular
+        pass
+
     # --- Safety normalization ---
     matches = result.get("matches")
     if not isinstance(matches, list):
@@ -712,3 +742,92 @@ def debug_mapping(category: str = "ovrigt") -> Dict[str, Any]:
         }
     except Exception as e:  # noqa: BLE001
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# =========================================================
+#  ATL SEARCH – /sandbox/atl-search (admin, no GPT)
+# =========================================================
+
+@router.get("/atl-search")
+def atl_search(q: str, max_rows: int = 20) -> Dict[str, Any]:
+    """
+    Admin-hjälp: Sök i ATL-listan (Del7_ATL_Total.csv) och returnera top-kandidater.
+    Ingen GPT här – bara heuristisk textmatchning som stöd för admin.
+    """
+    query = (q or "").strip()
+    if not query:
+        raise HTTPException(status_code=400, detail="q (query) krävs")
+
+    # rimliga bounds så man inte råkar få gigantiska svar
+    try:
+        max_rows_int = int(max_rows)
+    except Exception:
+        max_rows_int = 20
+    max_rows_int = max(1, min(50, max_rows_int))
+
+    from src.services.ai_suggestions import find_atl_candidates_for_segment
+
+    rows = find_atl_candidates_for_segment(
+        segment_text=query,
+        max_rows=max_rows_int,
+        min_score=0.01,
+    )
+
+    out_rows: List[Dict[str, Any]] = []
+    for r in rows:
+        out_rows.append(
+            {
+                "arbetsmoment": r.arbetsmoment,
+                "moment_id": r.id_str,
+                "grupp": r.grupp,
+                "rad": r.rad,
+                "moment_text": r.moment_text,
+                "underlag_text": r.underlag_text,
+                "enhet": r.enhet,
+                "times": r.times,
+            }
+        )
+
+    return {
+        "query": query,
+        "max_rows": max_rows_int,
+        "count": len(out_rows),
+        "rows": out_rows,
+    }
+
+
+
+# =========================================================
+#  GPT-ATL-RANK – /sandbox/gpt-atl-rank (Admin)
+# =========================================================
+
+class GPTAtlRankRequest(BaseModel):
+    """
+    Admin-request för att föreslå ATL-referens för en task.
+    """
+    task: Dict[str, Any]
+    segment_text: str
+    max_rows: Optional[int] = 25
+
+
+@router.post("/gpt-atl-rank")
+def gpt_atl_rank(payload: GPTAtlRankRequest) -> Dict[str, Any]:
+    """
+    Admin-only:
+    Föreslå ATL moment + variant för en task baserat på segment-text.
+    """
+    if not payload.task or not payload.segment_text:
+        raise HTTPException(status_code=400, detail="task och segment_text krävs")
+
+    from src.services.ai_atl_rank import suggest_atl_ref_for_task
+
+    try:
+        result = suggest_atl_ref_for_task(
+            task=payload.task,
+            segment_text=payload.segment_text,
+            max_rows=payload.max_rows or 25,
+        )
+        return result
+    except Exception as e:  # noqa: BLE001
+        raise HTTPException(status_code=500, detail=str(e))
+
