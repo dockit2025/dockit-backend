@@ -11,3 +11,11 @@ dockit.db
 # Virtual environments
 .venv/
 env/
+
+# Runtime logs (ska aldrig versioneras)
+knowledge/logs/*.jsonl
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
