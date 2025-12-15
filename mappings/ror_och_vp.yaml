@@ -264,7 +264,7 @@ tasks:
   label: Installera kopplingsdosa i tak
   category: ror_och_vp
   manual_time_minutes_per_unit: 18
-  time_source: gpt
+  time_source: manual
   description: Montering och inkoppling av kopplingsdosa i tak för framtida belysning eller elinstallation.
   quantity_type: per_unit
   default_unit: st
@@ -322,3 +322,4 @@ tasks:
     description: Fästklammer för VP-rör
     quantity_per_unit: 1.0
   notes: 'ATL-baserad tid ca 3,6 min/m från "Rörförläggning i färdig bilad spår (VP 16–50)".'
+

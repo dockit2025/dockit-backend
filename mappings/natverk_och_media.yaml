@@ -317,7 +317,7 @@ tasks:
     label: Installera mediacentral
     category: natverk_och_media
     manual_time_minutes_per_unit: 60
-    time_source: gpt
+    time_source: manual
     description: Montering och inkoppling av mediacentral för nätverk och media i bostad.
     quantity_type: per_unit
     default_unit: st
@@ -338,7 +338,7 @@ tasks:
     label: Dra nätverkskabel till datauttag
     category: natverk_och_media
     manual_time_minutes_per_unit: 6
-    time_source: gpt
+    time_source: manual
     description: Dragning och montering av nätverkskabel till nytt eller befintligt datauttag, inklusive fastsättning och anslutning.
     quantity_type: per_meter
     default_unit: m
@@ -377,6 +377,7 @@ tasks:
       - nätverksuttag
       - apparatdosa
     notes: Schablonmoment för infällt nätverksuttag.
+
 
 
 

@@ -190,7 +190,7 @@ tasks:
   label: Installera kronbrytare
   category: brytare_och_uttag
   manual_time_minutes_per_unit: 30
-  time_source: gpt
+  time_source: manual
   description: Montering och inkoppling av kronbrytare för styrning av två ljuskällor.
   quantity_type: per_unit
   default_unit: st
@@ -230,7 +230,7 @@ tasks:
   label: Installera apparatdosa infällt i vägg
   category: brytare_och_uttag
   manual_time_minutes_per_unit: 18
-  time_source: gpt
+  time_source: manual
   description: Montering av apparatdosa infällt i vägg för eluttag eller brytare.
   quantity_type: per_unit
   default_unit: st
@@ -245,3 +245,4 @@ tasks:
     unit: st
     description: Infälld apparatdosa
   _auto_generated: true
+

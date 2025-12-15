@@ -313,7 +313,7 @@ tasks:
   label: Flytta över befintliga grupper i normcentral
   category: ovrigt
   manual_time_minutes_per_unit: 15
-  time_source: gpt
+  time_source: manual
   description: Flytt och återanslutning av befintliga grupper vid byte av normcentral.
   quantity_type: per_unit
   default_unit: st
@@ -341,3 +341,4 @@ tasks:
     time_source: "manual"
     atl_refs: []
     manual_time_minutes_per_unit: 15
+

@@ -274,7 +274,7 @@ tasks:
   label: Installera spotlight i tak
   category: belysning
   manual_time_minutes_per_unit: 30
-  time_source: gpt
+  time_source: manual
   description: Montering och inkoppling av infälld eller utanpåliggande spotlight
     i tak, inklusive anslutning till befintlig elinstallation.
   quantity_type: per_unit
@@ -299,7 +299,7 @@ tasks:
   label: Installera dimmer
   category: belysning
   manual_time_minutes_per_unit: 30
-  time_source: gpt
+  time_source: manual
   description: Montering och inkoppling av dimmer för styrning av belysning.
   quantity_type: per_unit
   default_unit: st
@@ -319,7 +319,7 @@ tasks:
   label: Dra matning till utebelysning
   category: belysning
   manual_time_minutes_per_unit: 45
-  time_source: gpt
+  time_source: manual
   description: Dragning av elkabel och anslutning till utomhusbelysning, inklusive
     koppling via skymningsrelä.
   quantity_type: per_unit
@@ -344,7 +344,7 @@ tasks:
   label: Installera kopplingsdosa i tak
   category: belysning
   manual_time_minutes_per_unit: 18
-  time_source: gpt
+  time_source: manual
   description: Montering och inkoppling av kopplingsdosa i tak för framtida belysning
     eller elinstallation.
   quantity_type: per_unit
@@ -374,3 +374,4 @@ tasks:
     time_source: "manual"
     atl_refs: []
     manual_time_minutes_per_unit: 25
+
