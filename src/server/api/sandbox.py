@@ -18,6 +18,7 @@ from src.services.ai_specs import (
 from src.services import task_suggestions as ts
 from src.services import ai_suggestions  # ATL-hjälp
 from src.services.atl_lookup import get_atl_time_minutes
+from src.services.atl_apply import resolve_mapping_path, load_mapping_yaml, find_task_in_mapping, confirm_apply_atl_ref
 
 
 class GPTTaskSuggestRequest(BaseModel):
@@ -810,6 +811,20 @@ class GPTAtlRankRequest(BaseModel):
     max_rows: Optional[int] = 25
 
 
+class AtlApplyPreviewRequest(BaseModel):
+    """
+    Admin-request för att preview:a att en vald ATL-referens kan appliceras på en befintlig task.
+
+    Viktigt:
+    - Ingen fil skrivs i preview.
+    - mapping_file ska komma från server-side task_meta, men vi validerar defensivt ändå.
+    """
+    task_id: str
+    mapping_file: str
+    moment_id: str
+    variant: int
+
+
 @router.post("/gpt-atl-rank")
 def gpt_atl_rank(payload: GPTAtlRankRequest) -> Dict[str, Any]:
     """
@@ -828,6 +843,148 @@ def gpt_atl_rank(payload: GPTAtlRankRequest) -> Dict[str, Any]:
             max_rows=payload.max_rows or 25,
         )
         return result
+    except Exception as e:  # noqa: BLE001
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# =========================================================
+#  ATL APPLY (PREVIEW) – /sandbox/atl-apply-preview (Admin)
+# =========================================================
+
+@router.post("/atl-apply-preview")
+def atl_apply_preview(payload: AtlApplyPreviewRequest) -> Dict[str, Any]:
+    """
+    Admin-only preview:
+    - Validerar mapping_file
+    - Verifierar att task_id finns i filen
+    - Slår upp moment_text via ATL (moment_id -> moment_text)
+    - Returnerar en "plan" för write (utan att skriva)
+    """
+    try:
+        task_id = (payload.task_id or "").strip()
+        mapping_file = (payload.mapping_file or "").strip()
+        moment_id = (payload.moment_id or "").strip()
+        variant = int(payload.variant)
+
+        if not task_id or not mapping_file or not moment_id:
+            raise HTTPException(status_code=400, detail="task_id, mapping_file, moment_id och variant krävs")
+
+        # 1) Resolve + load mapping
+        path = resolve_mapping_path(mapping_file)
+        root = load_mapping_yaml(path)
+
+        # 2) Hitta task i filen (måste finnas)
+        task, meta = find_task_in_mapping(mapping_root=root, task_id=task_id)
+        if not task:
+            raise HTTPException(status_code=404, detail=f"task_id '{task_id}' hittades inte i {mapping_file}")
+
+        # 3) moment_id -> moment_text (Moment/Typ/Sort)
+        # ai_suggestions använder arbetsmoment-numret som id_str
+        rows = ai_suggestions.load_atl_rows()
+        moment_text = None
+        for r in rows:
+            if getattr(r, "id_str", None) == moment_id:
+                moment_text = getattr(r, "moment_text", None)
+                break
+
+        if not moment_text:
+            raise HTTPException(status_code=404, detail=f"moment_id '{moment_id}' hittades inte i ATL-data")
+
+        # 4) Kontroll: går det att slå upp tid med moment_text + variant?
+        minutes_per_unit = get_atl_time_minutes(moment_text, variant)
+
+        return {
+            "status": "ok",
+            "task_id": task_id,
+            "mapping_file": mapping_file,
+            "mapping_path": str(path),
+            "tasks_container_type": meta.get("tasks_container_type"),
+            "atl_ref": {"moment": moment_text, "variant": variant, "moment_id": moment_id},
+            "time_minutes_per_unit": minutes_per_unit,
+            "note": "Preview only. Ingen fil är skriven.",
+        }
+    except HTTPException:
+        raise
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:  # noqa: BLE001
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# =========================================================
+#  ATL APPLY (CONFIRM) – /sandbox/atl-apply-confirm (Admin)
+# =========================================================
+
+class AtlApplyConfirmRequest(BaseModel):
+    """
+    Admin-request för att confirm:a (skriva) en vald ATL-referens till mapping-YAML.
+
+    Viktigt:
+    - Detta gör faktisk write + backup.
+    - mapping_file ska komma från server-side task_meta, men vi validerar defensivt ändå.
+    """
+    task_id: str
+    mapping_file: str
+    moment_id: str
+    variant: int
+
+
+@router.post("/atl-apply-confirm")
+def atl_apply_confirm(payload: AtlApplyConfirmRequest) -> Dict[str, Any]:
+    """
+    Admin-only confirm:
+    - Validerar mapping_file
+    - Verifierar att task_id finns i filen
+    - Slår upp moment_text via ATL (moment_id -> moment_text)
+    - Skapar backup
+    - Skriver ATL-ref till YAML + re-read validate
+    """
+    try:
+        task_id = (payload.task_id or "").strip()
+        mapping_file = (payload.mapping_file or "").strip()
+        moment_id = (payload.moment_id or "").strip()
+        variant = int(payload.variant)
+
+        if not task_id or not mapping_file or not moment_id:
+            raise HTTPException(status_code=400, detail="task_id, mapping_file, moment_id och variant krävs")
+
+        # moment_id -> moment_text (Moment/Typ/Sort)
+        rows = ai_suggestions.load_atl_rows()
+        moment_text = None
+        for r in rows:
+            if getattr(r, "id_str", None) == moment_id:
+                moment_text = getattr(r, "moment_text", None)
+                break
+
+        if not moment_text:
+            raise HTTPException(status_code=404, detail=f"moment_id '{moment_id}' hittades inte i ATL-data")
+
+        # Gör write + backup + verify
+        res = confirm_apply_atl_ref(
+            task_id=task_id,
+            mapping_file=mapping_file,
+            moment_text=moment_text,
+            variant=variant,
+        )
+
+        # Extra: returnera även ATL-tid för transparens
+        minutes_per_unit = get_atl_time_minutes(moment_text, variant)
+
+        return {
+            **res,
+            "atl_ref": {"moment": moment_text, "variant": variant, "moment_id": moment_id},
+            "time_minutes_per_unit": minutes_per_unit,
+            "note": "CONFIRM: filen är skriven och verifierad.",
+        }
+
+    except HTTPException:
+        raise
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:  # noqa: BLE001
         raise HTTPException(status_code=500, detail=str(e))
 
