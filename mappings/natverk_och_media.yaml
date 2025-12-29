@@ -4,8 +4,9 @@ tasks:
     category: natverk_och_media
     patterns:
       - installera nätverksuttag
-      - installera rj45 uttag
-      - installera rj45-uttag
+      - installera nätverksuttag cat6
+      - montera nätverksuttag
+      - nätverksuttag cat6      - installera rj45 uttag
       - sätta upp nätverksuttag
       - montera rj45
       - dra fram nätverksuttag
@@ -365,9 +366,7 @@ tasks:
     label: Installera infällt nätverksuttag
     category: natverk_och_media
     patterns:
-      - installera nätverksuttag
       - montera nätverksuttag
-      - installera rj45-uttag
       - montera rj45-uttag
     time_source: manual
     atl_refs: []
@@ -380,4 +379,10 @@ tasks:
 
 
 
+
+
+      - installera nätverksuttag
+      - installera nätverksuttag cat6
+      - montera nätverksuttag
+      - nätverksuttag cat6
 

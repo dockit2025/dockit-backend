@@ -160,8 +160,7 @@ tasks:
   # ---------------------------------------------------------
   # FELSÖKNING – BADRUM
   # ---------------------------------------------------------
-
-  felsokning_badrumsflakt:
+  felsokning_badrumsflakt_generell:
     label: "Felsökning badrumsfläkt"
     category: "felsokning"
     patterns:
@@ -343,4 +342,27 @@ tasks:
     pricing_source: "manual"
     material_suggestions: []
     notes: "Kontroll av jordningssystem, mätning och dokumentation."
+
+
+
+  byta_automatsakringar:
+    label: "Byta automatsäkringar / dvärgbrytare"
+    category: "felsokning_och_service"
+    patterns:
+      - "byta automatsäkringar"
+      - "byta automatsäkring"
+      - "byta dvärgbrytare"
+      - "byta säkringar i central"
+      - "byta säkring i central"
+      - "automatsäkringar ("
+      - "märka upp central"
+      - "märka upp elcentral"
+      - "märka upp säkringar"
+      - "märka upp grupper"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 60
+    pricing_source: "manual"
+    material_suggestions: []
+    notes: "Byte av en eller flera automatsäkringar/dvärgbrytare samt eventuell märkning av grupper i elcentral."
 

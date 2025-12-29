@@ -1,21 +1,33 @@
-# Python cache
+# ATL generated / raw data
+knowledge/atl/compiled/
+knowledge/atl/source/
+knowledge/atl/staging/
+
+# Build scripts (one-off)
+scripts/compile_*.py
+
+# Documentation / prompts
+MasterPrompt/
+
+# Python bytecode
 __pycache__/
 *.pyc
 
-# SQLite database
-dockit.db
-
-# Excel & temp files
-*.xlsx
-
-# Virtual environments
+# Python virtual environment
 .venv/
-env/
 
-# Runtime logs (ska aldrig versioneras)
-knowledge/logs/*.jsonl
+# Local databases
+*.db
 
-# OS / editor
-.DS_Store
-.vscode/
-.idea/
+# Imported catalogs / price lists
+knowledge/catalogs/
+
+# Compiled material catalog (generated)
+knowledge/catalogs/compiled/
+__pycache__/
+*.pyc
+tmp/
+knowledge/logs/
+knowledge/atl/stress_inputs.txt
+mappings/*.BAK*
+*.BAK*
