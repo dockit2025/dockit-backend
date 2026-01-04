@@ -3,10 +3,9 @@
 from __future__ import annotations
 
 import json
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, Optional
-
-from datetime import datetime
 
 
 # ROOT = projektroten, t.ex. D:\dockit-ai
@@ -112,6 +111,10 @@ def get_favorite_article(
     if not cust_key:
         return None
 
+    material_ref = str(material_ref or "").strip()
+    if not material_ref:
+        return None
+
     favorites = _load_favorites()
     cust_map = favorites.get(cust_key) or {}
     entry = cust_map.get(material_ref)
@@ -172,6 +175,64 @@ def register_favorite_article(
 
     cust_map[material_ref] = entry
     _save_favorites(favorites)
+
+
+def delete_favorite_article(
+    customer_id: Optional[str],
+    material_ref: str,
+) -> bool:
+    """
+    Tar bort en favoritartikel för en kund + material_ref.
+
+    Returnerar:
+      - True om något togs bort
+      - False om inget fanns att ta bort
+    """
+    cust_key = _make_customer_key(customer_id)
+    if not cust_key:
+        return False
+
+    material_ref = str(material_ref or "").strip()
+    if not material_ref:
+        return False
+
+    favorites = _load_favorites()
+    cust_map = favorites.get(cust_key)
+    if not isinstance(cust_map, dict):
+        return False
+
+    if material_ref not in cust_map:
+        return False
+
+    cust_map.pop(material_ref, None)
+
+    # Om kunden inte har några favoriter kvar, städa bort customer-nyckeln
+    if not cust_map:
+        favorites.pop(cust_key, None)
+
+    _save_favorites(favorites)
+    return True
+
+
+def delete_all_favorites_for_customer(customer_id: Optional[str]) -> bool:
+    """
+    Tar bort ALLA favoriter för en kund.
+
+    Returnerar:
+      - True om kunden fanns och togs bort
+      - False om kunden inte fanns
+    """
+    cust_key = _make_customer_key(customer_id)
+    if not cust_key:
+        return False
+
+    favorites = _load_favorites()
+    if cust_key not in favorites:
+        return False
+
+    favorites.pop(cust_key, None)
+    _save_favorites(favorites)
+    return True
 
 
 def list_favorites_for_customer(
