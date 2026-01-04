@@ -7,7 +7,14 @@ connect_args = {}
 if settings.database_url.startswith("sqlite"):
     connect_args = {"check_same_thread": False}
 
-engine = create_engine(settings.database_url, echo=settings.debug, connect_args=connect_args)
+db_url = settings.database_url
+# Render Postgres URL kan börja med "postgresql://". För psycopg (v3) vill vi ha driver "postgresql+psycopg://"
+if db_url.startswith("postgresql://"):
+    db_url = db_url.replace("postgresql://", "postgresql+psycopg://", 1)
+elif db_url.startswith("postgres://"):
+    db_url = db_url.replace("postgres://", "postgresql+psycopg://", 1)
+
+engine = create_engine(db_url, echo=settings.debug, connect_args=connect_args)
 
 
 def _ensure_quote_status_column() -> None:
