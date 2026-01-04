@@ -62,6 +62,7 @@ def _serialize_quote(q: Quote, session: Session) -> dict:
     return {
         "id": q.id,
         "title": getattr(q, "title", f"Offert #{q.id}"),
+        "status": getattr(q, "status", "draft"),
         "customer_name": cust_name,
         "subtotal_sek": float(getattr(q, "subtotal_sek", 0) or 0),
         "rot_discount_sek": float(getattr(q, "rot_discount_sek", 0) or 0),
@@ -402,3 +403,35 @@ def get_quote(quote_id: int, session: Session = Depends(get_session)):
     if not q:
         raise HTTPException(status_code=404, detail="Offerten hittades inte")
     return _serialize_quote(q, session)
+
+
+
+# ==============================
+# QUOTE STATUS
+# ==============================
+
+class QuoteStatusIn(BaseModel):
+    status: str
+
+
+@router.put("/{quote_id}/status")
+def update_quote_status(
+    quote_id: int,
+    payload: QuoteStatusIn,
+    session: Session = Depends(get_session),
+):
+    allowed = {"draft", "sent", "accepted", "rejected"}
+    status = (payload.status or "").strip().lower()
+    if status not in allowed:
+        raise HTTPException(status_code=400, detail=f"Invalid status: {status}")
+
+    q = session.get(Quote, quote_id)
+    if not q:
+        raise HTTPException(status_code=404, detail="Offerten hittades inte")
+
+    q.status = status
+    session.add(q)
+    session.commit()
+    session.refresh(q)
+    return _serialize_quote(q, session)
+
