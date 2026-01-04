@@ -6,12 +6,20 @@ from sqlalchemy import select
 from pydantic import BaseModel
 
 from src.services.quote_service import make_draft, create_quote, material_draft
-from src.services.favorites import register_favorite_article, list_favorites_for_customer
+from src.services.favorites import (
+    register_favorite_article,
+    list_favorites_for_customer,
+    delete_favorite_article,
+    delete_all_favorites_for_customer,
+    get_favorite_article,
+)
 from src.services.material_suggestions import get_material_suggestions
+from src.services.pricing import get_price
 
 from src.server.db.session import get_session
 from src.server.models import Quote, QuoteLine, Customer
 from src.server.schemas.quote import QuoteDraftIn, MaterialDraftIn
+from src.server.settings.config import settings
 from material_list_parser import parse_material_text as _parse_material_text
 
 
@@ -20,7 +28,7 @@ from material_list_parser import parse_material_text as _parse_material_text
 # ==============================
 
 API_KEY_HEADER_NAME = "X-DOCKIT-API-KEY"
-API_KEY_VALUE = "dockit-material-beta-123"
+API_KEY_VALUE = settings.dockit_api_key or "dockit-material-beta-123"
 
 
 def verify_api_key(x_dockit_api_key: str = Header(None)) -> None:
@@ -179,6 +187,39 @@ def get_favorite_materials(
     }
 
 
+@router.delete("/favorite-material")
+def delete_favorite_material(
+    material_ref: str = Query(...),
+    customer_id: Optional[str] = Query(default=None),
+    customer_email: Optional[str] = Query(default=None),
+    customer_name: Optional[str] = Query(default=None),
+):
+    cust_key = customer_id or customer_email or customer_name
+    if not cust_key:
+        raise HTTPException(status_code=400, detail="customer-id or email required")
+
+    deleted = delete_favorite_article(
+        customer_id=cust_key,
+        material_ref=material_ref,
+    )
+
+    return {"status": "ok", "deleted": deleted}
+
+
+@router.delete("/favorite-materials")
+def delete_all_favorite_materials(
+    customer_id: Optional[str] = Query(default=None),
+    customer_email: Optional[str] = Query(default=None),
+    customer_name: Optional[str] = Query(default=None),
+):
+    cust_key = customer_id or customer_email or customer_name
+    if not cust_key:
+        raise HTTPException(status_code=400, detail="customer-id or email required")
+
+    deleted = delete_all_favorites_for_customer(cust_key)
+    return {"status": "ok", "deleted": deleted}
+
+
 # ==============================
 # MATERIAL SUGGESTIONS
 # ==============================
@@ -220,10 +261,73 @@ class MaterialParseIn(BaseModel):
     customer_email: Optional[str] = None
 
 
+def _load_material_ref_map() -> dict:
+    # Small, stable mapping file (tracked)
+    from pathlib import Path
+    import json
+
+    path = Path("knowledge/catalogs/material_ref_map.json")
+    if not path.exists():
+        return {}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        return data if isinstance(data, dict) else {}
+    except Exception:
+        return {}
+
+
+def _load_article_info_index() -> dict:
+    """
+    Returnerar {artikelnummer: {"benamning": str, "enhet": str}}
+    Läser båda kataloger om de finns så UI kan visa namn/enhet även för Ahlsell-artiklar.
+    """
+    from pathlib import Path
+    import json
+
+    def _load_list(p: Path) -> list:
+        if not p.exists():
+            return []
+        try:
+            data = json.loads(p.read_text(encoding="utf-8"))
+            return data if isinstance(data, list) else []
+        except Exception:
+            return []
+
+    # Prioritet: Ahlsell först för benämning/enhet om samma artikelnummer finns i båda
+    ahlsell = _load_list(Path("knowledge/catalogs/price_catalog_ahlsell.json"))
+    base = _load_list(Path("knowledge/catalogs/price_catalog.json"))
+
+    idx: dict = {}
+
+    def _ingest(rows: list) -> None:
+        for row in rows:
+            if not isinstance(row, dict):
+                continue
+            art = str(row.get("artikelnummer") or "").strip()
+            if not art:
+                continue
+            name = str(row.get("benamning") or "").strip()
+            unit = str(row.get("enhet") or "").strip()
+            # only set if not already set (so earlier lists win)
+            if art not in idx:
+                idx[art] = {
+                    "benamning": name,
+                    "enhet": unit,
+                }
+
+    _ingest(ahlsell)
+    _ingest(base)
+    return idx
+
+
 @router.post("/material-parse")
 def quote_material_parse(payload: MaterialParseIn):
     parsed = _parse_material_text(payload.text)
     items = parsed.get("items") or []
+
+    # Load maps/index once per request
+    refmap = _load_material_ref_map()
+    article_idx = _load_article_info_index()
 
     enriched = []
     for item in items:
@@ -233,66 +337,54 @@ def quote_material_parse(payload: MaterialParseIn):
         qty = item.get("qty")
         unit = item.get("unit")
 
-        # article lookup reused from pricing service
-        from src.services.favorites import get_favorite_article
-        from pathlib import Path
-        import json
-
-        def _load_material_ref_map():
-            path = Path("knowledge/catalogs/material_ref_map.json")
-            if not path.exists():
-                return {}
-            try:
-                return json.loads(path.read_text(encoding="utf-8"))
-            except Exception:
-                return {}
-
-        def _load_price_catalog():
-            path = Path("knowledge/catalogs/price_catalog.json")
-            if not path.exists():
-                return []
-            try:
-                return json.loads(path.read_text(encoding="utf-8"))
-            except Exception:
-                return []
-
-        # resolve article
+        # resolve article_number (favorites -> refmap)
         article_number = None
-        if payload.customer_email:
+        if payload.customer_email and ref:
             fav = get_favorite_article(payload.customer_email, ref)
             if fav:
                 article_number = fav
 
-        if not article_number:
-            refmap = _load_material_ref_map()
+        if not article_number and ref:
             rawmap = refmap.get(ref) or refmap.get(str(ref).upper())
             if rawmap:
-                article_number = rawmap
+                article_number = str(rawmap).strip()
 
+        # Price: use shared pricing logic (supports Ahlsell + customer-specific)
+        unit_price = 0.0
+        try:
+            if payload.customer_email and ref and ref != "UNKNOWN":
+                unit_price = float(get_price(payload.customer_email, str(ref)))
+            elif payload.customer_email and article_number:
+                unit_price = float(get_price(payload.customer_email, str(article_number)))
+            elif ref and ref != "UNKNOWN":
+                unit_price = float(get_price(None, str(ref)))
+            elif article_number:
+                unit_price = float(get_price(None, str(article_number)))
+        except Exception:
+            unit_price = 0.0
+
+        # Name/unit: look up by article_number in either catalog
         article_name = ""
-        unit_from_catalog = unit
-        unit_price = 0
-
+        unit_from_catalog = unit or "st"
         if article_number:
-            catalog = _load_price_catalog()
-            for row in catalog:
-                if str(row.get("artikelnummer")).strip() == str(article_number).strip():
-                    article_name = row.get("benamning") or ""
-                    unit_from_catalog = row.get("enhet") or "st"
-                    unit_price = row.get("gn_pris") or 0
-                    break
+            info = article_idx.get(str(article_number).strip())
+            if isinstance(info, dict):
+                article_name = str(info.get("benamning") or "").strip()
+                unit_from_catalog = str(info.get("enhet") or unit_from_catalog).strip() or unit_from_catalog
 
-        enriched.append({
-            "raw": raw,
-            "parsed_core": parsed_core,
-            "qty": qty,
-            "unit": unit,
-            "material_ref": ref,
-            "article_number": article_number,
-            "article_name": article_name,
-            "unit_price": unit_price,
-            "unit_from_catalog": unit_from_catalog,
-        })
+        enriched.append(
+            {
+                "raw": raw,
+                "parsed_core": parsed_core,
+                "qty": qty,
+                "unit": unit,
+                "material_ref": ref,
+                "article_number": article_number,
+                "article_name": article_name,
+                "unit_price": unit_price,
+                "unit_from_catalog": unit_from_catalog,
+            }
+        )
 
     return {
         "free_text": payload.text,
