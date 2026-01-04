@@ -163,6 +163,12 @@ def _guess_material_ref(core_text: str) -> str:
         return "TAKDOSA"
 
     # --------------------------------------------------
+    # Apparatram 1-fack
+    # --------------------------------------------------
+    if "apparatram" in t or "appram" in t or ("ram" in t and ("1-fack" in t or "1 fack" in t or "1fack" in t)):
+        return "APPRAM-1FACK"
+
+    # --------------------------------------------------
     # VP-rör / rör – använd dimensioner om de finns, annars 16 mm
     # --------------------------------------------------
     if "vp" in t or "vp-rör" in t or "vp rör" in t or "vp-ror" in t or "rör" in t or "ror" in t:
@@ -347,3 +353,4 @@ if __name__ == "__main__":
 
     parsed = parse_material_text(input_text)
     print(json.dumps(parsed, ensure_ascii=False, indent=2))
+
