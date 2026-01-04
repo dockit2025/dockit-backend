@@ -14,6 +14,12 @@ if db_url.startswith("postgresql://"):
 elif db_url.startswith("postgres://"):
     db_url = db_url.replace("postgres://", "postgresql+psycopg://", 1)
 
+try:
+    from urllib.parse import urlparse
+    p = urlparse(db_url)
+    print(f"[db] Using DB host={p.hostname} db={p.path}", flush=True)
+except Exception:
+    pass
 engine = create_engine(db_url, echo=settings.debug, connect_args=connect_args)
 
 
@@ -47,3 +53,4 @@ def init_db() -> None:
 def get_session():
     with Session(engine) as session:
         yield session
+
