@@ -1,3 +1,7 @@
+# RUNTIME: /sandbox/interpret
+# Active path: src/server/api/sandbox.py -> src/services/quote_service.make_draft() -> interpret_free_text()
+# This file is part of the current runtime matching engine (mappings/*.yaml).
+# Other loaders exist for sandbox GPT matching; see documentation/runtime_map.md.
 import re
 import json
 import sys
@@ -547,3 +551,5 @@ if __name__ == "__main__":
 
     data = interpret_free_text(free_text_input)
     print(json.dumps(data, ensure_ascii=False, indent=2))
+
+
