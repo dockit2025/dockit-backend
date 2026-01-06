@@ -139,40 +139,64 @@ def _category_to_mapping_path(category: Optional[str]) -> Path:
 
 
 def _load_mapping_file(path: Path) -> Dict[str, Any]:
+    """
+    Läser mappings-fil och normaliserar till {"tasks": [...]} men BEVARAR container-typen.
+    Container-typen används senare vid save så vi inte råkar ändra YAML-formatet.
+    """
     if not path.exists():
-        return {"tasks": []}
+        # Nya filer ska defaulta till samma format som repo:t idag: top-level lista
+        return {"tasks": [], "_tasks_container": "list"}
 
     import yaml
     with path.open("r", encoding="utf-8") as f:
-        data = yaml.safe_load(f) or {}
+        data = yaml.safe_load(f)
 
+    if data is None:
+        return {"tasks": [], "_tasks_container": "list"}
+
+    # Format A: top-level lista (nuvarande mappings/*.yaml i repo)
+    if isinstance(data, list):
+        return {"tasks": data, "_tasks_container": "list"}
+
+    # Format B: dict med "tasks": [...]
     if isinstance(data, dict):
         tasks = data.get("tasks")
         if isinstance(tasks, list):
-            return {"tasks": tasks}
+            return {"tasks": tasks, "_tasks_container": "dict_tasks"}
+
+        # Format C: dict med "tasks": {task_id: {...}}
         if isinstance(tasks, dict):
-            out = []
+            out: List[Dict[str, Any]] = []
             for task_id, task_def in tasks.items():
                 if not isinstance(task_def, dict):
                     continue
                 t = dict(task_def)
                 t.setdefault("task_id", task_id)
                 out.append(t)
-            return {"tasks": out}
-        return {"tasks": []}
+            return {"tasks": out, "_tasks_container": "dict_tasks"}
 
-    if isinstance(data, list):
-        return {"tasks": data}
-
-    return {"tasks": []}
+    # Okänt format → fail-safe
+    return {"tasks": [], "_tasks_container": "list"}
 
 
 def _save_mapping_file(path: Path, data: Dict[str, Any]) -> None:
+    """
+    Sparar mappings-fil utan att ändra dess container-format.
+    - "list"      -> top-level lista
+    - "dict_tasks"-> {"tasks": [...]}
+    """
     import yaml
+
     path.parent.mkdir(parents=True, exist_ok=True)
-    out = {"tasks": data.get("tasks") or []}
+
+    tasks = data.get("tasks") or []
+    container = (data.get("_tasks_container") or "list").strip()
+
     with path.open("w", encoding="utf-8") as f:
-        yaml.safe_dump(out, f, allow_unicode=True, sort_keys=False, indent=2)
+        if container == "dict_tasks":
+            yaml.safe_dump({"tasks": tasks}, f, allow_unicode=True, sort_keys=False, indent=2)
+        else:
+            yaml.safe_dump(tasks, f, allow_unicode=True, sort_keys=False, indent=2)
 
 
 def _task_exists(tasks: List[Dict[str, Any]], task_id: str) -> bool:
@@ -339,4 +363,5 @@ if __name__ == "__main__":
     apply_suggested_tasks(gpt_output)
 
     print("OK: suggestions logged + written to mapping files.")
+
 
