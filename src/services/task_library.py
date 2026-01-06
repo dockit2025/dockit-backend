@@ -1,3 +1,4 @@
+from __future__ import annotations
 # RUNTIME NOTE: /sandbox/gpt-match-tasks
 # Denna loader används av sandbox-GPT-matchning (FAS 2 kandidatlista):
 #   src/server/api/sandbox.py -> /sandbox/gpt-match-tasks
@@ -51,4 +52,5 @@ def load_all_tasks_from_mappings() -> List[Dict[str, Any]]:
                 all_tasks.append(tcopy)
 
     return all_tasks
+
 
