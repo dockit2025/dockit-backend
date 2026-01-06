@@ -11,7 +11,6 @@ from free_text_interpreter import interpret_free_text
 # ROT-beräkning
 from src.rot_calculator import RotConfig, apply_rot_to_lines
 from src.services.atl_lookup import get_atl_time_minutes
-from src.services.atl_lookup import get_atl_time_minutes
 
 # Prislogik
 from src.services.pricing import get_price
@@ -505,31 +504,6 @@ def create_quote(*, payload: QuoteDraftIn, session: Session) -> Quote:
 
 
 
-def _estimate_task_time_minutes(task_id: str, quantity_units: float) -> float:
-    """
-    Enkel, hårdkodad tidsuppskattning per task-id i material-läget.
-    Detta är en första version – senare kan vi koppla detta mot ATL på samma sätt
-    som fri-text-tolken gör.
-
-    quantity_units är t.ex. meter rör eller antal uttag (st).
-    """
-    # TODO: flytta detta till en gemensam "task_metadata"-service kopplad till ATL.
-    if task_id == "dra_vp_ror_infalld_vagg":
-        # Samma som i fri-text-vägen: ca 1.8 min/m
-        minutes_per_unit = get_atl_time_minutes("Infällda rör (VP 16–20 mm)", 0)
-    elif task_id == "lagga_kabel_i_list":
-        # Vår manuella schablon: 5 min/m
-        minutes_per_unit = 5.0
-    elif task_id == "installera_nytt_vagguttag":
-        # Manuellt: 45 min per nytt uttag
-        minutes_per_unit = 45.0
-    else:
-        # Okänt task – ingen tid (endast material debiteras)
-        minutes_per_unit = 0.0
-
-    return quantity_units * minutes_per_unit
-
-
 def _find_work_profile(material_ref: str, environment: Optional[str], work_type: Optional[str]) -> Optional[dict]:
     """
     Försöker hitta en work_profile i work_profiles.yaml som matchar
@@ -752,49 +726,6 @@ def _estimate_task_time_minutes(task_id: str, quantity_units: float) -> float:
     """
     Tidsuppskattning per task via ATL om möjligt, annars manuella schabloner.
 
-    quantity_units är t.ex. meter rör eller antal uttag (st).
-    """
-    task_id = task_id or ""
-    qty = float(quantity_units or 0.0)
-    if qty <= 0:
-        return 0.0
-
-    # Försök ATL först för de task-id där vi vet vilket moment som gäller
-    if task_id == "dra_vp_ror_infalld_vagg":
-        minutes_per_unit = get_atl_time_minutes("Infällda rör (VP 16–20 mm)", 0)
-        try:
-            minutes_per_unit_f = float(minutes_per_unit)
-        except (TypeError, ValueError):
-            minutes_per_unit_f = 0.0
-
-        if minutes_per_unit_f > 0:
-            return qty * minutes_per_unit_f
-
-    # Fallback: manuella schabloner (samma som tidigare logik)
-    if task_id in ("lagga_kabel_i_list", "dra_kabelkanal_vagg"):
-        # Vår manuella schablon: 5 min/m kabel/list/kanal
-        minutes_per_unit = 5.0
-    elif task_id in ("installera_nytt_vagguttag", "INSTALLERA-VAGGUTTAG-INFALLT"):
-        # Manuellt: 45 min per nytt infällt uttag
-        minutes_per_unit = 45.0
-    elif task_id == "INSTALLERA-DIMMER":
-        # Rimlig schablon: ca 30 min per dimmer
-        minutes_per_unit = 30.0
-    else:
-        # Okänt task – ingen tid (endast material debiteras)
-        minutes_per_unit = 0.0
-
-    return qty * minutes_per_unit
-
-
-
-
-
-
-def _estimate_task_time_minutes(task_id: str, quantity_units: float) -> float:
-    """
-    Tidsuppskattning per task via ATL om möjligt, annars manuella schabloner.
-
     quantity_units är t.ex. meter kabel/rör eller antal apparater (st).
     """
     task_id = task_id or ""
@@ -838,4 +769,5 @@ def _estimate_task_time_minutes(task_id: str, quantity_units: float) -> float:
         minutes_per_unit = 0.0
 
     return qty * minutes_per_unit
+
 
