@@ -1,4 +1,9 @@
 from __future__ import annotations
+# LEGACY-NOT-WIRED
+# Status: Not used by any API router under src/server/api/* (verified by search).
+# Purpose: Keep for reference/experiments only. Do not build new runtime features here.
+# Active runtime paths are documented in: documentation/runtime_map.md
+#from __future__ import annotations
 
 import os
 import re
@@ -353,3 +358,5 @@ def search_atl(query: str, top_k: int = 5) -> List[Dict[str, Optional[str]]]:
     loader = ATLLoader()
     loader.load()
     return loader.search(query, top_k=top_k)
+
+
