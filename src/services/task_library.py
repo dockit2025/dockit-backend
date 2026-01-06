@@ -1,4 +1,11 @@
-from __future__ import annotations
+# RUNTIME NOTE: /sandbox/gpt-match-tasks
+# Denna loader används av sandbox-GPT-matchning (FAS 2 kandidatlista):
+#   src/server/api/sandbox.py -> /sandbox/gpt-match-tasks
+#
+# OBS: /sandbox/interpret använder istället free_text_interpreter.py som egen loader.
+# Ändra inte här utan att kontrollera runtime-noten i free_text_interpreter.py.
+# Se: documentation/runtime_map.md
+#from __future__ import annotations
 
 from pathlib import Path
 from typing import Any, Dict, List
@@ -44,3 +51,4 @@ def load_all_tasks_from_mappings() -> List[Dict[str, Any]]:
                 all_tasks.append(tcopy)
 
     return all_tasks
+
