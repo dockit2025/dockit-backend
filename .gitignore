@@ -10,11 +10,8 @@ scripts/compile_*.py
 MasterPrompt/
 
 # Python bytecode
-__pycache__/
-*.pyc
 
 # Python virtual environment
-.venv/
 
 # Local databases
 *.db
@@ -24,8 +21,6 @@ knowledge/catalogs/
 
 # Compiled material catalog (generated)
 knowledge/catalogs/compiled/
-__pycache__/
-*.pyc
 tmp/
 knowledge/logs/
 knowledge/atl/stress_inputs.txt
@@ -38,6 +33,7 @@ src/server_backup_*/
 
 # Runtime customer data (do not deploy)
 knowledge/customers/favorites.json
+
 
 .venv/
 __pycache__/
