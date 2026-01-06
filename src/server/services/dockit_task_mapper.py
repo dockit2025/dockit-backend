@@ -37,7 +37,6 @@ Användning (exempel):
 Funktionen returnerar en lista av MatchedTask-objekt.
 """
 
-from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Any, Dict, Iterable, List, Optional, Union
