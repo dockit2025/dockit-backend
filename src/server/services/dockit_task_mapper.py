@@ -1,4 +1,9 @@
-# file: src/server/services/dockit_task_mapper.py
+from __future__ import annotations
+# LEGACY-NOT-WIRED
+# Status: Not used by any API router under src/server/api/* (verified by search).
+# Purpose: Keep for reference/experiments only. Do not build new runtime features here.
+# Active runtime paths are documented in: documentation/runtime_map.md
+## file: src/server/services/dockit_task_mapper.py
 """
 Dockit task mapping:
 
@@ -409,3 +414,5 @@ if __name__ == "__main__":
     for t in tasks:
         print("-" * 40)
         pprint(t)
+
+
