@@ -1,4 +1,9 @@
 from __future__ import annotations
+# LEGACY-NOT-WIRED
+# Status: Not used by any API router under src/server/api/* (verified by search).
+# Purpose: Keep for reference/experiments only. Do not build new runtime features here.
+# Active runtime paths are documented in: documentation/runtime_map.md
+#from __future__ import annotations
 import csv, re
 from pathlib import Path
 from typing import List, Dict, Optional
@@ -79,3 +84,5 @@ def find_times(name_query: str) -> List[Dict]:
     q = (name_query or "").strip().lower()
     if not q: return []
     return [r for r in ATL_INDEX if q in (r["moment_name"] or "").lower()]
+
+
