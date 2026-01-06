@@ -31,3 +31,15 @@ knowledge/logs/
 knowledge/atl/stress_inputs.txt
 mappings/*.BAK*
 *.BAK*
+
+# Archived backups (not part of runtime)
+src/server_backup_*/
+
+
+# Runtime customer data (do not deploy)
+knowledge/customers/favorites.json
+
+.venv/
+__pycache__/
+*.pyc
+dockit-ui/node_modules/
