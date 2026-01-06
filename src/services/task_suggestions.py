@@ -365,3 +365,75 @@ if __name__ == "__main__":
     print("OK: suggestions logged + written to mapping files.")
 
 
+
+# ---------------------------------------------------------
+# Admin queue helpers: summarize recurring missing segments
+# ---------------------------------------------------------
+
+def _normalize_segment_text(text: str) -> str:
+    s = (text or "").strip().lower()
+    s = " ".join(s.split())  # collapse whitespace
+    return s
+
+
+def summarize_missing_task_segments(*, min_count: int = 1, limit: int = 50) -> Dict[str, Any]:
+    """
+    Bygger en admin-kö baserat på knowledge/logs/missing_task_segments.jsonl.
+
+    - Räknar förekomster per normaliserad segment-text
+    - Returnerar top-N (limit) med count + exempel + last_seen_ts
+    - min_count kan vara 1 i början och höjas senare för mindre brus
+    """
+    try:
+        min_count_int = int(min_count)
+    except Exception:
+        min_count_int = 1
+    min_count_int = max(1, min_count_int)
+
+    try:
+        limit_int = int(limit)
+    except Exception:
+        limit_int = 50
+    limit_int = max(1, min(200, limit_int))
+
+    events = _load_missing_task_events(limit=None)
+
+    by_key: Dict[str, Dict[str, Any]] = {}
+
+    for ev in events:
+        seg = str(ev.get("segment") or "").strip()
+        if not seg:
+            continue
+
+        key = _normalize_segment_text(seg)
+        if not key:
+            continue
+
+        ts_raw = str(ev.get("ts") or "").strip()
+
+        item = by_key.get(key)
+        if not item:
+            by_key[key] = {
+                "segment_key": key,
+                "example": seg,
+                "count": 1,
+                "last_seen_ts": ts_raw,
+            }
+        else:
+            item["count"] = int(item.get("count", 0)) + 1
+            prev = str(item.get("last_seen_ts") or "")
+            if ts_raw and (not prev or ts_raw > prev):
+                item["last_seen_ts"] = ts_raw
+
+    items = [v for v in by_key.values() if int(v.get("count", 0)) >= min_count_int]
+    items.sort(key=lambda x: (-int(x.get("count", 0)), str(x.get("last_seen_ts") or ""), str(x.get("segment_key") or "")))
+    items = items[:limit_int]
+
+    return {
+        "min_count": min_count_int,
+        "limit": limit_int,
+        "total_unique": len(by_key),
+        "returned": len(items),
+        "items": items,
+    }
+

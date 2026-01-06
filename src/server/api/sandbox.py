@@ -988,3 +988,16 @@ def atl_apply_confirm(payload: AtlApplyConfirmRequest) -> Dict[str, Any]:
     except Exception as e:  # noqa: BLE001
         raise HTTPException(status_code=500, detail=str(e))
 
+
+# =========================================================
+#  ADMIN QUEUE – /sandbox/admin/task-queue (read-only)
+# =========================================================
+
+@router.get("/admin/task-queue")
+def admin_task_queue(min_count: int = 1, limit: int = 50) -> Dict[str, Any]:
+    """
+    Read-only: summerar återkommande missing_task_segments som en admin-kö.
+    Används för att besluta vad som ska bli tasks (kontrollerad självlärning).
+    """
+    return ts.summarize_missing_task_segments(min_count=min_count, limit=limit)
+
