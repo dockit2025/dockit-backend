@@ -960,6 +960,7 @@ def atl_apply_confirm(payload: AtlApplyConfirmRequest) -> Dict[str, Any]:
 def admin_task_queue(
     min_count: int = 1,
     limit: int = 50,
+    exclude_prefixes: Optional[str] = None,
     session: Session = Depends(get_session),
 ) -> Dict[str, Any]:
     """
@@ -967,6 +968,9 @@ def admin_task_queue(
 
     Primärt: DB-backed (MissingTaskSegment).
     Fallback: ts.summarize_missing_task_segments (jsonl) om DB inte fungerar.
+
+    exclude_prefixes:
+      - kommaseparerad lista av prefix att dölja, t.ex. "zz_,test_"
     """
     try:
         min_count_int = int(min_count)
@@ -980,8 +984,35 @@ def admin_task_queue(
         limit_int = 50
     limit_int = max(1, min(200, limit_int))
 
+    prefixes: List[str] = []
+    raw = (exclude_prefixes or "").strip()
+    if raw:
+        prefixes = [p.strip().lower() for p in raw.split(",") if p.strip()]
+
+    def _apply_filter(out: Dict[str, Any]) -> Dict[str, Any]:
+        if not prefixes:
+            return out
+        items = out.get("items") or []
+        if not isinstance(items, list):
+            items = []
+        before = len(items)
+        filtered = []
+        for it in items:
+            key = str((it or {}).get("segment_key") or "").strip().lower()
+            if not key:
+                continue
+            if any(key.startswith(p) for p in prefixes):
+                continue
+            filtered.append(it)
+        out["items"] = filtered
+        out["returned"] = len(filtered)
+        out["filtered_out"] = before - len(filtered)
+        out["exclude_prefixes"] = prefixes
+        return out
+
     try:
-        return _db_task_queue(session=session, min_count=min_count_int, limit=limit_int)
+        out = _db_task_queue(session=session, min_count=min_count_int, limit=limit_int)
     except Exception:
-        # Fallback till gamla logg-summeringen
-        return ts.summarize_missing_task_segments(min_count=min_count_int, limit=limit_int)
+        out = ts.summarize_missing_task_segments(min_count=min_count_int, limit=limit_int)
+
+    return _apply_filter(out)
