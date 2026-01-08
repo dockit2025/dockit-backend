@@ -14,6 +14,7 @@
 
 Runtime notes:
 - free_text_interpreter returns **1 task per segment** (deterministisk match).
+- Runtime uses the shared mappings loader: src/services/task_library.py:load_all_tasks_from_mappings.
 - Each ATL-backed task now includes **atl_variant_options** (UI-underlag för att välja variant).
 
 ### Quotes draft + persistence (available)
@@ -90,3 +91,4 @@ These files are present but are not imported by src/server/api/* routes:
 ## Cleanup policy
 - Step 1 cleanup = documentation + labeling only (no behavior change).
 - Any consolidation/refactor must be preceded by: grep/search for imports + a minimal smoke test run.
+

@@ -12,6 +12,7 @@ from typing import Any, Dict, List, Optional
 import yaml
 
 from src.services.atl_lookup import get_atl_time_minutes, get_atl_variant_options
+from src.services.task_library import load_all_tasks_from_mappings as load_all_tasks_from_mappings_shared
 
 
 # ---------------------------------------------------------
@@ -77,49 +78,10 @@ def _log_unmatched_segment(segment: str) -> None:
 
 def _load_all_tasks_from_mappings() -> List[Dict[str, Any]]:
     """
-    Läser alla YAML-filer i mappen 'mappings/' och returnerar en lista med task-dictar.
-    Stöder både:
-    - {"tasks": [ {...}, {...} ]}
-    - {"tasks": { "id": {...}, ... }}
-    - eller ren lista med dictar.
+    Wrapper: använd gemensam loader i src/services/task_library.py
+    så runtime och sandbox använder samma mapping-loader.
     """
-    mappings_dir = ROOT / "mappings"
-    if not mappings_dir.exists():
-        raise FileNotFoundError(f"Hittar inte mappen 'mappings/' på: {mappings_dir}")
-
-    all_tasks: List[Dict[str, Any]] = []
-
-    for path in sorted(mappings_dir.glob("*.yaml")):
-        with path.open("r", encoding="utf-8") as f:
-            data = yaml.safe_load(f) or {}
-
-        tasks_raw = None
-        if isinstance(data, dict) and "tasks" in data:
-            tasks_raw = data["tasks"] or []
-        elif isinstance(data, list):
-            tasks_raw = data
-        else:
-            continue
-
-        if isinstance(tasks_raw, list):
-            for task in tasks_raw:
-                if not isinstance(task, dict):
-                    continue
-                tcopy = dict(task)
-                tcopy["_mapping_file"] = path.name
-                all_tasks.append(tcopy)
-        elif isinstance(tasks_raw, dict):
-            for task_id, task_def in tasks_raw.items():
-                if not isinstance(task_def, dict):
-                    continue
-                tcopy = dict(task_def)
-                tcopy.setdefault("task_id", task_id)
-                tcopy["_mapping_file"] = path.name
-                all_tasks.append(tcopy)
-
-    return all_tasks
-
-
+    return load_all_tasks_from_mappings_shared()
 def _collect_mapping_filenames() -> List[str]:
     mappings_dir = ROOT / "mappings"
     if not mappings_dir.exists():
@@ -579,5 +541,6 @@ if __name__ == "__main__":
 
     data = interpret_free_text(free_text_input)
     print(json.dumps(data, ensure_ascii=False, indent=2))
+
 
 
