@@ -1,5 +1,6 @@
 # ATL generated / raw data
 knowledge/atl/compiled/
+!knowledge/atl/compiled/atl_total.csv
 knowledge/atl/source/
 knowledge/atl/staging/
 
@@ -39,3 +40,4 @@ knowledge/customers/favorites.json
 __pycache__/
 *.pyc
 dockit-ui/node_modules/
+
