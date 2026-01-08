@@ -11,7 +11,7 @@ from typing import Any, Dict, List, Optional
 
 import yaml
 
-from src.services.atl_lookup import get_atl_time_minutes
+from src.services.atl_lookup import get_atl_time_minutes, get_atl_variant_options
 
 
 # ---------------------------------------------------------
@@ -128,28 +128,28 @@ def _collect_mapping_filenames() -> List[str]:
 
 
 # ---------------------------------------------------------
-# Enkel patternmatchning
+# Enkel patternmatchning (DETERMINISTISK)
 # ---------------------------------------------------------
 
 
-def _simple_pattern_match(text: str, pattern: str) -> bool:
+def _pattern_match_score(text: str, pattern: str) -> int:
     """
-    Enkel matchning:
-    - case-insensitive
-    - först: direkt substring
-    - annars: alla ord i pattern i rätt ordning, med begränsad spridning.
+    Matchstyrka:
+      2 = direkt substring
+      1 = alla ord i rätt ordning inom MAX_SPAN_CHARS
+      0 = ingen match
     """
-    text_l = text.lower()
-    patt_l = pattern.strip().lower()
+    text_l = (text or "").lower()
+    patt_l = (pattern or "").strip().lower()
     if not patt_l:
-        return False
+        return 0
 
     if patt_l in text_l:
-        return True
+        return 2
 
     words = re.findall(r"[a-zåäö0-9]+", patt_l)
     if not words:
-        return False
+        return 0
 
     idx = 0
     first_pos = None
@@ -158,7 +158,7 @@ def _simple_pattern_match(text: str, pattern: str) -> bool:
     for w in words:
         m = re.search(r"\b" + re.escape(w) + r"\b", text_l[idx:])
         if not m:
-            return False
+            return 0
         pos = idx + m.start()
         if first_pos is None:
             first_pos = pos
@@ -168,9 +168,13 @@ def _simple_pattern_match(text: str, pattern: str) -> bool:
     MAX_SPAN_CHARS = 25
     if first_pos is not None and last_pos is not None:
         if (last_pos - first_pos) > MAX_SPAN_CHARS:
-            return False
+            return 0
 
-    return True
+    return 1
+
+
+def _simple_pattern_match(text: str, pattern: str) -> bool:
+    return _pattern_match_score(text, pattern) > 0
 
 
 # ---------------------------------------------------------
@@ -419,7 +423,7 @@ def _build_task_result(
             except Exception:
                 atl_variant = None
 
-    # ATL: använd get_atl_time_minutes som redan returnerar MINUTER per enhet
+    # ATL: get_atl_time_minutes returnerar minuter per enhet
     if atl_moment and atl_variant is not None and time_source in ("atl", "auto"):
         try:
             variant_int = int(atl_variant)
@@ -432,7 +436,6 @@ def _build_task_result(
             atl_minutes = None
 
         if atl_minutes is not None and atl_minutes > 0:
-            # atl_minutes är redan minuter per enhet
             manual_time_minutes_per_unit = float(atl_minutes)
             time_source = "atl"
 
@@ -443,6 +446,13 @@ def _build_task_result(
     )
 
     time_minutes_total = manual_time_minutes_per_unit * quantity
+
+    atl_variant_options = None
+    if atl_moment:
+        try:
+            atl_variant_options = get_atl_variant_options(str(atl_moment))
+        except Exception:
+            atl_variant_options = None
 
     result = {
         "task_id": task_def.get("task_id"),
@@ -458,6 +468,7 @@ def _build_task_result(
         "materials": task_def.get("materials", []),
         "atl_moment": atl_moment,
         "atl_variant": atl_variant,
+        "atl_variant_options": atl_variant_options,
     }
 
     return result
@@ -480,36 +491,53 @@ def interpret_free_text(free_text: str) -> Dict[str, Any]:
 
     segments = _split_into_segments(free_text_stripped)
 
+    # NYTT: 1 task per segment (bästa deterministiska match)
     for segment in segments:
-        segment_matched = False
+        best = None  # (score, patt_len, words_len, task_def, chosen_pattern)
 
         for task_def in all_tasks_defs:
             patterns: Optional[List[str]] = task_def.get("patterns")
             if not patterns:
                 continue
 
-            chosen_pattern: Optional[str] = None
-
+            best_for_task = None  # (score, patt_len, words_len, chosen_pattern)
             for pattern in patterns:
                 if not isinstance(pattern, str):
                     continue
 
-                if _simple_pattern_match(segment, pattern):
-                    chosen_pattern = pattern
-                    break
+                score = _pattern_match_score(segment, pattern)
+                if score <= 0:
+                    continue
 
-            if chosen_pattern is not None:
-                result_task = _build_task_result(
-                    task_def=task_def,
-                    matched_pattern=chosen_pattern,
-                    text_segment=segment,
-                )
-                matched_tasks.append(result_task)
-                segment_matched = True
+                patt = pattern.strip()
+                patt_len = len(patt)
+                words_len = len(re.findall(r"[a-zåäö0-9]+", patt.lower()))
+                cand = (score, patt_len, words_len, patt)
 
-        if not segment_matched:
+                if best_for_task is None or cand > best_for_task:
+                    best_for_task = cand
+
+            if best_for_task is None:
+                continue
+
+            score, patt_len, words_len, chosen_pattern = best_for_task
+            cand_best = (score, patt_len, words_len, task_def, chosen_pattern)
+
+            if best is None or cand_best > best:
+                best = cand_best
+
+        if best is None:
             _log_unmatched_segment(segment)
             missing_segments.append(segment)
+            continue
+
+        _, _, _, task_def, chosen_pattern = best
+        result_task = _build_task_result(
+            task_def=task_def,
+            matched_pattern=chosen_pattern,
+            text_segment=segment,
+        )
+        matched_tasks.append(result_task)
 
     matched_tasks = _dedupe_tasks(matched_tasks)
     matched_tasks = _propagate_same_distance_quantity(matched_tasks)

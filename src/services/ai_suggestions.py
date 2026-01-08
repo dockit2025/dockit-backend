@@ -203,7 +203,8 @@ def apply_material_suggestions(suggestions: Dict[str, str]) -> None:
 #  ATL-INTEGRATION FÖR GPT/SANDBOX
 # ------------------------------------------------------------
 
-ATL_PATH = ROOT / "knowledge" / "atl" / "Del7_ATL_Total.csv"
+# NY: använd kompilerad runtime-sanning
+ATL_PATH = ROOT / "knowledge" / "atl" / "compiled" / "atl_total.csv"
 
 
 @dataclass
@@ -230,12 +231,13 @@ _ATL_CACHE: Optional[List[ATLRow]] = None
 
 def load_atl_rows() -> List[ATLRow]:
     """
-    Läser Del7_ATL_Total.csv och returnerar en lista ATLRow.
+    Läser compiled/atl_total.csv och returnerar en lista ATLRow.
 
     - Läser med encoding utf-8-sig (hanterar BOM).
     - Använder semikolon som delimiter (;).
     - Hoppar över rader där Arbetsmoment saknas eller inte är ett tal.
     - Hoppar över rader där både Moment/Typ/Sort, Underlag/Variant och Enhet är tomma.
+    - Ignorerar kolumnen 'Del' (den får inte hamna i times).
 
     Om filen saknas returneras en tom lista (ingen hård crash).
     """
@@ -277,6 +279,7 @@ def load_atl_rows() -> List[ATLRow]:
             times: Dict[str, float] = {}
             for key, value in raw.items():
                 if key in (
+                    "Del",
                     "Arbetsmoment",
                     "Grupp",
                     "Rad",
@@ -314,7 +317,6 @@ def load_atl_rows() -> List[ATLRow]:
 
 def _tokenize(text: str) -> List[str]:
     text = text.lower()
-    # enkel tokenisering – bokstäver/siffror inkl åäö
     return re.findall(r"[a-z0-9åäö]+", text)
 
 
@@ -326,8 +328,6 @@ def _similarity_score(segment: str, row: ATLRow) -> float:
       - moment_text (högst vikt)
       - underlag_text (lägre vikt)
       - enhet (låg vikt)
-
-    Syfte: relevanta "moment" ska rankas före t.ex. tillägg som bara råkar nämna samma ord i underlag.
     """
     seg_tokens = set(_tokenize(segment))
     if not seg_tokens:
@@ -344,12 +344,9 @@ def _similarity_score(segment: str, row: ATLRow) -> float:
     overlap_underlag = seg_tokens & underlag_tokens
     overlap_enhet = seg_tokens & enhet_tokens
 
-    # Inget overlap alls -> 0
     if not (overlap_moment or overlap_underlag or overlap_enhet):
         return 0.0
 
-    # Viktad overlap + liten bonus för fler gemensamma ord
-    # moment väger tyngst, underlag lite, enhet minst
     score = 0.0
     score += 1.0 * (len(overlap_moment) / max(1, len(seg_tokens | moment_tokens)))
     score += 0.4 * (len(overlap_underlag) / max(1, len(seg_tokens | underlag_tokens)))
@@ -358,6 +355,7 @@ def _similarity_score(segment: str, row: ATLRow) -> float:
     bonus = 0.02 * (len(overlap_moment) + 0.5 * len(overlap_underlag))
     return score + bonus
 
+
 def find_atl_candidates_for_segment(
     segment_text: str,
     max_rows: int = 20,
@@ -365,9 +363,6 @@ def find_atl_candidates_for_segment(
 ) -> List[ATLRow]:
     """
     Returnerar de ATL-rader som språkligt liknar segmentet mest.
-
-    max_rows: hur många rader vi max skickar till GPT per segment.
-    min_score: filter så att helt irrelevanta rader faller bort.
     """
     atl_rows = load_atl_rows()
     if not atl_rows:
@@ -379,7 +374,6 @@ def find_atl_candidates_for_segment(
         if score >= min_score:
             scored.append((score, row))
 
-    # sortera bästa först
     scored.sort(key=lambda x: x[0], reverse=True)
     top = scored[:max_rows]
     return [r for _, r in top]
@@ -392,32 +386,6 @@ def build_gpt_input_with_atl_for_segments(
     """
     Bygger gpt_input-struktur att skickas till AIClient.generate_tasks,
     där varje segment får en lista över atl_candidates.
-
-    Struktur:
-
-    {
-      "segments": [...],
-      "atl_candidates": [
-        {
-          "segment_id": "...",
-          "segment_text": "...",
-          "rows": [
-            {
-              "arbetsmoment": 501,
-              "moment_id": "501",
-              "grupp": "501",
-              "rad": "10",
-              "moment_text": "...",
-              "underlag_text": "...",
-              "enhet": "m rör",
-              "times": { "0": 0.03, "-1": 0.06, ... }
-            },
-            ...
-          ]
-        },
-        ...
-      ]
-    }
     """
     atl_candidates: List[Dict[str, Any]] = []
 
@@ -462,10 +430,6 @@ def build_gpt_input_with_atl_for_segments(
 
 
 if __name__ == "__main__":
-    # Enkel CLI-hjälp för materialdelen:
-    # 1) Läs topp saknade refs
-    # 2) Skriv ut prompt till konsolen
     top = get_top_missing_material_refs(50)
     prompt = build_material_mapping_prompt(top)
     print(prompt)
-

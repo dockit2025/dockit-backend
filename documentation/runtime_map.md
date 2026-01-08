@@ -1,6 +1,7 @@
 # Dockit Backend – Runtime Map (single source of truth)
 
 ## Active runtime (in use)
+
 ### Free-text quote preview (Lovable CreateQuote)
 - Endpoint: POST /sandbox/interpret
 - Code path:
@@ -10,7 +11,10 @@
   -> mappings/*.yaml (patterns/tasks)
   -> src/services/atl_lookup.py:get_atl_time_minutes (ATL time lookup)
   -> src/services/pricing.py:get_price (material pricing)
-  -> src/services/favorites.py (customer favorites)
+
+Runtime notes:
+- free_text_interpreter returns **1 task per segment** (deterministisk match).
+- Each ATL-backed task now includes **atl_variant_options** (UI-underlag för att välja variant).
 
 ### Quotes draft + persistence (available)
 - Endpoint: POST /quotes/draft
@@ -31,13 +35,22 @@
 - Endpoint: POST /quotes/material-parse
 - Implementation currently lives in:
   src/server/api/quotes.py:quote_material_parse
-- Note: this endpoint duplicates price/map lookup logic instead of reusing src/services/pricing.py.
+- Note: duplicates parts of pricing/map lookup logic (tech debt).
 
 ## Admin-only / Sandbox tooling (used intentionally)
-### Accept/apply ATL ref to mappings (writes YAML + backup)
+
+### Read-only ATL helpers for UI (no writes)
+- POST /sandbox/atl-variant-preview
+  - Input: { moment, variant }
+  - Output: minutes_per_unit + variant_options
+- POST /sandbox/atl-time-calc
+  - Input: { moment, variant, quantity }
+  - Output: minutes_per_unit + minutes_total (+ variant_options)
+
+### Accept/apply ATL ref to mappings (writes YAML + backup) — GUARDED
 - Endpoints:
-  POST /sandbox/atl-apply-preview
-  POST /sandbox/atl-apply-confirm
+  POST /sandbox/atl-apply-preview (read-only)
+  POST /sandbox/atl-apply-confirm (writes YAML; blocked in prod unless DOCKIT_ALLOW_MAPPING_WRITES=true)
 - Code path:
   src/server/api/sandbox.py
   -> src/services/atl_apply.py (backup + write + verify)
@@ -61,18 +74,18 @@ These files are present but are not imported by src/server/api/* routes:
 - src/server/loaders/atl_loader_backup.py
   (Loader experiments for ATL search; currently not used by API routes)
 
-## Known duplication / tech debt (do not change in cleanup step 1)
+## Known duplication / tech debt (do not refactor in cleanup step 1)
 - Task loader exists in two places:
   - free_text_interpreter.py:_load_all_tasks_from_mappings
   - src/services/task_library.py:load_all_tasks_from_mappings
-  (Risk: divergence. Cleanup later should consolidate.)
+  (Risk: divergence. Consolidate later.)
 
-- ATL source used in current code paths points to:
-  knowledge/atl/Del7_ATL_Total.csv
-  (Compiled + nav architecture described in Master Prompt is not active in code right now.)
+- ATL runtime source is now:
+  knowledge/atl/compiled/atl_total.csv
+  (Nav-layer per chapter is not implemented/wired in code right now.)
 
-- src/services/quote_service.py contains duplicated helper definitions (_estimate_task_time_minutes defined multiple times).
-  (Cleanup later; avoid changing behavior in early cleanup.)
+- src/services/quote_service.py contains duplicated helper definitions / legacy paths.
+  (Cleanup later; avoid behavior changes early.)
 
 ## Cleanup policy
 - Step 1 cleanup = documentation + labeling only (no behavior change).

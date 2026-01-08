@@ -1016,3 +1016,95 @@ def admin_task_queue(
         out = ts.summarize_missing_task_segments(min_count=min_count_int, limit=limit_int)
 
     return _apply_filter(out)
+
+# =========================================================
+# /sandbox/atl-variant-preview (read-only)
+# =========================================================
+class AtlVariantPreviewRequest(BaseModel):
+    moment: str
+    variant: int
+
+
+@router.post("/atl-variant-preview")
+def atl_variant_preview(payload: AtlVariantPreviewRequest) -> Dict[str, Any]:
+    """
+    Read-only preview för att låta UI byta ATL-variant och få ny tid direkt.
+    Ingen fil skrivs.
+    """
+    moment = (payload.moment or "").strip()
+    if not moment:
+        raise HTTPException(status_code=400, detail="moment krävs")
+
+    try:
+        variant = int(payload.variant)
+    except Exception:
+        raise HTTPException(status_code=400, detail="variant måste vara ett heltal")
+
+    minutes_per_unit = get_atl_time_minutes(moment, variant)
+
+    # Variant-alternativ för UI (om momentet är entydigt)
+    try:
+        from src.services.atl_lookup import get_atl_variant_options
+        variant_options = get_atl_variant_options(moment)
+    except Exception:
+        variant_options = None
+
+    return {
+        "status": "ok",
+        "moment": moment,
+        "variant": variant,
+        "time_minutes_per_unit": minutes_per_unit,
+        "variant_options": variant_options,
+        "note": "Preview only. Ingen fil är skriven.",
+    }
+
+# =========================================================
+# /sandbox/atl-time-calc (read-only)
+# =========================================================
+class AtlTimeCalcRequest(BaseModel):
+    moment: str
+    variant: int
+    quantity: float = 1.0
+
+
+@router.post("/atl-time-calc")
+def atl_time_calc(payload: AtlTimeCalcRequest) -> Dict[str, Any]:
+    """
+    Read-only: beräknar tid per enhet + total tid för given quantity.
+    Ingen fil skrivs.
+    """
+    moment = (payload.moment or "").strip()
+    if not moment:
+        raise HTTPException(status_code=400, detail="moment krävs")
+
+    try:
+        variant = int(payload.variant)
+    except Exception:
+        raise HTTPException(status_code=400, detail="variant måste vara ett heltal")
+
+    try:
+        qty = float(payload.quantity if payload.quantity is not None else 1.0)
+    except Exception:
+        qty = 1.0
+    if qty <= 0:
+        qty = 1.0
+
+    minutes_per_unit = float(get_atl_time_minutes(moment, variant) or 0.0)
+    minutes_total = minutes_per_unit * qty
+
+    try:
+        from src.services.atl_lookup import get_atl_variant_options
+        variant_options = get_atl_variant_options(moment)
+    except Exception:
+        variant_options = None
+
+    return {
+        "status": "ok",
+        "moment": moment,
+        "variant": variant,
+        "quantity": qty,
+        "time_minutes_per_unit": round(minutes_per_unit, 2),
+        "time_minutes_total": round(minutes_total, 2),
+        "variant_options": variant_options,
+        "note": "Read-only calc. Ingen fil är skriven.",
+    }
