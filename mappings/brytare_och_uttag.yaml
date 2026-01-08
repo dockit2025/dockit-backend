@@ -226,3 +226,19 @@ tasks:
         unit: st
         description: Infälld apparatdosa
     _auto_generated: true
+  - task_id: INSTALLERA-PLEJD-PUCK
+    label: Installera Plejd puck bakom befintlig brytare
+    category: brytare_och_uttag
+    atl_moment: null
+    atl_variant: null
+    manual_time_minutes_per_unit: 45
+    time_source: gpt
+    description: null
+    quantity_type: per_unit
+    default_unit: st
+    room_type_hint: null
+    gpt_confidence: 0.95
+    patterns:
+      - installera plejd puck bakom befintlig brytare
+    materials: []
+    _auto_generated: true
