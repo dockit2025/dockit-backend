@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import sys
 from functools import lru_cache
 from pathlib import Path
@@ -136,12 +137,26 @@ def _load_merged_catalog() -> Dict[str, Dict[str, Any]]:
     _stderr(f"Mergad katalog innehåller totalt {len(merged)} artiklar.")
     return merged
 
+def _norm_search(s: str) -> str:
+    # Normalisera så att "vp rör", "vp-rör", "vp_rör" matchar lika
+    s = (s or "").lower()
+    s = re.sub(r"[\s\-_]+", " ", s)
+    s = re.sub(r"\s+", " ", s).strip()
+    return s
+
+
+def _compact_search(s: str) -> str:
+    # Tar bort separators helt för robust matchning
+    return re.sub(r"[\s\-_]+", "", (s or "").lower())
+
 
 def _search_articles(term: str, limit: int = 20) -> List[ArticleSuggestion]:
     """
     Enkel substring-sökning i artikelnummer + benämning (case-insensitive).
     """
     term_norm = term.strip().lower()
+    term_norm2 = _norm_search(term)
+    term_compact = _compact_search(term)
     if not term_norm:
         return []
 
@@ -154,7 +169,18 @@ def _search_articles(term: str, limit: int = 20) -> List[ArticleSuggestion]:
         unit = row.get("enhet")
         price = row.get("gn_pris")
 
-        if term_norm in art.lower() or term_norm in name.lower():
+        art_l = art.lower()
+        name_l = name.lower()
+        name_norm = _norm_search(name)
+        art_compact = _compact_search(art)
+        name_compact = _compact_search(name)
+
+        if (
+            term_norm in art_l
+            or term_norm in name_l
+            or term_norm2 in name_norm
+            or (term_compact and (term_compact in art_compact or term_compact in name_compact))
+        ):
             results.append(
                 ArticleSuggestion(
                     article_number=art,
@@ -208,3 +234,5 @@ async def autocomplete_articles(
         raise HTTPException(status_code=500, detail="Fel vid artikelsökning") from e
 
     return results
+
+
