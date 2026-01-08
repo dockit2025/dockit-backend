@@ -85,6 +85,23 @@ tasks:
   - kabel
   notes: Installation av laddbox utan markarbete. Kabeldragning ingår.
   task_id: installera_laddbox
+- label: Installera lastbalansering
+  category: ovrigt
+  patterns:
+  - installera lastbalansering
+  - montera lastbalansering
+  - lastbalansering laddbox
+  - lastbalanserare
+  - lastbalansering
+  - effektvakt laddbox
+  - laststyrning laddbox
+  time_source: manual
+  atl_refs: []
+  manual_time_minutes_per_unit: 60
+  pricing_source: manual
+  material_suggestions: []
+  notes: Installation/konfiguration av lastbalansering till laddbox (t.ex. effektvakt/CT-klämmor). Ej markarbete.
+  task_id: installera_lastbalansering_laddbox
 - label: Felsökning laddbox
   category: ovrigt
   patterns:
@@ -341,4 +358,6 @@ tasks:
     time_source: "manual"
     atl_refs: []
     manual_time_minutes_per_unit: 15
+
+
 
