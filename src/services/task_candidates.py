@@ -98,10 +98,11 @@ def build_candidates_by_segment(
             scored_tasks.append((_score_segment_to_task(seg_text, t), t))
 
         scored_tasks.sort(key=lambda x: x[0], reverse=True)
-        top = [t for _, t in scored_tasks[:max_tasks_per_segment]]
+        top_scored = scored_tasks[:max_tasks_per_segment]
 
         candidates: List[Dict[str, Any]] = []
-        for t in top:
+        for score_tuple, t in top_scored:
+            score, patt_hits, best_patt_len = score_tuple
             patterns = t.get("patterns") or []
             patterns_trimmed = _select_top_patterns(seg_text, patterns, max_patterns_per_task)
             candidates.append(
@@ -111,9 +112,16 @@ def build_candidates_by_segment(
                     "category": t.get("category"),
                     "patterns": patterns_trimmed,
                     "notes": t.get("notes"),
+                    "mapping_file": t.get("_mapping_file"),
+                    "score": int(score),
+                    "patt_hits": int(patt_hits),
+                    "best_patt_len": int(best_patt_len),
                 }
             )
 
         result[seg_id] = candidates
 
     return result
+
+
+

@@ -543,6 +543,33 @@ def gpt_match_tasks(payload: GPTMatchTasksRequest) -> Dict[str, Any]:
             m["confidence"] = min(float(m.get("confidence") or 0.0), 0.49)
             m["reason"] = (m.get("reason") or "") + " (Safety: matched_task_id fanns inte i kandidatlistan.)"
 
+
+    # Attach top candidates (+score) per match for triage tooling
+    try:
+        for m in matches:
+            if not isinstance(m, dict):
+                continue
+            sid = str(m.get("segment_id") or "").strip()
+            if not sid:
+                continue
+            cands = candidates_by_segment.get(sid) or []
+            if not isinstance(cands, list):
+                cands = []
+            m["candidates"] = [
+                {
+                    "task_id": cc.get("task_id"),
+                    "label": cc.get("label"),
+                    "category": cc.get("category"),
+                    "mapping_file": cc.get("mapping_file"),
+                    "score": cc.get("score"),
+                    "patt_hits": cc.get("patt_hits"),
+                    "best_patt_len": cc.get("best_patt_len"),
+                }
+                for cc in cands[:5]
+                if isinstance(cc, dict)
+            ]
+    except Exception:
+        pass
     unmatched: List[Dict[str, Any]] = []
     for m in matches:
         if not isinstance(m, dict):
@@ -1108,3 +1135,5 @@ def atl_time_calc(payload: AtlTimeCalcRequest) -> Dict[str, Any]:
         "variant_options": variant_options,
         "note": "Read-only calc. Ingen fil är skriven.",
     }
+
+
