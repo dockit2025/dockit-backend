@@ -116,6 +116,8 @@ tasks:
   - infällt vp rör i vägg
   - spåra och lägga vp rör
   - förlägga vp rör i vägg
+  - vp rör i vägg
+  - vp-rör i vägg
   time_source: atl
   atl_refs:
   - moment: Infällda rör (VP 16–20 mm)
@@ -331,6 +333,7 @@ tasks:
     description: Fästklammer för VP-rör
     quantity_per_unit: 1.0
   notes: 'ATL-baserad tid ca 3,6 min/m från "Rörförläggning i färdig bilad spår (VP 16–50)".'
+
 
 
 
