@@ -1,15 +1,19 @@
 from __future__ import annotations
 
 import os
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
+from sqlalchemy import func
 from sqlalchemy.orm import Session
+from sqlmodel import select
 
 from src.server.api.quotes import verify_api_key
 from src.server.db.session import get_session
 from src.server.schemas.quote import QuoteDraftIn
+from src.server.models.missing_task_segment import MissingTaskSegment
 from src.services.quote_service import make_draft
 from src.services.ai_client import AIClient
 from src.services.ai_specs import load_task_generation_spec, load_text_cleaner_spec
@@ -43,6 +47,136 @@ def _ensure_mapping_writes_allowed() -> None:
             status_code=403,
             detail="Mapping writes are disabled. Set DOCKIT_ALLOW_MAPPING_WRITES=true to enable.",
         )
+
+
+# =========================================================
+# DB helpers: MissingTaskSegment (admin queue, threshold-gating)
+# =========================================================
+def _normalize_segment_key(text: str) -> str:
+    s = (text or "").strip().lower()
+    s = " ".join(s.split())  # collapse whitespace
+    return s
+
+
+def _record_missing_segments_in_db(session: Session, segments: List[str]) -> None:
+    """
+    Upsertar MissingTaskSegment-rader (count + last_seen_utc + example).
+    Fail-safe: caller ska fånga exception (vi vill inte stoppa /sandbox/interpret).
+    """
+    if not segments:
+        return
+
+    now = datetime.now(timezone.utc)
+
+    # Dedup per request: räkna occurrences i denna request (så vi inte gör N queries för samma text)
+    per_key: Dict[str, Dict[str, Any]] = {}
+    for s in segments:
+        example = str(s or "").strip()
+        if not example:
+            continue
+        key = _normalize_segment_key(example)
+        if not key:
+            continue
+        entry = per_key.get(key)
+        if not entry:
+            per_key[key] = {"example": example, "inc": 1}
+        else:
+            entry["inc"] = int(entry.get("inc", 0)) + 1
+            # uppdatera exempel till senaste i listan (mest relevant för admin)
+            entry["example"] = example
+
+    if not per_key:
+        return
+
+    for key, meta in per_key.items():
+        inc = int(meta.get("inc", 1))
+        example = str(meta.get("example") or "")
+
+        # 1) Läs befintlig
+        row = None
+        try:
+            # SQLModel Session har .exec; men Session här är kompatibel i runtime.
+            if hasattr(session, "exec"):
+                row = session.exec(
+                    select(MissingTaskSegment).where(MissingTaskSegment.segment_key == key)
+                ).first()
+            else:
+                row = session.execute(
+                    select(MissingTaskSegment).where(MissingTaskSegment.segment_key == key)
+                ).scalars().first()
+        except Exception:
+            row = None
+
+        if row:
+            row.count = int(row.count or 0) + inc
+            row.example = example or row.example or ""
+            row.last_seen_utc = now
+            session.add(row)
+        else:
+            session.add(
+                MissingTaskSegment(
+                    segment_key=key,
+                    example=example or key,
+                    count=inc,
+                    first_seen_utc=now,
+                    last_seen_utc=now,
+                )
+            )
+
+    session.commit()
+
+
+def _db_task_queue(session: Session, *, min_count: int, limit: int) -> Dict[str, Any]:
+    """
+    Läser admin-kö från DB.
+    """
+    # total_unique
+    total_unique = 0
+    try:
+        if hasattr(session, "exec"):
+            total_unique = int(session.exec(select(func.count()).select_from(MissingTaskSegment)).one())
+        else:
+            total_unique = int(session.execute(select(func.count()).select_from(MissingTaskSegment)).scalar() or 0)
+    except Exception:
+        total_unique = 0
+
+    # rows
+    stmt = (
+        select(MissingTaskSegment)
+        .where(MissingTaskSegment.count >= min_count)
+        .order_by(MissingTaskSegment.count.desc(), MissingTaskSegment.last_seen_utc.desc())
+        .limit(limit)
+    )
+
+    if hasattr(session, "exec"):
+        rows = session.exec(stmt).all()
+    else:
+        rows = session.execute(stmt).scalars().all()
+
+    items: List[Dict[str, Any]] = []
+    for r in rows:
+        last_seen = getattr(r, "last_seen_utc", None)
+        if isinstance(last_seen, datetime):
+            last_seen_ts = last_seen.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
+        else:
+            last_seen_ts = None
+
+        items.append(
+            {
+                "segment_key": r.segment_key,
+                "example": r.example,
+                "count": int(r.count or 0),
+                "last_seen_ts": last_seen_ts,
+            }
+        )
+
+    return {
+        "min_count": min_count,
+        "limit": limit,
+        "total_unique": total_unique,
+        "returned": len(items),
+        "items": items,
+    }
 
 
 # =========================================================
@@ -80,13 +214,6 @@ class GPTMatchTasksRequest(BaseModel):
 class GPTMatchAtlRequest(BaseModel):
     """
     Request till /sandbox/gpt-match-atl (ATL-Sandbox).
-
-    items: lista av matchade tasks från FAS 2, där varje item innehåller:
-      - segment_id
-      - segment_text
-      - task_id
-      - label (valfri)
-      - quantity
     """
     items: List[Dict[str, Any]]
 
@@ -102,11 +229,6 @@ class AcceptTaskRequest(BaseModel):
 class SandboxInterpretRequest(BaseModel):
     """
     Request till /sandbox/interpret från Sandbox-fliken i frontend.
-
-    Vi stödjer både:
-      - job_summary
-      - text
-    så att frontend kan skicka vilket som.
     """
     job_summary: Optional[str] = None
     text: Optional[str] = None
@@ -116,35 +238,22 @@ class SandboxInterpretRequest(BaseModel):
 
 
 class TextCleanerRequest(BaseModel):
-    """
-    Request till /sandbox/clean-text och /sandbox/gpt-extract-segments.
-    """
     job_text: str
 
 
 class GPTWorkplanRequest(BaseModel):
-    """
-    Request till /sandbox/gpt-workplan (FAS 0).
-    """
     job_text: str
     language: Optional[str] = "sv"
     context: Optional[Dict[str, Any]] = None
 
 
 class GPTAtlRankRequest(BaseModel):
-    """
-    Admin-request för att föreslå ATL-referens för en task.
-    """
     task: Dict[str, Any]
     segment_text: str
     max_rows: Optional[int] = 25
 
 
 class AtlApplyPreviewRequest(BaseModel):
-    """
-    Admin-request för att preview:a att en vald ATL-referens kan appliceras på en befintlig task.
-    Ingen fil skrivs i preview.
-    """
     task_id: str
     mapping_file: str
     moment_id: str
@@ -152,9 +261,6 @@ class AtlApplyPreviewRequest(BaseModel):
 
 
 class AtlApplyConfirmRequest(BaseModel):
-    """
-    Admin-request för att confirm:a (skriva) en vald ATL-referens till mapping-YAML.
-    """
     task_id: str
     mapping_file: str
     moment_id: str
@@ -194,12 +300,12 @@ def sandbox_interpret(
     result = make_draft(payload=draft_payload, session=session)
 
     # Rensa missing_segments från uppenbart brus (hälsningar, tackfraser)
+    filtered_missing: List[str] = []
     try:
         interpretation = result.get("interpretation") or {}
         raw_missing = interpretation.get("missing_segments") or []
 
         if isinstance(raw_missing, list):
-            filtered_missing: List[str] = []
             for s in raw_missing:
                 text = str(s or "").strip()
                 if not text:
@@ -218,7 +324,16 @@ def sandbox_interpret(
             interpretation["missing_segments"] = filtered_missing
             result["interpretation"] = interpretation
     except Exception:
+        # vi vill inte att /sandbox/interpret kraschar för "rensningen"
         pass
+
+    # DB-backed admin queue: upserta missing segments (fail-safe)
+    if filtered_missing:
+        try:
+            _record_missing_segments_in_db(session=session, segments=filtered_missing)
+        except Exception:
+            # fail-safe: påverka inte runtime
+            pass
 
     result["sandbox"] = True
     return result
@@ -523,7 +638,11 @@ def gpt_suggest_tasks(payload: GPTTaskSuggestRequest) -> Dict[str, Any]:
         gpt_input = {**base_input, "atl_candidates": atl_enriched.get("atl_candidates", [])}
 
     if not segments:
-        return {"gpt_input": gpt_input, "suggested_tasks": [], "note": "Inga segments skickades in och inga missing_task-segment hittades i loggen."}
+        return {
+            "gpt_input": gpt_input,
+            "suggested_tasks": [],
+            "note": "Inga segments skickades in och inga missing_task-segment hittades i loggen.",
+        }
 
     spec = load_task_generation_spec()
     client = AIClient()
@@ -560,7 +679,7 @@ def gpt_suggest_tasks(payload: GPTTaskSuggestRequest) -> Dict[str, Any]:
 
         filtered.append(s)
 
-    # 3b) Sätt ATL-tider om atl_moment/atl_variant finns
+    # Sätt ATL-tider om atl_moment/atl_variant finns
     for s in filtered:
         try:
             atl_moment = (s.get("atl_moment") or "").strip()
@@ -838,9 +957,31 @@ def atl_apply_confirm(payload: AtlApplyConfirmRequest) -> Dict[str, Any]:
 # /sandbox/admin/task-queue (read-only)
 # =========================================================
 @router.get("/admin/task-queue")
-def admin_task_queue(min_count: int = 1, limit: int = 50) -> Dict[str, Any]:
+def admin_task_queue(
+    min_count: int = 1,
+    limit: int = 50,
+    session: Session = Depends(get_session),
+) -> Dict[str, Any]:
     """
-    Read-only: summerar återkommande missing_task_segments som en admin-kö.
-    Används för att besluta vad som ska bli tasks (kontrollerad självlärning).
+    Read-only admin-kö.
+
+    Primärt: DB-backed (MissingTaskSegment).
+    Fallback: ts.summarize_missing_task_segments (jsonl) om DB inte fungerar.
     """
-    return ts.summarize_missing_task_segments(min_count=min_count, limit=limit)
+    try:
+        min_count_int = int(min_count)
+    except Exception:
+        min_count_int = 1
+    min_count_int = max(1, min_count_int)
+
+    try:
+        limit_int = int(limit)
+    except Exception:
+        limit_int = 50
+    limit_int = max(1, min(200, limit_int))
+
+    try:
+        return _db_task_queue(session=session, min_count=min_count_int, limit=limit_int)
+    except Exception:
+        # Fallback till gamla logg-summeringen
+        return ts.summarize_missing_task_segments(min_count=min_count_int, limit=limit_int)
