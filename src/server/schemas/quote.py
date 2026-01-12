@@ -16,6 +16,11 @@ class QuoteDraftIn(BaseModel):
     lines: List[QuoteLineIn]
     apply_rot: bool = True
 
+    # Session 3: per-offert overrides (optional, bakåtkompatibla)
+    hourly_rate: Optional[float] = None
+    markup_percent: Optional[float] = None  # 0–100
+    markup_scope: Optional[str] = None      # 'work' | 'material' | 'all'
+
 class QuoteDraftOut(BaseModel):
     title: str
     subtotal_sek: float

@@ -315,6 +315,44 @@ def _apply_pricelist_to_material_lines(
         l["line_total_sek"] = qty * unit_price_f
 
 
+
+def _apply_markup_to_lines(lines: List[Dict[str, Any]], markup_percent: Any, markup_scope: Any) -> None:
+    """
+    Applicerar procentpåslag på unit_price_sek och uppdaterar line_total_sek.
+    scope: work | material | all (allt annat => ingen markup).
+    markup_percent: 0–100 (allt annat => ingen markup).
+    """
+    try:
+        p = float(markup_percent) if markup_percent is not None else 0.0
+    except (TypeError, ValueError):
+        p = 0.0
+
+    if p <= 0:
+        return
+    if p > 100:
+        p = 100.0
+
+    scope = str(markup_scope or "").strip().lower()
+    if scope not in ("work", "material", "all"):
+        return
+
+    factor = 1.0 + (p / 100.0)
+
+    for l in lines:
+        kind = (l.get("kind") or "").strip().lower()
+        if scope != "all" and kind != scope:
+            continue
+
+        try:
+            unit = float(l.get("unit_price_sek", 0) or 0.0)
+            qty  = float(l.get("qty", 0) or 0.0)
+        except (TypeError, ValueError):
+            continue
+
+        unit2 = unit * factor
+        l["unit_price_sek"] = unit2
+        l["line_total_sek"] = qty * unit2
+
 def make_draft(*, payload: QuoteDraftIn, session: Session) -> Dict[str, Any]:
     """
     Beräknar ett offertutkast baserat på inkommande data.
@@ -435,6 +473,11 @@ def make_draft(*, payload: QuoteDraftIn, session: Session) -> Dict[str, Any]:
         l["unit_price_sek"] = unit_price
         qty = float(l.get("qty", 0) or 0.0)
         l["line_total_sek"] = qty * unit_price
+
+    # 3d) Optional markup (före ROT)
+    markup_percent = getattr(payload, 'markup_percent', None)
+    markup_scope = getattr(payload, 'markup_scope', None)
+    _apply_markup_to_lines(out_lines, markup_percent, markup_scope)
 
     # 4) Subtotal (före ROT)
     subtotal = 0.0
@@ -818,6 +861,7 @@ def _estimate_task_time_minutes(task_id: str, quantity_units: float) -> float:
         minutes_per_unit = 0.0
 
     return qty * minutes_per_unit
+
 
 
 
