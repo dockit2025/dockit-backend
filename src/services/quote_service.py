@@ -1,4 +1,5 @@
 from typing import Dict, Any, List, Optional
+import secrets
 
 from sqlmodel import Session, select
 
@@ -572,6 +573,9 @@ def create_quote(*, payload: QuoteDraftIn, session: Session) -> Quote:
         rot_discount_sek=totals["rot_discount"],
         total_sek=totals["total"],
     )
+    if not getattr(quote, 'share_token', None):
+        quote.share_token = secrets.token_urlsafe(32)
+
     session.add(quote)
     session.commit()
     session.refresh(quote)
@@ -605,6 +609,10 @@ def update_quote(*, quote_id: int, payload: QuoteDraftIn, session: Session) -> Q
     q = session.get(Quote, quote_id)
     if not q:
         raise ValueError("Quote not found")
+
+    if not getattr(q, 'share_token', None):
+        q.share_token = secrets.token_urlsafe(32)
+
 
     # Bygg line-dicts från payload.lines (qty * unit_price)
     out_lines = _build_lines_from_payload(payload)

@@ -7,6 +7,7 @@ class Quote(SQLModel, table=True):
     customer_id: Optional[int] = Field(default=None, foreign_key="customer.id")
     title: str
     status: str = Field(default="draft", index=True)  # draft|sent|accepted|rejected
+    share_token: Optional[str] = Field(default=None, index=True)  # public share link token
 
     subtotal_sek: float = 0.0
     rot_discount_sek: float = 0.0

@@ -394,6 +394,33 @@ def quote_material_parse(payload: MaterialParseIn):
 
 
 # ==============================
+# SHARE (token for customer link)
+# ==============================
+
+@router.get("/{quote_id}/share")
+def get_quote_share(quote_id: int, session: Session = Depends(get_session)):
+    q = session.get(Quote, quote_id)
+    if not q:
+        raise HTTPException(status_code=404, detail="Offerten hittades inte")
+
+    # ensure token exists (for older quotes)
+    if not getattr(q, "share_token", None):
+        import secrets
+        q.share_token = secrets.token_urlsafe(32)
+        session.add(q)
+        session.commit()
+        session.refresh(q)
+
+    token = str(getattr(q, "share_token") or "")
+    share_url = f"/quotes/{quote_id}/document?token={token}"
+
+    return {
+        "quote_id": quote_id,
+        "share_token": token,
+        "share_url": share_url,
+    }
+
+# ==============================
 # GET SINGLE QUOTE
 # ==============================
 
@@ -446,6 +473,7 @@ def update_quote_status(
     session.commit()
     session.refresh(q)
     return _serialize_quote(q, session)
+
 
 
 

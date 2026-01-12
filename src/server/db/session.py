@@ -42,15 +42,37 @@ def _ensure_quote_status_column() -> None:
         conn.execute(text(ddl))
 
 
+
+def _ensure_quote_share_token_column() -> None:
+    """
+    Skapar kolumnen quote.share_token om den saknas.
+    """
+    insp = inspect(engine)
+    try:
+        cols = [c["name"] for c in insp.get_columns("quote")]
+    except Exception:
+        return
+
+    if "share_token" in cols:
+        return
+
+    # SQLite/Postgres compatible enough for our use
+    ddl = "ALTER TABLE quote ADD COLUMN share_token VARCHAR"
+    with engine.begin() as conn:
+        conn.execute(text(ddl))
+
 def init_db() -> None:
     # Se till att modellerna laddas (EN gång, via src.server.*)
     from src.server.models import __all_models  # noqa: F401
 
     SQLModel.metadata.create_all(engine)
     _ensure_quote_status_column()
+    _ensure_quote_share_token_column()
 
 
 def get_session():
     with Session(engine) as session:
         yield session
+
+
 
