@@ -336,7 +336,56 @@ def make_draft(*, payload: QuoteDraftIn, session: Session) -> Dict[str, Any]:
         summary_text = getattr(payload, "free_text", None)
 
     if isinstance(summary_text, str) and summary_text.strip():
-        interpretation = interpret_free_text(summary_text.strip())
+        raw_text = summary_text.strip()
+        final_text = raw_text
+
+        # Optional GPT text cleaning/segmentation (FAS0/FAS1) with deterministic fallback
+        try:
+            import os
+            enable = (os.getenv('DOCKIT_ENABLE_GPT_CLEANING') or '').strip().lower() in {'1','true','yes','on'}
+        except Exception:
+            enable = False
+
+        if enable:
+            try:
+                import os
+                import concurrent.futures
+                from src.services.ai_specs import load_text_cleaner_spec
+                from src.services.ai_client import AIClient
+
+                timeout_s = float((os.getenv('DOCKIT_GPT_CLEAN_TIMEOUT_S') or '4').strip())
+
+                def _run_clean():
+                    spec = load_text_cleaner_spec()
+                    client = AIClient()
+                    return client.generate_text_segments(spec=spec, job_text=raw_text)
+
+                with concurrent.futures.ThreadPoolExecutor(max_workers=1) as ex:
+                    fut = ex.submit(_run_clean)
+                    res = fut.result(timeout=timeout_s)
+
+                clean_segments = res.get('clean_segments') or []
+                segments_out = []
+                if isinstance(clean_segments, list):
+                    for item in clean_segments:
+                        if isinstance(item, dict):
+                            if 'segment_text' in item:
+                                txt = str(item.get('segment_text') or '').strip()
+                            elif 'text' in item:
+                                txt = str(item.get('text') or '').strip()
+                            else:
+                                txt = str(item).strip()
+                        else:
+                            txt = str(item or '').strip()
+                        if txt:
+                            segments_out.append(txt)
+
+                if segments_out:
+                    final_text = '\\n'.join(segments_out)
+            except Exception:
+                final_text = raw_text
+
+        interpretation = interpret_free_text(final_text)
 
     # 2) Timpris
     hourly_rate = _get_hourly_rate(payload)
@@ -769,5 +818,6 @@ def _estimate_task_time_minutes(task_id: str, quantity_units: float) -> float:
         minutes_per_unit = 0.0
 
     return qty * minutes_per_unit
+
 
 
