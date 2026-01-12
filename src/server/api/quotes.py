@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select
 from pydantic import BaseModel
 
-from src.services.quote_service import make_draft, create_quote, material_draft
+from src.services.quote_service import make_draft, create_quote, update_quote, material_draft
 from src.services.favorites import (
     register_favorite_article,
     list_favorites_for_customer,
@@ -407,6 +407,18 @@ def get_quote(quote_id: int, session: Session = Depends(get_session)):
 
 
 # ==============================
+# UPDATE QUOTE (PUT)
+# ==============================
+
+@router.put("/{quote_id}")
+def update_quote_endpoint(payload: QuoteDraftIn, quote_id: int, session: Session = Depends(get_session)):
+    try:
+        q = update_quote(quote_id=quote_id, payload=payload, session=session)
+    except ValueError:
+        raise HTTPException(status_code=404, detail="Offerten hittades inte")
+    return _serialize_quote(q, session)
+
+# ==============================
 # QUOTE STATUS
 # ==============================
 
@@ -434,4 +446,6 @@ def update_quote_status(
     session.commit()
     session.refresh(q)
     return _serialize_quote(q, session)
+
+
 

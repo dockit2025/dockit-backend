@@ -596,6 +596,100 @@ def create_quote(*, payload: QuoteDraftIn, session: Session) -> Quote:
 
 
 
+def update_quote(*, quote_id: int, payload: QuoteDraftIn, session: Session) -> Quote:
+    """
+    Uppdaterar en befintlig offert (samma id) baserat på inkommande lines.
+    Tolkar INTE om fri text. Räknar om totals (inkl ROT + markup före ROT).
+    Ersätter alla QuoteLine-rader.
+    """
+    q = session.get(Quote, quote_id)
+    if not q:
+        raise ValueError("Quote not found")
+
+    # Bygg line-dicts från payload.lines (qty * unit_price)
+    out_lines = _build_lines_from_payload(payload)
+
+    # line_type + ROT-flagga (krävs för ROT-beräkning)
+    for l in out_lines:
+        kind = (l.get("kind") or "").strip()
+        line_type = "work" if kind == "work" else "material"
+        l["line_type"] = line_type
+        l["is_rot_eligible"] = line_type == "work"
+        # säkerställ line_total
+        try:
+            qty = float(l.get("qty", 0) or 0.0)
+            unit = float(l.get("unit_price_sek", 0) or 0.0)
+        except (TypeError, ValueError):
+            qty, unit = 0.0, 0.0
+        l["line_total_sek"] = qty * unit
+
+    # Markup före ROT (om angivet)
+    markup_percent = getattr(payload, "markup_percent", None)
+    markup_scope = getattr(payload, "markup_scope", None)
+    _apply_markup_to_lines(out_lines, markup_percent, markup_scope)
+
+    # Subtotal (före ROT)
+    subtotal = 0.0
+    for l in out_lines:
+        try:
+            subtotal += float(l.get("line_total_sek", 0) or 0.0)
+        except (TypeError, ValueError):
+            continue
+
+    # ROT
+    rot_discount = 0.0
+    rot_summary: Optional[Dict[str, Any]] = None
+
+    if getattr(payload, "apply_rot", False):
+        rot_config = RotConfig(
+            rot_rate=0.30,
+            max_per_person_sek=50_000,
+            num_persons=1,
+        )
+
+        prepared_lines: List[Dict[str, Any]] = []
+        for l in out_lines:
+            prepared = dict(l)
+            prepared["total_price_sek"] = float(l.get("line_total_sek", 0) or 0.0)
+            prepared_lines.append(prepared)
+
+        updated_lines, rot_summary = apply_rot_to_lines(prepared_lines, rot_config)
+        out_lines = updated_lines
+        rot_discount = float((rot_summary or {}).get("rot_amount_sek", 0) or 0.0)
+
+    total = subtotal - rot_discount
+
+    # Uppdatera quote-header (status lämnas orörd)
+    q.title = f"Preliminär offert för {getattr(payload, 'customer_name', '')}".strip() or q.title
+    q.subtotal_sek = float(subtotal or 0.0)
+    q.rot_discount_sek = float(rot_discount or 0.0)
+    q.total_sek = float(total or 0.0)
+    session.add(q)
+
+    # Radera gamla rader och skapa nya
+    old_lines = session.exec(select(QuoteLine).where(QuoteLine.quote_id == quote_id)).all()
+    for ol in old_lines:
+        session.delete(ol)
+
+    for l in out_lines:
+        qty = float(l.get("qty", 0) or 0.0)
+        unit = float(l.get("unit_price_sek", 0) or 0.0)
+        session.add(
+            QuoteLine(
+                quote_id=quote_id,
+                kind=str(l.get("kind") or ""),
+                ref=l.get("ref"),
+                description=str(l.get("description") or ""),
+                qty=qty,
+                unit_price_sek=unit,
+                line_total_sek=float(l.get("line_total_sek", qty * unit) or 0.0),
+            )
+        )
+
+    session.commit()
+    session.refresh(q)
+    return q
+
 def _find_work_profile(material_ref: str, environment: Optional[str], work_type: Optional[str]) -> Optional[dict]:
     """
     Försöker hitta en work_profile i work_profiles.yaml som matchar
@@ -861,6 +955,7 @@ def _estimate_task_time_minutes(task_id: str, quantity_units: float) -> float:
         minutes_per_unit = 0.0
 
     return qty * minutes_per_unit
+
 
 
 
