@@ -455,7 +455,9 @@ def interpret_free_text(free_text: str) -> Dict[str, Any]:
 
     # NYTT: 1 task per segment (bästa deterministiska match)
     for segment in segments:
-        best = None  # (score, patt_len, words_len, task_def, chosen_pattern)
+        best_key = None  # (score, patt_len, words_len, task_id, mapping_file, chosen_pattern)
+        best_task_def = None
+        best_pattern = None
 
         for task_def in all_tasks_defs:
             patterns: Optional[List[str]] = task_def.get("patterns")
@@ -483,20 +485,24 @@ def interpret_free_text(free_text: str) -> Dict[str, Any]:
                 continue
 
             score, patt_len, words_len, chosen_pattern = best_for_task
-            cand_best = (score, patt_len, words_len, task_def, chosen_pattern)
 
-            if best is None or cand_best > best:
-                best = cand_best
+            task_id = str(task_def.get("task_id") or "")
+            mapping_file = str(task_def.get("_mapping_file") or "")
+            cand_key = (score, patt_len, words_len, task_id, mapping_file, chosen_pattern)
 
-        if best is None:
+            if best_key is None or cand_key > best_key:
+                best_key = cand_key
+                best_task_def = task_def
+                best_pattern = chosen_pattern
+
+        if best_task_def is None or best_pattern is None:
             _log_unmatched_segment(segment)
             missing_segments.append(segment)
             continue
 
-        _, _, _, task_def, chosen_pattern = best
         result_task = _build_task_result(
-            task_def=task_def,
-            matched_pattern=chosen_pattern,
+            task_def=best_task_def,
+            matched_pattern=best_pattern,
             text_segment=segment,
         )
         matched_tasks.append(result_task)
@@ -541,6 +547,8 @@ if __name__ == "__main__":
 
     data = interpret_free_text(free_text_input)
     print(json.dumps(data, ensure_ascii=False, indent=2))
+
+
 
 
 
