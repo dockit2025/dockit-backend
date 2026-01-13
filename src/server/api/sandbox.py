@@ -4,13 +4,28 @@ import os
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Header
 from pydantic import BaseModel
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 from sqlmodel import select
 
 from src.server.api.quotes import verify_api_key
+# =========================================================
+# Admin auth for /sandbox/*
+# =========================================================
+ADMIN_KEY_HEADER_NAME = "X-DOCKIT-ADMIN-KEY"
+ADMIN_KEY_VALUE = (os.getenv("DOCKIT_ADMIN_KEY") or "").strip()
+
+def verify_admin_key(x_dockit_admin_key: str = Header(None)) -> None:
+    # If no admin key is configured, sandbox is disabled (safe default)
+    if not ADMIN_KEY_VALUE:
+        raise HTTPException(status_code=403, detail="Sandbox is disabled. Set DOCKIT_ADMIN_KEY to enable.")
+
+    if x_dockit_admin_key != ADMIN_KEY_VALUE:
+        raise HTTPException(status_code=401, detail="Invalid or missing admin key")
+
+
 from src.server.db.session import get_session
 from src.server.schemas.quote import QuoteDraftIn
 from src.server.models.missing_task_segment import MissingTaskSegment
@@ -273,7 +288,7 @@ class AtlApplyConfirmRequest(BaseModel):
 router = APIRouter(
     prefix="/sandbox",
     tags=["sandbox"],
-    dependencies=[Depends(verify_api_key)],
+    dependencies=[Depends(verify_admin_key)],
 )
 
 
@@ -1135,5 +1150,6 @@ def atl_time_calc(payload: AtlTimeCalcRequest) -> Dict[str, Any]:
         "variant_options": variant_options,
         "note": "Read-only calc. Ingen fil är skriven.",
     }
+
 
 
