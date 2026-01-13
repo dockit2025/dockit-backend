@@ -28,7 +28,9 @@ from material_list_parser import parse_material_text as _parse_material_text
 # ==============================
 
 API_KEY_HEADER_NAME = "X-DOCKIT-API-KEY"
-API_KEY_VALUE = settings.dockit_api_key or "dockit-material-beta-123"
+API_KEY_VALUE = settings.dockit_api_key
+if not API_KEY_VALUE:
+    raise RuntimeError("DOCKIT_API_KEY saknas. Sätt env DOCKIT_API_KEY innan start.")
 
 
 def verify_api_key(x_dockit_api_key: str = Header(None)) -> None:
