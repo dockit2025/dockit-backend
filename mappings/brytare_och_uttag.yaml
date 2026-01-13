@@ -32,6 +32,9 @@ tasks:
     label: Installera nytt vägguttag
     category: brytare_och_uttag
     patterns:
+      - strömmatning till väggmonterad tv
+      - installera uttag bakom tv
+      - nytt uttag bakom tv
       - installera nytt vägguttag
       - sätta upp ett extra uttag
       - sätta upp extra uttag
@@ -148,6 +151,14 @@ tasks:
     room_type_hint: null
     gpt_confidence: 0.9
     patterns:
+      - installera infällt vägguttag
+      - installera infällt uttag
+      - montera infällt vägguttag
+      - infällt vägguttag
+      - installera infällt vägguttag
+      - installera infällt uttag
+      - montera infällt vägguttag
+      - infällt vägguttag
       - sätta upp nytt vägguttag
     materials:
       - ref: VAGGUTTAG-INF-JORD

@@ -84,6 +84,8 @@ tasks:
     label: "Installera badrumsfläkt med timer"
     category: "badrum"
     patterns:
+      - "installera en fläkt i badrum med timer"
+      - "fläkt i badrum med timer"
       - "installera fläkt med timer"
       - "installera badrumsfläkt med timer"
       - "montera fläkt med timerfunktion"
@@ -342,6 +344,7 @@ tasks:
     label: "Dra kabel vid badrumsrenovering"
     category: "badrum"
     patterns:
+      - "dra kabel vid badrumsrenovering"
       - "dra kabel i badrummet"
       - "elinstallation vid badrumsrenovering"
       - "dra nya rör i badrummet"
@@ -358,6 +361,7 @@ tasks:
     label: "Installera kopplingsdosa IP44"
     category: "badrum"
     patterns:
+      - "installera kopplingsdosa ip44"
       - "installera kopplingsdosa i badrum"
       - "ip44 kopplingsdosa"
       - "sätta upp kopplingsdosa badrum"

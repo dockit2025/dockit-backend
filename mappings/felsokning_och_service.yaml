@@ -258,6 +258,8 @@ tasks:
     label: "Felsökning utomhusbelysning"
     category: "felsokning"
     patterns:
+      - "fel på utebelysning"
+      - "kontrollera och åtgärda fel på utebelysning"
       - "utomhusbelysningen fungerar inte"
       - "utelampan är trasig"
       - "fasadbelysning fungerar inte"

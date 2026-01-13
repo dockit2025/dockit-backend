@@ -420,7 +420,7 @@ def make_draft(*, payload: QuoteDraftIn, session: Session) -> Dict[str, Any]:
                             segments_out.append(txt)
 
                 if segments_out:
-                    final_text = '\\n'.join(segments_out)
+                    final_text = ". ".join(segments_out) + "."
             except Exception:
                 final_text = raw_text
 
@@ -963,6 +963,8 @@ def _estimate_task_time_minutes(task_id: str, quantity_units: float) -> float:
         minutes_per_unit = 0.0
 
     return qty * minutes_per_unit
+
+
 
 
 

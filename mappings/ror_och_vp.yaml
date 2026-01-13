@@ -214,6 +214,7 @@ tasks:
 - label: Dra kabelkanal på vägg
   category: ror_och_vp
   patterns:
+  - byta kabelkanal
   - dra kabelkanal på vägg
   - dra kanal på vägg
   - dra plastkanal på vägg

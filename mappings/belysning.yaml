@@ -123,6 +123,7 @@
   room_type_hint: utomhus
   gpt_confidence: 0.9
   patterns:
+    - dra matning till utebelysning
     - dra matning till led-pollare i trädgård
     - dra kabel till utebelysning med skymningsrelä
     - koppla utomhusbelysning via skymningsrelä

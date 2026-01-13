@@ -30,6 +30,7 @@ tasks:
     label: "Byta spis/ugn"
     category: "kok"
     patterns:
+      - "byta spis/ugn"
       - "ersätta spis"
       - "ersätta ugn"
       - "ta bort gammal spis och sätta dit ny"
@@ -136,6 +137,7 @@ tasks:
     label: "Installera ny matning till kök"
     category: "kok"
     patterns:
+      - "installera ny matning till kök"
       - "dra ny matning till köket"
       - "ny grupp till köket"
       - "extra säkring till köket"
@@ -169,3 +171,23 @@ tasks:
     pricing_source: "manual"
     material_suggestions: []
     notes: "Övergripande felsökning av matningar till vitvaror i kök."
+
+  installera_spisuttag:
+    label: "Installera spisuttag / 3-fas anslutning"
+    category: "kok"
+    patterns:
+      - "montera spisuttag"
+      - "installera spisuttag"
+      - "spisuttag"
+      - "3-fas spis"
+      - "dra ny matning till spis"
+      - "ny matning till spis"
+    time_source: "manual"
+    atl_refs: []
+    manual_time_minutes_per_unit: 120
+    pricing_source: "manual"
+    material_suggestions:
+      - "spisuttag"
+      - "kabel 5g"
+    notes: "Enkel schablon för spisuttag/3-fas anslutning. Exakta förutsättningar varierar."
+
