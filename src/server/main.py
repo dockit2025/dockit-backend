@@ -32,6 +32,10 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:5173",
         "http://127.0.0.1:5173",
+        "http://localhost:8080",
+        "http://127.0.0.1:8080",
+        "http://localhost:8081",
+        "http://127.0.0.1:8081",
         "https://lovable.dev",
         "https://4d33ec7a-7844-4eb7-9795-d6b0452f4ffe.lovableproject.com",
         "https://id-preview--4d33ec7a-7844-4eb7-9795-d6b0452f4ffe.lovable.app",
