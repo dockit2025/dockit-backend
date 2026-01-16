@@ -43,3 +43,8 @@ dockit-ui/node_modules/
 
 
 runs/
+
+# Local-only folders
+node_modules/
+dockit-ui-lovable/
+
