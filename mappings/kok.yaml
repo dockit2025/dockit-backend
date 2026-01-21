@@ -1,193 +1,161 @@
-# file: knowledge/dockit/dockit_custom_mapping.yaml
-# Beskriv...
-#       patterns:                #
-version: "1.0"
-description: "Kök – vitvaror, köksfläkt, spis/ugn/häll, köksrenovering m.m."
+version: '1.0'
+description: Kök – vitvaror, köksfläkt, spis/ugn/häll, köksrenovering m.m.
 tasks:
-  # -----------------------------------------------------
-  # KÖK – SPIS / UGN / HÄLL
-  # -----------------------------------------------------
-
   installera_spis_ugn:
-    label: "Installera spis/ugn"
-    category: "kok"
+    label: Installera spis/ugn
+    category: kok
     patterns:
-      - "installera spis"
-      - "installera ugn"
-      - "ansluta spis"
-      - "ansluta ugn"
-      - "koppla in spis"
-      - "koppla in ugn"
-    time_source: "manual"
+    - installera spis
+    - installera ugn
+    - ansluta spis
+    - ansluta ugn
+    - koppla in spis
+    - koppla in ugn
+    time_source: manual
     atl_refs: []
     manual_time_minutes_per_unit: 60
-    pricing_source: "manual"
+    pricing_source: manual
     material_suggestions:
-      - "anslutningskabel spis"
-    notes: "Elanslutning eller byte av spis/ugn. Förutsätter framdragen grupp."
-
+    - anslutningskabel spis
+    notes: Elanslutning eller byte av spis/ugn. Förutsätter framdragen grupp.
   byta_spis_ugn:
-    label: "Byta spis/ugn"
-    category: "kok"
+    label: Byta spis/ugn
+    category: kok
     patterns:
-      - "byta spis/ugn"
-      - "ersätta spis"
-      - "ersätta ugn"
-      - "ta bort gammal spis och sätta dit ny"
-    time_source: "manual"
+    - byta spis/ugn
+    - ersätta spis
+    - ersätta ugn
+    - ta bort gammal spis och sätta dit ny
+    time_source: manual
     atl_refs: []
     manual_time_minutes_per_unit: 45
-    pricing_source: "manual"
+    pricing_source: manual
     material_suggestions:
-      - "anslutningskabel spis"
-    notes: "Byte av spis/ugn på befintlig anslutning."
-
+    - anslutningskabel spis
+    notes: Byte av spis/ugn på befintlig anslutning.
   installera_hall:
-    label: "Installera häll"
-    category: "kok"
+    label: Installera häll
+    category: kok
     patterns:
-      - "installera häll"
-      - "installera induktionshäll"
-      - "koppla in häll"
-      - "byta häll"
-    time_source: "manual"
+    - installera häll
+    - installera induktionshäll
+    - koppla in häll
+    - byta häll
+    time_source: manual
     atl_refs: []
     manual_time_minutes_per_unit: 60
-    pricing_source: "manual"
+    pricing_source: manual
     material_suggestions:
-      - "anslutningskabel häll"
-    notes: "Installation eller byte av häll, separat från ugn."
-
-  # -----------------------------------------------------
-  # KÖK – DISKMASKIN / ANDRA VITVAROR
-  # -----------------------------------------------------
-
+    - anslutningskabel häll
+    notes: Installation eller byte av häll, separat från ugn.
   installera_diskmaskin:
-    label: "Installera diskmaskin"
-    category: "kok"
+    label: Installera diskmaskin
+    category: kok
     patterns:
-      - "installera diskmaskin"
-      - "ansluta diskmaskin"
-      - "koppla in diskmaskin"
-      - "byta diskmaskin"
-    time_source: "manual"
+    - installera diskmaskin
+    - ansluta diskmaskin
+    - koppla in diskmaskin
+    - byta diskmaskin
+    time_source: manual
     atl_refs: []
     manual_time_minutes_per_unit: 45
-    pricing_source: "manual"
+    pricing_source: manual
     material_suggestions:
-      - "anslutningskabel diskmaskin"
-    notes: "Elanslutning/byte av diskmaskin. Vatten/avlopp hanteras av VVS."
-
+    - anslutningskabel diskmaskin
+    notes: Elanslutning/byte av diskmaskin. Vatten/avlopp hanteras av VVS.
   installera_inbyggd_mikro:
-    label: "Installera inbyggd mikrovågsugn"
-    category: "kok"
+    label: Installera inbyggd mikrovågsugn
+    category: kok
     patterns:
-      - "montera inbyggd mikrovågsugn"
-      - "installera inbyggd mikro"
-      - "koppla in inbyggd mikro"
-    time_source: "manual"
+    - montera inbyggd mikrovågsugn
+    - installera inbyggd mikro
+    - koppla in inbyggd mikro
+    time_source: manual
     atl_refs: []
     manual_time_minutes_per_unit: 45
-    pricing_source: "manual"
+    pricing_source: manual
     material_suggestions: []
-    notes: "Installation av inbyggd mikrovågsugn i kök."
-
-  # -----------------------------------------------------
-  # KÖK – KÖKSFLÄKT / SPISFLÄKT
-  # -----------------------------------------------------
-
+    notes: Installation av inbyggd mikrovågsugn i kök.
   installera_koksflakt:
-    label: "Installera/byta köksfläkt"
-    category: "kok"
+    label: Installera/byta köksfläkt
+    category: kok
     patterns:
-      - "byta köksfläkt"
-      - "installera köksfläkt"
-      - "byta spisfläkt"
-      - "installera spisfläkt"
-    time_source: "manual"
+    - byta köksfläkt
+    - installera köksfläkt
+    - byta spisfläkt
+    - installera spisfläkt
+    time_source: manual
     atl_refs: []
     manual_time_minutes_per_unit: 60
-    pricing_source: "manual"
+    pricing_source: manual
     material_suggestions: []
-    notes: "Installation eller byte av köksfläkt/spisfläkt, elanslutning ingår."
-
-  # -----------------------------------------------------
-  # KÖK – KÖKSRENOVERING / NYINSTALLATION
-  # -----------------------------------------------------
-
+    notes: Installation eller byte av köksfläkt/spisfläkt, elanslutning ingår.
   installera_koksrenovering_el:
-    label: "Köksrenovering (el-nyinstallation)"
-    category: "kok"
+    label: Köksrenovering (el-nyinstallation)
+    category: kok
     patterns:
-      - "köksrenovering"
-      - "dra om el i kök"
-      - "ny el i kök"
-      - "el vid köksrenovering"
-    time_source: "manual"
+    - köksrenovering
+    - dra om el i kök
+    - ny el i kök
+    - el vid köksrenovering
+    time_source: manual
     atl_refs: []
     manual_time_minutes_per_unit: 480
-    pricing_source: "manual"
+    pricing_source: manual
     material_suggestions:
-      - "kabel"
-      - "apparatdosor"
-      - "vägguttag"
-    notes: "Övergripande nyinstallation av el i samband med större köksrenovering."
-
+    - kabel
+    - apparatdosor
+    - vägguttag
+    notes: Övergripande nyinstallation av el i samband med större köksrenovering.
   installera_matning_till_kok:
-    label: "Installera ny matning till kök"
-    category: "kok"
+    label: Installera ny matning till kök
+    category: kok
     patterns:
-      - "installera ny matning till kök"
-      - "dra ny matning till köket"
-      - "ny grupp till köket"
-      - "extra säkring till köket"
-      - "dra ny matning till diskmaskin"
-      - "ny matning till diskmaskin"
-      - "dra matning till diskmaskin"
-      - "diskmaskin från central"
-    time_source: "manual"
+    - installera ny matning till kök
+    - dra ny matning till köket
+    - ny grupp till köket
+    - extra säkring till köket
+    - dra ny matning till diskmaskin
+    - ny matning till diskmaskin
+    - dra matning till diskmaskin
+    - diskmaskin från central
+    - dra fram ny matning från central
+    time_source: manual
     atl_refs: []
     manual_time_minutes_per_unit: 90
-    pricing_source: "manual"
+    pricing_source: manual
     material_suggestions:
-      - "kabel"
-    notes: "Ny matning från central till kök, t.ex. för spis eller extra grupper."
-
-  # -----------------------------------------------------
-  # KÖK – FELSÖKNING (VITVAROR)
-  # -----------------------------------------------------
-
+    - kabel
+    notes: Ny matning från central till kök, t.ex. för spis eller extra grupper.
   felsokning_kok_vitvaror:
-    label: "Felsökning vitvaror i kök"
-    category: "kok"
+    label: Felsökning vitvaror i kök
+    category: kok
     patterns:
-      - "spis och diskmaskin fungerar inte"
-      - "vitvaror i kök fungerar inte"
-      - "felsöka vitvaror i kök"
-      - "felsökning matning kök"
-    time_source: "manual"
+    - spis och diskmaskin fungerar inte
+    - vitvaror i kök fungerar inte
+    - felsöka vitvaror i kök
+    - felsökning matning kök
+    time_source: manual
     atl_refs: []
     manual_time_minutes_per_unit: 90
-    pricing_source: "manual"
+    pricing_source: manual
     material_suggestions: []
-    notes: "Övergripande felsökning av matningar till vitvaror i kök."
-
+    notes: Övergripande felsökning av matningar till vitvaror i kök.
   installera_spisuttag:
-    label: "Installera spisuttag / 3-fas anslutning"
-    category: "kok"
+    label: Installera spisuttag / 3-fas anslutning
+    category: kok
     patterns:
-      - "montera spisuttag"
-      - "installera spisuttag"
-      - "spisuttag"
-      - "3-fas spis"
-      - "dra ny matning till spis"
-      - "ny matning till spis"
-    time_source: "manual"
+    - montera spisuttag
+    - installera spisuttag
+    - spisuttag
+    - 3-fas spis
+    - dra ny matning till spis
+    - ny matning till spis
+    time_source: manual
     atl_refs: []
     manual_time_minutes_per_unit: 120
-    pricing_source: "manual"
+    pricing_source: manual
     material_suggestions:
-      - "spisuttag"
-      - "kabel 5g"
-    notes: "Enkel schablon för spisuttag/3-fas anslutning. Exakta förutsättningar varierar."
-
+    - spisuttag
+    - kabel 5g
+    notes: Enkel schablon för spisuttag/3-fas anslutning. Exakta förutsättningar varierar.
