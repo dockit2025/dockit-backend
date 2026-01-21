@@ -20,6 +20,7 @@ try:
     print(f"[db] Using DB host={p.hostname} db={p.path}", flush=True)
 except Exception:
     pass
+
 engine = create_engine(db_url, echo=settings.debug, connect_args=connect_args)
 
 
@@ -42,7 +43,6 @@ def _ensure_quote_status_column() -> None:
         conn.execute(text(ddl))
 
 
-
 def _ensure_quote_share_token_column() -> None:
     """
     Skapar kolumnen quote.share_token om den saknas.
@@ -56,23 +56,45 @@ def _ensure_quote_share_token_column() -> None:
     if "share_token" in cols:
         return
 
-    # SQLite/Postgres compatible enough for our use
     ddl = "ALTER TABLE quote ADD COLUMN share_token VARCHAR"
     with engine.begin() as conn:
         conn.execute(text(ddl))
 
+
+def _ensure_customer_postcode_city_columns() -> None:
+    """
+    Skapar kolumnerna customer.postcode och customer.city om de saknas.
+    (create_all lägger inte till nya kolumner på existerande tabeller.)
+    """
+    insp = inspect(engine)
+    try:
+        cols = [c["name"] for c in insp.get_columns("customer")]
+    except Exception:
+        return
+
+    ddls = []
+    if "postcode" not in cols:
+        ddls.append("ALTER TABLE customer ADD COLUMN postcode VARCHAR")
+    if "city" not in cols:
+        ddls.append("ALTER TABLE customer ADD COLUMN city VARCHAR")
+
+    if not ddls:
+        return
+
+    with engine.begin() as conn:
+        for ddl in ddls:
+            conn.execute(text(ddl))
+
+
 def init_db() -> None:
-    # Se till att modellerna laddas (EN gång, via src.server.*)
     from src.server.models import __all_models  # noqa: F401
 
     SQLModel.metadata.create_all(engine)
     _ensure_quote_status_column()
     _ensure_quote_share_token_column()
+    _ensure_customer_postcode_city_columns()
 
 
 def get_session():
     with Session(engine) as session:
         yield session
-
-
-

@@ -8,5 +8,8 @@ class Customer(SQLModel, table=True):
     email: Optional[str] = None
     phone: Optional[str] = None
     address: Optional[str] = None
+    postcode: Optional[str] = None
+    city: Optional[str] = None
     orgnr: Optional[str] = None
+    reverse_charge: bool = False
 

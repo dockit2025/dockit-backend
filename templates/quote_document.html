@@ -2,11 +2,9 @@
 <html lang="sv">
 <head>
   <meta charset="UTF-8" />
-  <title>[[document_title]] [[document_number]]</title>
+  <title>Offert [[document_number]]</title>
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -17,23 +15,35 @@
     }
 
     .page {
-      width: 780px;           /* ungefär A4-bredd i px */
+      width: 794px;
       margin: 0 auto;
-      padding: 20px 40px 25px 40px;
+      padding: 12px 24px 22px 24px;
+      min-height: 1040px;
+      display: flex;
+      flex-direction: column;
     }
 
-    /* HEADER ---------------------------------------------------- */
+    .top-block { }
+    .bottom-block { margin-top: auto; }
 
+    .content { width: 86%; margin: 0 auto; }
+
+    /* HEADER */
     .header {
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
-      margin-bottom: 12px;
+      margin-bottom: 6px;
     }
 
     .logo {
-      max-width: 260px;
-      max-height: 120px;
+      max-width: 320px;
+      max-height: 110px;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      display: block;
+      margin: 0;
     }
 
     .title {
@@ -41,78 +51,63 @@
       text-align: center;
       font-size: 20px;
       font-weight: bold;
-      margin-top: 10px;
+      margin: 0;
+      line-height: 1.0;
     }
 
-    .meta-box {
-      text-align: left;
+    .meta-box { min-width: 180px; font-size: 11px; margin: 0; }
+    .meta-box table { width: 100%; border-collapse: collapse; }
+    .meta-box td { padding: 1px 0; vertical-align: top; }
+    .meta-label { text-align: right; padding-right: 10px; white-space: nowrap; }
+    .meta-value { text-align: left; padding-left: 6px; white-space: nowrap; }
+
+    /* === Fortnox 5-kolumns schema (matchar tabellen) === */
+    :root {
+      --c1: 12%;
+      --c2: 38%;
+      --c3: 14%;
+      --c4: 18%;
+      --c5: 18%;
+    }
+
+    .topgrid {
+      display: grid;
+      grid-template-columns: var(--c1) var(--c2) var(--c3) var(--c4) var(--c5);
+      row-gap: 10px;
+      align-items: start;
+      margin: 6px 0 10px 0;
+    }
+
+    .g-left { grid-column: 1 / span 2; }
+    .g-right { grid-column: 3 / span 3; padding-left: 10px; }
+
+    /* Kundnr/VAT: Fortnox-lik tvåkolumnsrad */
+    /* ger plats för större logo */
       font-size: 11px;
-      min-width: 170px;
     }
+    .kv td { padding: 0 14px 4px 0; vertical-align: top; }
+    .kv td.label { font-weight: bold; padding-right: 22px; white-space: nowrap; }
+    .kv td.value { white-space: nowrap; }
 
-    .meta-box table {
-      width: 100%;
+    /* Mottagare */
+    .recipient { line-height: 1.3; }
+    .recipient .name { font-weight: bold; }
+
+    /* Villkor: Fortnox-lik tvåkolumnsrad */
+    .terms {
       border-collapse: collapse;
-    }
-
-    .meta-box td {
-      padding: 1px 0;
-      vertical-align: top;
-    }
-
-    .meta-label {
-      text-align: right;
-      padding-right: 8px;
-      white-space: nowrap;
-    }
-
-    .meta-value {
-      text-align: left;
-      white-space: nowrap;
-    }
-
-    .spacer-large {
-      height: 28px;
-    }
-
-    /* AVSÄNDAREADRESS ------------------------------------------ */
-
-    .company-address {
-      text-align: left;
       font-size: 11px;
-      margin-bottom: 18px;
-      line-height: 1.3;
+      margin-top: 6px;
     }
+    .terms td { padding: 0 14px 2px 0; vertical-align: top; }
+    .terms td.label { font-weight: bold; white-space: nowrap; padding-right: 22px; }
+    .terms td.value { white-space: nowrap; }
 
-    /* KUND + REFERENSBLOCK -------------------------------------- */
-
-    .customer-info {
-      display: flex;
-      justify-content: space-between;
-      font-size: 11px;
-      margin-bottom: 26px;
-    }
-
-    .customer-block {
-      flex: 1;
-    }
-
-    .customer-block h4 {
-      margin: 0 0 2px 0;
-      font-size: 11px;
-      font-weight: bold;
-    }
-
-    .customer-block p {
-      margin: 0 0 6px 0;
-    }
-
-    /* ARTIKELTABELL --------------------------------------------- */
-
+    /* ITEMS TABLE */
     .items-table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 8px;
+      margin-top: 10px;
       font-size: 11px;
     }
 
@@ -123,232 +118,223 @@
       text-align: left;
     }
 
-    .items-table thead th.col-levant,
+    .items-table thead th.col-levant { text-align: center; }
     .items-table thead th.col-apris,
-    .items-table thead th.col-summa {
-      text-align: right;
-    }
+    .items-table thead th.col-summa { text-align: right; }
 
     .items-table tbody td {
       padding: 3px 4px;
-      border-bottom: 0.5px solid #ddd;
       vertical-align: top;
-    }
-
-    .items-table tbody td.col-levant,
-    .items-table tbody td.col-apris,
-    .items-table tbody td.col-summa {
-      text-align: right;
-      white-space: nowrap;
-    }
-
-    .items-table tbody tr:last-child td {
       border-bottom: none;
     }
 
-    /* SUMMARUTA ------------------------------------------------- */
+    .items-table tbody td.col-levant { text-align: center; white-space: nowrap; }
+    .items-table tbody td.col-apris,
+    .items-table tbody td.col-summa { text-align: right; white-space: nowrap; }
 
-    .summary-box {
-      margin-top: 8px;
-      width: 260px;
-      margin-left: auto;
-      font-size: 11px;
-    }
+    /* FORTNOX-LIK SUMMERING */
+    .fortnox-summary { margin-top: 10px; font-size: 11px; }
+    .fortnox-note { margin-bottom: 6px; }
 
-    .summary-table {
+    .fortnox-bar {
       width: 100%;
       border-collapse: collapse;
-    }
-
-    .summary-label {
-      text-align: left;
-      padding: 2px 0;
-    }
-
-    .summary-value {
-      text-align: right;
-      padding: 2px 0;
-      white-space: nowrap;
-    }
-
-    .summary-total-row .summary-label,
-    .summary-total-row .summary-value {
-      font-weight: bold;
-    }
-
-    .summary-total-row:first-of-type .summary-label,
-    .summary-total-row:first-of-type .summary-value {
       border-top: 1px solid #000;
-      padding-top: 4px;
-      margin-top: 2px;
+      border-bottom: 1px solid #000;
     }
 
-    /* NOT-RAD --------------------------------------------------- */
+    .fortnox-bar td { padding: 6px 6px; vertical-align: bottom; }
+    .fortnox-bar .label { font-size: 10px; }
+    .fortnox-bar .value { font-size: 11px; margin-top: 2px; }
+    .fortnox-bar .right { text-align: right; }
+    .fortnox-bar .pay { font-weight: bold; font-size: 12px; }
 
-    .note-text {
-      margin-top: 22px;
-      font-size: 11px;
-    }
+    .fortnox-iban { margin-top: 6px; text-align: right; font-size: 10px; }
 
-    /* FOOTER ---------------------------------------------------- */
-
+    /* FOOTER */
     .footer {
-      margin-top: 40px;
+      margin-top: 16px;
       border-top: 1px solid #000;
       padding-top: 6px;
       font-size: 10px;
     }
 
-    .footer-columns {
-      display: flex;
-      justify-content: space-between;
+    .footer-columns { display: flex; justify-content: space-between; gap: 16px; }
+    .footer-column { width: 25%; line-height: 1.3; }
+  
+    /* === OVERRIDES (Fortnox-justering) === */
+    .g-right { padding-left: 24px; }
+
+    /* === OVERRIDES (justering) === */
+    .terms td.value { padding-left: 34px; }
+    .kv { margin-top: 155px; }
+
+    /* === OVERRIDE-KV-ABS === */
+    /* Lås vänstercellens höjd så resten av sidan inte rör sig */
+    .g-left { position: relative; height: 120px; }
+
+    /* Flytta bara själva Kundnr/VAT-tabellen inom den lådan */
+    .kv {
+      position: absolute;
+      top: 135px;   /* ändra detta för att flytta ner/upp */
+      left: 0;
+      margin-top: 0 !important;
+      transform: none !important;
     }
 
-    .footer-column {
-      width: 33%;
-      line-height: 1.3;
-    }
+    /* === OVERRIDE-META === */
+    .meta-box { text-align: left; }
+    .meta-box table { width: 100%; border-collapse: collapse; }
+    .meta-box td { padding: 1px 0; }
+    .meta-box td.meta-label { width: 95px; text-align: left; padding-right: 10px; white-space: nowrap; }
+    .meta-box td.meta-value { text-align: left; white-space: nowrap; }
+
+    /* === OVERRIDE-LOGO === */
+    .logo { max-width: 520px; max-height: 170px; }
+    .meta-box { min-width: 210px; }
   </style>
 </head>
 <body>
   <div class="page">
 
-    <!-- HEADER -->
-    <div class="header">
-      <div>
-        <img class="logo" src="[[company_logo_url]]" alt="[[company_name]]" />
+    <div class="top-block">
+      <div class="header">
+        <div><img class="logo" src="[[company_logo_url]]" alt="[[company_name]]" /></div>
+        <div class="title">Offert</div>
+        <div class="meta-box">
+          <table>
+            <tr>
+              <td class="meta-label">Sida</td>
+              <td class="meta-value">1 (1)</td>
+            </tr>
+            <tr>
+              <td class="meta-label">Offertdatum</td>
+              <td class="meta-value">[[document_date]]</td>
+            </tr>
+            <tr>
+              <td class="meta-label">Offertnr</td>
+              <td class="meta-value">[[document_number]]</td>
+            </tr>
+            <tr>
+              <td class="meta-label">OCR</td>
+              <td class="meta-value">[[ocr_number]]</td>
+            </tr>
+          </table>
+        </div>
       </div>
 
-      <div class="title">
-        [[document_title]]
-      </div>
+      <div class="content">
+        <div class="topgrid">
+          <!-- Vänster: Kundnr + VAT i två kolumner -->
+          <div class="g-left">
+            <table class="kv">
+              <tr><td class="label">Kundnr</td><td class="value">[[customer_number]]</td></tr>
+              [[customer_vat_row]]
+            </table>
+          </div>
 
-      <div class="meta-box">
-        <table>
-          <tr>
-            <td class="meta-label">[[document_title]]datum</td>
-            <td class="meta-value">[[document_date]]</td>
-          </tr>
-          <tr>
-            <td class="meta-label">[[document_title]]nr</td>
-            <td class="meta-value">[[document_number]]</td>
-          </tr>
-          <tr>
-            <td class="meta-label">OCR</td>
-            <td class="meta-value">[[ocr_number]]</td>
-          </tr>
+          <!-- Höger: mottagare -->
+          <div class="g-right recipient">
+            <div class="name">[[customer_name_full]]</div>
+            [[customer_address_line1]]<br />
+            [[customer_postcode_city]]<br />
+            [[customer_country]]
+          </div>
+
+          <!-- Höger: villkor (två kolumner label/value) -->
+          <div class="g-right">
+            <table class="terms">
+              <tr><td class="label">Vår referens</td><td class="value">[[our_reference]]</td></tr>
+              <tr><td class="label">Betalningsvillkor</td><td class="value">[[payment_terms]]</td></tr>
+              <tr><td class="label">Förfallodatum</td><td class="value">[[due_date]]</td></tr>
+              <tr><td class="label">Dröjsmålsränta</td><td class="value">[[late_interest]]</td></tr>
+            </table>
+          </div>
+        </div>
+
+        <table class="items-table">
+          <colgroup>
+            <col style="width: var(--c1);" />
+            <col style="width: var(--c2);" />
+            <col style="width: var(--c3);" />
+            <col style="width: var(--c4);" />
+            <col style="width: var(--c5);" />
+          </colgroup>
+          <thead>
+            <tr>
+              <th class="col-artnr">Artnr</th>
+              <th class="col-benamning">Benämning</th>
+              <th class="col-levant">Lev ant</th>
+              <th class="col-apris">À-pris</th>
+              <th class="col-summa">Summa</th>
+            </tr>
+          </thead>
+          <tbody>
+            [[rows_html]]
+          </tbody>
         </table>
       </div>
     </div>
 
-    <div class="spacer-large"></div>
+    <div class="bottom-block">
+      <div class="content">
+        <div class="fortnox-summary">
+          <div class="fortnox-note">[[note_text]]</div>
+          <div class="fortnox-note">[[reverse_charge_notice]]</div>
 
-    <!-- COMPANY ADDRESS -->
-    <div class="company-address">
-      [[company_name]]<br />
-      [[company_address_line1]]<br />
-      [[company_postcode]] [[company_city]]<br />
-      [[company_country]]
-    </div>
+          <table class="fortnox-bar">
+            <tr>
+              <td>
+                <div class="label">Exkl. moms</div>
+                <div class="value">[[total_ex_vat]]</div>
+              </td>
+              <td class="right">
+                <div class="label">Totalt</div>
+                <div class="value">[[total_display]]</div>
+              </td>
+              <td class="right">
+                <div class="label">ATT BETALA</div>
+                <div class="value pay">SEK [[payable_display]]</div>
+              </td>
+            </tr>
+          </table>
 
-    <!-- CUSTOMER / PAYMENT INFO -->
-    <div class="customer-info">
-      <div class="customer-block">
-        <h4>Kundnr</h4>
-        <p>[[customer_number]]</p>
-
-        <h4>Ert VAT-nummer</h4>
-        <p>[[customer_vat_number]]</p>
-      </div>
-
-      <div class="customer-block">
-        <h4>Vår referens</h4>
-        <p>[[our_reference]]</p>
-
-        <h4>Betalningsvillkor</h4>
-        <p>[[payment_terms]]</p>
-
-        <h4>Förfallodatum</h4>
-        <p>[[due_date]]</p>
-
-        <h4>Dröjsmålsränta</h4>
-        <p>[[late_interest]]</p>
-      </div>
-    </div>
-
-    <!-- ITEMS TABLE -->
-    <table class="items-table">
-      <thead>
-        <tr>
-          <th class="col-artnr">Artnr</th>
-          <th class="col-benamning">Benämning</th>
-          <th class="col-levant">Lev ant</th>
-          <th class="col-apris">À-pris</th>
-          <th class="col-summa">Summa</th>
-        </tr>
-      </thead>
-      <tbody>
-        [[rows_html]]
-      </tbody>
-    </table>
-
-    <!-- SUMMARY -->
-    <div class="summary-box">
-      <table class="summary-table">
-        <tr>
-          <td class="summary-label">Exkl. moms</td>
-          <td class="summary-value">[[total_ex_vat]]</td>
-        </tr>
-        <tr>
-          <td class="summary-label">Moms [[vat_percent]]%</td>
-          <td class="summary-value">[[vat_amount]]</td>
-        </tr>
-        <tr class="summary-total-row">
-          <td class="summary-label">Totalt</td>
-          <td class="summary-value">[[total_inc_vat]]</td>
-        </tr>
-        <tr class="summary-total-row">
-          <td class="summary-label">ATT BETALA</td>
-          <td class="summary-value">[[total_inc_vat]]</td>
-        </tr>
-      </table>
-    </div>
-
-    <!-- NOTE -->
-    <div class="note-text">
-      [[note_text]]
-    </div>
-
-    <!-- FOOTER -->
-    <div class="footer">
-      <div class="footer-columns">
-        <div class="footer-column">
-          <strong>Adress</strong><br />
-          [[company_name]]<br />
-          [[company_address_line1]]<br />
-          [[company_postcode]] [[company_city]]<br />
-          [[company_country]]
+          <div class="fortnox-iban">IBAN [[company_iban]]&nbsp;&nbsp;BIC [[company_bic]]</div>
         </div>
 
-        <div class="footer-column">
-          <strong>Telefon</strong><br />
-          [[company_phone]]<br />
-          <br />
-          <strong>E-post</strong><br />
-          [[company_email]]
-        </div>
+        <div class="footer">
+          <div class="footer-columns">
+            <div class="footer-column">
+              <strong>Adress</strong><br />
+              [[company_name]]<br />
+              [[company_address_line1]]<br />
+              [[company_postcode]] [[company_city]]<br />
+              [[company_country]]
+            </div>
 
-        <div class="footer-column">
-          <strong>Bankgiro</strong><br />
-          [[company_bankgiro]]<br />
-          <strong>IBAN</strong><br />
-          [[company_iban]]<br />
-          <strong>Organisationsnr</strong><br />
-          [[company_org_number]]<br />
-          <strong>Säte</strong><br />
-          [[company_city]]<br />
-          <strong>Godkänd för F-skatt</strong><br />
-          [[company_f_tax_text]]
+            <div class="footer-column">
+              <strong>Telefon</strong><br />
+              [[company_phone]]<br /><br />
+              <strong>E-post</strong><br />
+              [[company_email]]
+            </div>
+
+            <div class="footer-column">
+              <strong>Bankgiro</strong><br />
+              [[company_bankgiro]]<br />
+              <strong>IBAN</strong><br />
+              [[company_iban]]<br />
+            </div>
+
+            <div class="footer-column">
+              <strong>Organisationsnr</strong><br />
+              [[company_org_number]]<br />
+              <strong>Säte</strong><br />
+              [[company_city]]<br />
+              <strong>Godkänd för F-skatt</strong><br />
+              [[company_f_tax_text]]
+            </div>
+          </div>
         </div>
       </div>
     </div>

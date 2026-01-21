@@ -24,8 +24,9 @@ class CustomerIn(BaseModel):
     phone: Optional[str] = None
     address: Optional[str] = None
     orgnr: Optional[str] = None
+    reverse_charge: Optional[bool] = None
 
-    # Frontend-fält (accepteras men lagras inte än)
+    # Adressfält
     postcode: Optional[str] = None
     city: Optional[str] = None
 
@@ -36,6 +37,7 @@ class CustomerUpdateIn(BaseModel):
     phone: Optional[str] = None
     address: Optional[str] = None
     orgnr: Optional[str] = None
+    reverse_charge: Optional[bool] = None
 
     postcode: Optional[str] = None
     city: Optional[str] = None
@@ -49,8 +51,9 @@ def _serialize_customer(c: Customer) -> Dict[str, Any]:
         "phone": c.phone,
         "address": c.address,
         "orgnr": c.orgnr,
-        "postcode": None,
-        "city": None,
+        "reverse_charge": bool(getattr(c, "reverse_charge", False)),
+        "postcode": getattr(c, "postcode", None),
+        "city": getattr(c, "city", None),
     }
 
 
@@ -85,7 +88,10 @@ def create_customer(payload: CustomerIn, session: Session = Depends(get_session)
         email=(payload.email or None),
         phone=(payload.phone or None),
         address=(payload.address or None),
+        postcode=(payload.postcode or None),
+        city=(payload.city or None),
         orgnr=(payload.orgnr or None),
+        reverse_charge=bool(payload.reverse_charge) if payload.reverse_charge is not None else False,
     )
     session.add(c)
     session.commit()
@@ -113,7 +119,13 @@ def update_customer(customer_id: int, payload: CustomerUpdateIn, session: Sessio
         c.address = payload.address or None
     if payload.orgnr is not None:
         c.orgnr = payload.orgnr or None
+    if payload.reverse_charge is not None:
+        c.reverse_charge = bool(payload.reverse_charge)
 
+    if payload.postcode is not None:
+        c.postcode = payload.postcode or None
+    if payload.city is not None:
+        c.city = payload.city or None
     session.add(c)
     session.commit()
     session.refresh(c)

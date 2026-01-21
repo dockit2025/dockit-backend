@@ -549,11 +549,18 @@ def create_quote(*, payload: QuoteDraftIn, session: Session) -> Quote:
     baserat på samma payload-struktur som make_draft använder.
     """
     # Hämta eller skapa kund
+    customer_id = getattr(payload, "customer_id", None)
     email = getattr(payload, "customer_email", None)
     name = getattr(payload, "customer_name", None)
 
     cust = None
-    if email:
+    if customer_id:
+        try:
+            cust = session.get(Customer, int(customer_id))
+        except Exception:
+            cust = None
+
+    if not cust and email:
         cust = session.exec(select(Customer).where(Customer.email == email)).first()
     if not cust and name:
         cust = session.exec(select(Customer).where(Customer.name == name)).first()
@@ -963,10 +970,3 @@ def _estimate_task_time_minutes(task_id: str, quantity_units: float) -> float:
         minutes_per_unit = 0.0
 
     return qty * minutes_per_unit
-
-
-
-
-
-
-

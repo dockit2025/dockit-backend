@@ -51,9 +51,25 @@ router = APIRouter(
 
 def _serialize_quote(q: Quote, session: Session) -> dict:
     cust_name: Optional[str] = None
+    cust_email: Optional[str] = None
+    cust_phone: Optional[str] = None
+    cust_address: Optional[str] = None
+    cust_postcode: Optional[str] = None
+    cust_city: Optional[str] = None
+    cust_orgnr: Optional[str] = None
+    cust_reverse_charge: Optional[bool] = None
+
     if getattr(q, "customer_id", None) is not None:
         cust = session.get(Customer, q.customer_id)
-        cust_name = cust.name if cust else None
+        if cust:
+            cust_name = cust.name
+            cust_email = getattr(cust, "email", None)
+            cust_phone = getattr(cust, "phone", None)
+            cust_address = getattr(cust, "address", None)
+            cust_postcode = getattr(cust, "postcode", None)
+            cust_city = getattr(cust, "city", None)
+            cust_orgnr = getattr(cust, "orgnr", None)
+            cust_reverse_charge = getattr(cust, "reverse_charge", None)
 
     lines = (
         session.exec(
@@ -65,7 +81,22 @@ def _serialize_quote(q: Quote, session: Session) -> dict:
         "id": q.id,
         "title": getattr(q, "title", f"Offert #{q.id}"),
         "status": getattr(q, "status", "draft"),
+        "created_at": str(getattr(q, "created_at", "") or ""),
         "customer_name": cust_name,
+        "customer_email": cust_email,
+        "customer_id": getattr(q, "customer_id", None),
+        "postcode": cust_postcode,
+        "city": cust_city,
+        "customer": {
+            "name": cust_name,
+            "email": cust_email,
+            "phone": cust_phone,
+            "address": cust_address,
+            "postcode": cust_postcode,
+            "city": cust_city,
+            "orgnr": cust_orgnr,
+            "reverse_charge": bool(cust_reverse_charge) if cust_reverse_charge is not None else False,
+        },
         "subtotal_sek": float(getattr(q, "subtotal_sek", 0) or 0),
         "rot_discount_sek": float(getattr(q, "rot_discount_sek", 0) or 0),
         "total_sek": float(getattr(q, "total_sek", 0) or 0),
@@ -81,7 +112,6 @@ def _serialize_quote(q: Quote, session: Session) -> dict:
             for l in lines
         ],
     }
-
 
 def _list_quotes_impl(skip: int, limit: int, session: Session) -> List[dict]:
     rows = (
@@ -103,11 +133,15 @@ def _get_company_settings() -> dict:
         "country": "Sverige",
         "phone": "070-000 00 00",
         "email": "info@dockit.se",
+        "contact_person": "Robin Charters-Rowe",
+        "payment_terms": "30 dagar",
+        "late_interest": "8 %",
         "bankgiro": "123-4567",
-        "iban": "",
+        "iban": "SE14 6000 0000 0004 3273 9211",
+        "bic": "HANDSESS",
         "org_number": "5590-0000",
         "f_tax_text": "Ja",
-        "logo_url": "/static/dockit-logo.png",
+        "logo_url": "/static/logos/elexab_safe/transparent.png",
     }
 
 
@@ -475,7 +509,3 @@ def update_quote_status(
     session.commit()
     session.refresh(q)
     return _serialize_quote(q, session)
-
-
-
-
