@@ -269,3 +269,130 @@ def confirm_apply_atl_ref(
         "task_id": task_id,
         "tasks_container_type": meta_apply.get("tasks_container_type"),
     }
+# =========================================================
+# Pattern Apply (Sandbox admin-only)
+# =========================================================
+
+def _normalize_pattern(text: str) -> str:
+    s = (text or "").strip().lower()
+    return " ".join(s.split())
+
+
+def apply_pattern_to_mapping_root(*, mapping_root: Any, task_id: str, pattern: str) -> Dict[str, Any]:
+    """
+    Applicerar ett nytt pattern till en befintlig task i mapping_root (in-memory). Ingen write här.
+
+    Returnerar meta:
+      - updated: bool
+      - already_present: bool
+      - tasks_container_type: "list" | "dict" | "unknown"
+      - normalized_pattern: str
+    """
+    tid = str(task_id or "").strip()
+    if not tid:
+        raise ValueError("task_id krävs")
+
+    patt_raw = str(pattern or "")
+    patt = _normalize_pattern(patt_raw)
+    if not patt:
+        raise ValueError("pattern krävs")
+
+    def _ensure_patterns_list(t: Dict[str, Any]) -> List[str]:
+        pats = t.get("patterns")
+        if isinstance(pats, list):
+            return pats
+        # skapa om saknas eller fel typ
+        t["patterns"] = []
+        return t["patterns"]
+
+    def _add_pattern(t: Dict[str, Any]) -> Dict[str, Any]:
+        pats = _ensure_patterns_list(t)
+        # normalisera befintliga för jämförelse
+        existing_norm = {_normalize_pattern(str(x)) for x in pats if str(x).strip()}
+        if patt in existing_norm:
+            return {"updated": False, "already_present": True}
+        pats.append(patt)
+        return {"updated": True, "already_present": False}
+
+    # dict root with tasks
+    if isinstance(mapping_root, dict) and "tasks" in mapping_root:
+        tasks_obj = mapping_root.get("tasks")
+
+        # tasks list
+        if isinstance(tasks_obj, list):
+            for t in tasks_obj:
+                if not isinstance(t, dict):
+                    continue
+                if str(t.get("task_id") or "").strip() == tid:
+                    r = _add_pattern(t)
+                    return {"tasks_container_type": "list", "normalized_pattern": patt, **r}
+            return {"tasks_container_type": "list", "normalized_pattern": patt, "updated": False, "already_present": False}
+
+        # tasks dict
+        if isinstance(tasks_obj, dict):
+            tdef = tasks_obj.get(tid)
+            if isinstance(tdef, dict):
+                r = _add_pattern(tdef)
+                return {"tasks_container_type": "dict", "normalized_pattern": patt, **r}
+            return {"tasks_container_type": "dict", "normalized_pattern": patt, "updated": False, "already_present": False}
+
+        return {"tasks_container_type": "unknown", "normalized_pattern": patt, "updated": False, "already_present": False}
+
+    # root list
+    if isinstance(mapping_root, list):
+        for t in mapping_root:
+            if not isinstance(t, dict):
+                continue
+            if str(t.get("task_id") or "").strip() == tid:
+                r = _add_pattern(t)
+                return {"tasks_container_type": "list", "normalized_pattern": patt, **r}
+        return {"tasks_container_type": "list", "normalized_pattern": patt, "updated": False, "already_present": False}
+
+    return {"tasks_container_type": "unknown", "normalized_pattern": patt, "updated": False, "already_present": False}
+
+
+def confirm_apply_pattern(*, task_id: str, mapping_file: str, pattern: str) -> Dict[str, Any]:
+    """
+    CONFIRM = faktisk write:
+    - validera + ladda mapping
+    - backup
+    - applicera pattern in-memory
+    - write tillbaka
+    - re-read + verify att pattern finns på tasken
+    """
+    path = resolve_mapping_path(mapping_file)
+    root = load_mapping_yaml(path)
+
+    backup_path = backup_mapping_file(path)
+
+    meta_apply = apply_pattern_to_mapping_root(mapping_root=root, task_id=task_id, pattern=pattern)
+    if not meta_apply.get("updated") and not meta_apply.get("already_present"):
+        raise ValueError(f"task_id '{task_id}' hittades inte i {mapping_file}")
+
+    _write_yaml_preserve_shape(path, root)
+
+    reread = load_mapping_yaml(path)
+    task_after, meta = find_task_in_mapping(mapping_root=reread, task_id=task_id)
+    if not task_after:
+        raise ValueError("Efter write: tasken hittades inte vid verifiering (oväntat).")
+
+    pats = task_after.get("patterns")
+    if not isinstance(pats, list):
+        raise ValueError("Efter write: patterns saknas eller är fel typ.")
+
+    patt_norm = meta_apply.get("normalized_pattern") or _normalize_pattern(pattern)
+    pats_norm = {_normalize_pattern(str(x)) for x in pats if str(x).strip()}
+    if patt_norm not in pats_norm:
+        raise ValueError("Efter write: pattern hittades inte på tasken.")
+
+    return {
+        "status": "ok",
+        "mapping_file": mapping_file,
+        "mapping_path": str(path),
+        "backup_path": str(backup_path),
+        "task_id": task_id,
+        "tasks_container_type": meta_apply.get("tasks_container_type"),
+        "normalized_pattern": patt_norm,
+        "updated": bool(meta_apply.get("updated")),
+        "already_present": bool(meta_apply.get("already_present")),
+    }

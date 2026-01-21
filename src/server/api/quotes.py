@@ -1,4 +1,5 @@
-from typing import List, Optional
+from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Header
 from sqlalchemy.orm import Session
@@ -17,7 +18,7 @@ from src.services.material_suggestions import get_material_suggestions
 from src.services.pricing import get_price
 
 from src.server.db.session import get_session
-from src.server.models import Quote, QuoteLine, Customer
+from src.server.models import Quote, QuoteLine, Customer, MissingTaskSegment, MissingTaskSegment
 from src.server.schemas.quote import QuoteDraftIn, MaterialDraftIn
 from src.server.settings.config import settings
 from material_list_parser import parse_material_text as _parse_material_text
@@ -176,6 +177,85 @@ def create_quote_endpoint(payload: QuoteDraftIn, session: Session = Depends(get_
         raise HTTPException(status_code=500, detail="Offerten kunde inte hämtas efter skapande")
     return _serialize_quote(q, session)
 
+
+
+
+
+
+# ==============================
+# MISSING SEGMENTS (prod-ingest -> DB-kö)
+# ==============================
+
+class MissingSegmentsIn(BaseModel):
+    segments: List[str]
+    customer_id: Optional[int] = None
+    quote_id: Optional[int] = None
+    free_text: Optional[str] = None
+
+
+def _normalize_segment_key(text: str) -> str:
+    s = (text or "").strip().lower()
+    return " ".join(s.split())
+
+
+def _upsert_missing_segments(session: Session, segments: List[str]) -> Dict[str, Any]:
+    if not segments:
+        return {"received": 0, "upserted": 0}
+
+    # Dedup per request (senaste exempel vinner)
+    per_key: Dict[str, str] = {}
+    for s in segments:
+        example = str(s or "").strip()
+        if not example:
+            continue
+        key = _normalize_segment_key(example)
+        if not key:
+            continue
+        per_key[key] = example
+
+    if not per_key:
+        return {"received": len(segments), "upserted": 0}
+
+    now = datetime.now(timezone.utc)
+    upserted = 0
+
+    for key, example in per_key.items():
+        row = None
+        try:
+            if hasattr(session, "exec"):
+                row = session.exec(select(MissingTaskSegment).where(MissingTaskSegment.segment_key == key)).first()
+            else:
+                row = session.execute(select(MissingTaskSegment).where(MissingTaskSegment.segment_key == key)).scalars().first()
+        except Exception:
+            row = None
+
+        if row:
+            row.count = int(row.count or 0) + 1
+            row.example = example or row.example or ""
+            row.last_seen_utc = now
+            session.add(row)
+        else:
+            session.add(
+                MissingTaskSegment(
+                    segment_key=key,
+                    example=example or key,
+                    count=1,
+                    first_seen_utc=now,
+                    last_seen_utc=now,
+                )
+            )
+        upserted += 1
+
+    session.commit()
+    return {"received": len(segments), "upserted": upserted}
+
+
+@router.post("/missing-segments", summary="Skicka missing segments till admin-kö (DB)")
+def ingest_missing_segments(payload: MissingSegmentsIn, session: Session = Depends(get_session)) -> Dict[str, Any]:
+    segs = payload.segments or []
+    cleaned = [str(s).strip()[:240] for s in segs if str(s or "").strip()]
+    out = _upsert_missing_segments(session=session, segments=cleaned)
+    return {"status": "ok", **out}
 
 # ==============================
 # FAVORITER
