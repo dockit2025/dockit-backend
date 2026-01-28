@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
 from src.server.db.session import init_db, get_session
-from src.server.api import health, system, quotes, articles, customers
+from src.server.api import health, system, quotes, articles, customers, speech
 from src.server.api.articles_autocomplete import router as autocomplete_router
 from src.server.api.quote_document import router as quote_document_router
 from src.server.api.quotes import _list_quotes_impl
@@ -51,6 +51,7 @@ app.include_router(health.router)
 app.include_router(system.router)
 app.include_router(quotes.router)            # /quotes..., kräver API-nyckel
 app.include_router(customers.router)         # /customers..., kräver API-nyckel
+app.include_router(speech.router)            # /speech..., kräver API-nyckel
 app.include_router(articles.router)
 app.include_router(autocomplete_router)      # /articles/autocomplete..., för dropdown i materiallistan
 app.include_router(quote_document_router)    # /quotes/{id}/document, offentlig utan API-nyckel
@@ -75,6 +76,8 @@ def list_quotes_proxy2(
     session: Session = Depends(get_session),
 ):
     return _list_quotes_impl(skip=skip, limit=limit, session=session)
+
+
 
 
 
