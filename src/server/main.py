@@ -39,6 +39,7 @@ app.add_middleware(
         "https://lovable.dev",
         "https://4d33ec7a-7844-4eb7-9795-d6b0452f4ffe.lovableproject.com",
         "https://id-preview--4d33ec7a-7844-4eb7-9795-d6b0452f4ffe.lovable.app",
+        "https://dockit-frontend-beta.onrender.com",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -74,6 +75,7 @@ def list_quotes_proxy2(
     session: Session = Depends(get_session),
 ):
     return _list_quotes_impl(skip=skip, limit=limit, session=session)
+
 
 
 
